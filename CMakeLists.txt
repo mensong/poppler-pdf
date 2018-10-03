@@ -389,6 +389,7 @@ set(poppler_SRCS
   poppler/FontEncodingTables.cc
   poppler/Form.cc
   poppler/FontInfo.cc
+  poppler/FreeTypeFontFace.cc
   poppler/Function.cc
   poppler/Gfx.cc
   poppler/GfxFont.cc
@@ -603,6 +604,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/FontEncodingTables.h
     poppler/FontInfo.h
     poppler/Form.h
+    poppler/FreeTypeFontFace.h
     poppler/Function.h
     poppler/Gfx.h
     poppler/GfxFont.h

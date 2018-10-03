@@ -50,6 +50,7 @@ class PSOutputDev;
 struct GfxFontCIDWidths;
 struct Base14FontMapEntry;
 class FNVHash;
+class FreeTypeFontFace;
 
 //------------------------------------------------------------------------
 // GfxFontType
@@ -373,6 +374,14 @@ public:
 
 private:
     ~Gfx8BitFont() override;
+
+    /** \brief Init the freeTypeFontFace member
+     *
+     * This method does nothing if freeTypeFontFace is not nullptr.  Otherwise,
+     * it constructs a new FreeTypeFontFace object and makes freeTypeFontFace point to it.
+     */
+    void initFreeTypeFontFace(XRef *xref);
+    std::unique_ptr<FreeTypeFontFace> freeTypeFontFace;
 
     const Base14FontMapEntry *base14; // for Base-14 fonts only; NULL otherwise
     char *enc[256]; // char code --> char name
