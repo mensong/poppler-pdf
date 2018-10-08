@@ -51,6 +51,7 @@
 
 #include "poppler-qt5.h"
 #include "poppler-embeddedfile-private.h"
+#include "ArthurOutputDev.h"
 
 class LinkDest;
 class FormWidget;
@@ -231,6 +232,45 @@ namespace Poppler {
 		::Page *page;
 		::FormWidget *fm;
 		QRectF box;
+    };
+
+    class OutputDevCallbackHelper
+    {
+    public:
+        void setCallbacks(Page::RenderToImagePartialUpdateFunc callback, Page::ShouldRenderToImagePartialQueryFunc shouldDoCallback, Page::ShouldAbortQueryFunc shouldAbortCallback, const QVariant &payloadA);
+
+        Page::RenderToImagePartialUpdateFunc partialUpdateCallback = nullptr;
+        Page::ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback = nullptr;
+        Page::ShouldAbortQueryFunc shouldAbortRenderCallback = nullptr;
+        QVariant payload;
+    };
+
+    class Qt5SplashOutputDev : public SplashOutputDev, public OutputDevCallbackHelper
+    {
+    public:
+        Qt5SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA,
+                            bool reverseVideoA, bool ignorePaperColorA, SplashColorPtr paperColorA,
+                            bool bitmapTopDownA, SplashThinLineMode thinLineMode,
+                            bool overprintPreviewA);
+
+        void dump() override;
+
+        QImage getXBGRImage(bool takeImageData);
+
+    private:
+        bool ignorePaperColor;
+    };
+
+
+    class QImageDumpingArthurOutputDev : public ArthurOutputDev, public OutputDevCallbackHelper
+    {
+    public:
+        QImageDumpingArthurOutputDev(QPainter *painter, QImage *i);
+
+        void dump() override;
+
+    private:
+        QImage *image;
     };
 
 }

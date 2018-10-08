@@ -30,10 +30,16 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QDebug>
 #include <QtCore/QVariant>
+#include <QtGui/QImage>
+#include <QtGui/QPainter>
 
 #include <Link.h>
 #include <Outline.h>
 #include <PDFDocEncoding.h>
+#if defined(HAVE_SPLASH)
+#include <SplashOutputDev.h>
+#include <splash/SplashBitmap.h>
+#endif
 #include <UnicodeMap.h>
 
 namespace Poppler {
@@ -310,4 +316,84 @@ namespace Debug {
         }
     }
 
+    void OutputDevCallbackHelper::setCallbacks(Page::RenderToImagePartialUpdateFunc callback, Page::ShouldRenderToImagePartialQueryFunc shouldDoCallback, Page::ShouldAbortQueryFunc shouldAbortCallback, const QVariant &payloadA)
+    {
+        partialUpdateCallback = callback;
+        shouldDoPartialUpdateCallback = shouldDoCallback;
+        shouldAbortRenderCallback = shouldAbortCallback;
+        payload = payloadA;
+    }
+
+    Qt5SplashOutputDev::Qt5SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA,
+                        bool reverseVideoA, bool ignorePaperColorA, SplashColorPtr paperColorA,
+                        bool bitmapTopDownA, SplashThinLineMode thinLineMode,
+                        bool overprintPreviewA)
+        : SplashOutputDev(colorModeA, bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA, thinLineMode, overprintPreviewA)
+        , ignorePaperColor(ignorePaperColorA)
+    {
+    }
+
+    void Qt5SplashOutputDev::dump()
+    {
+        if (partialUpdateCallback && shouldDoPartialUpdateCallback && shouldDoPartialUpdateCallback(payload)) {
+            partialUpdateCallback(getXBGRImage( false /* takeImageData */), payload);
+        }
+    }
+
+    QImage Qt5SplashOutputDev::getXBGRImage(bool takeImageData)
+    {
+        SplashBitmap *b = getBitmap();
+
+        const int bw = b->getWidth();
+        const int bh = b->getHeight();
+        const int brs = b->getRowSize();
+
+        // If we use DeviceN8, convert to XBGR8.
+        // If requested, also transfer Splash's internal alpha channel.
+        const SplashBitmap::ConversionMode mode = ignorePaperColor
+                ? SplashBitmap::conversionAlphaPremultiplied
+                : SplashBitmap::conversionOpaque;
+
+        const QImage::Format format = ignorePaperColor
+                ? QImage::Format_ARGB32_Premultiplied
+                : QImage::Format_RGB32;
+
+        if (b->convertToXBGR(mode)) {
+            SplashColorPtr data = takeImageData ? b->takeData() : b->getDataPtr();
+
+            if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
+                // Convert byte order from RGBX to XBGR.
+                for (int i = 0; i < bh; ++i) {
+                    for (int j = 0; j < bw; ++j) {
+                        SplashColorPtr pixel = &data[i * brs + j];
+
+                        qSwap(pixel[0], pixel[3]);
+                        qSwap(pixel[1], pixel[2]);
+                    }
+                }
+            }
+
+            if (takeImageData) {
+                // Construct a Qt image holding (and also owning) the raw bitmap data.
+                return QImage(data, bw, bh, brs, format, gfree, data);
+            } else {
+                return QImage(data, bw, bh, brs, format).copy();
+            }
+        }
+
+        return QImage();
+    }
+
+    QImageDumpingArthurOutputDev::QImageDumpingArthurOutputDev(QPainter *painter, QImage *i)
+        : ArthurOutputDev(painter)
+        , image(i)
+    {
+    }
+
+    void QImageDumpingArthurOutputDev::dump()
+    {
+        if (partialUpdateCallback && shouldDoPartialUpdateCallback && shouldDoPartialUpdateCallback(payload)) {
+            partialUpdateCallback(*image, payload);
+        }
+    }
 }
