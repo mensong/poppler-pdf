@@ -316,6 +316,63 @@ namespace Debug {
         }
     }
 
+    SplashRenderSetup::SplashRenderSetup(const int docHints, QColor docPaperColor)
+        : bitmapRowPad(4)
+        , reverseVideo(false)
+        , ignorePaperColorA(docHints & Poppler::Document::IgnorePaperColor)
+        , bitmapTopDown(true)
+        , overprintPreview(false) {
+#ifdef SPLASH_CMYK
+        overprintPreview = docHints & Document::OverprintPreview ? true : false;
+        if (overprintPreview)
+        {
+            Guchar c, m, y, k;
+
+            c = 255 - docPaperColor.blue();
+            m = 255 - docPaperColor.red();
+            y = 255 - docPaperColor.green();
+            k = c;
+            if (m < k) {
+                k = m;
+            }
+            if (y < k) {
+                k = y;
+            }
+            bgColor[0] = c - k;
+            bgColor[1] = m - k;
+            bgColor[2] = y - k;
+            bgColor[3] = k;
+            for (int i = 4; i < SPOT_NCOMPS + 4; i++) {
+                bgColor[i] = 0;
+            }
+        }
+        else
+#endif
+        {
+            bgColor[0] = docPaperColor.blue();
+            bgColor[1] = docPaperColor.green();
+            bgColor[2] = docPaperColor.red();
+        }
+
+        colorMode = splashModeXBGR8;
+#ifdef SPLASH_CMYK
+        if (overprintPreview) colorMode = splashModeDeviceN8;
+#endif
+
+        thinLineMode = splashThinLineDefault;
+        if (docHints & Poppler::Document::ThinLineShape)
+            thinLineMode = splashThinLineShape;
+        if (docHints & Poppler::Document::ThinLineSolid)
+            thinLineMode = splashThinLineSolid;
+
+        paperColor = ignorePaperColorA ? nullptr : bgColor;
+
+        textAntialiasing = docHints & Poppler::Document::TextAntialiasing ? true : false;
+        vectorAntialias = docHints & Poppler::Document::Antialiasing ? true : false;
+        freeTypeHintingEnable = docHints & Poppler::Document::TextHinting ? true : false;
+        freeTypeHintingEnableSlightHintingA = docHints & Poppler::Document::TextSlightHinting ? true : false;
+    }
+
     void OutputDevCallbackHelper::setCallbacks(Page::RenderToImagePartialUpdateFunc callback, Page::ShouldRenderToImagePartialQueryFunc shouldDoCallback, Page::ShouldAbortQueryFunc shouldAbortCallback, const QVariant &payloadA)
     {
         partialUpdateCallback = callback;
@@ -324,13 +381,14 @@ namespace Debug {
         payload = payloadA;
     }
 
-    Qt5SplashOutputDev::Qt5SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA,
-                        bool reverseVideoA, bool ignorePaperColorA, SplashColorPtr paperColorA,
-                        bool bitmapTopDownA, SplashThinLineMode thinLineMode,
-                        bool overprintPreviewA)
-        : SplashOutputDev(colorModeA, bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA, thinLineMode, overprintPreviewA)
-        , ignorePaperColor(ignorePaperColorA)
-    {
+    Qt5SplashOutputDev::Qt5SplashOutputDev(const SplashRenderSetup& settings)
+        : SplashOutputDev(settings.colorMode, settings.bitmapRowPad, settings.reverseVideo
+        , settings.paperColor, settings.bitmapTopDown
+        , settings.thinLineMode, settings.overprintPreview)
+        , ignorePaperColor(settings.ignorePaperColorA) {
+        setFontAntialias(settings.textAntialiasing);
+        setVectorAntialias(settings.vectorAntialias);
+        setFreeTypeHinting(settings.freeTypeHintingEnable, settings.freeTypeHintingEnableSlightHintingA);
     }
 
     void Qt5SplashOutputDev::dump()

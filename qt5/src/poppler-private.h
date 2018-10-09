@@ -234,6 +234,25 @@ namespace Poppler {
 		QRectF box;
     };
 
+    class SplashRenderSetup {
+    public:
+        SplashRenderSetup(const int docHints, QColor docPaperColor);
+
+        SplashColorMode colorMode;
+        int bitmapRowPad;
+        bool reverseVideo;
+        const bool ignorePaperColorA;
+        SplashColorPtr paperColor;
+        bool bitmapTopDown;
+        SplashThinLineMode thinLineMode;
+        bool overprintPreview;
+        SplashColor bgColor;
+        bool textAntialiasing;
+        bool vectorAntialias;
+        bool freeTypeHintingEnable;
+        bool freeTypeHintingEnableSlightHintingA;
+    };
+
     class OutputDevCallbackHelper
     {
     public:
@@ -248,10 +267,7 @@ namespace Poppler {
     class Qt5SplashOutputDev : public SplashOutputDev, public OutputDevCallbackHelper
     {
     public:
-        Qt5SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA,
-                            bool reverseVideoA, bool ignorePaperColorA, SplashColorPtr paperColorA,
-                            bool bitmapTopDownA, SplashThinLineMode thinLineMode,
-                            bool overprintPreviewA);
+        Qt5SplashOutputDev(const SplashRenderSetup& settings);
 
         void dump() override;
 

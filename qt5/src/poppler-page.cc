@@ -420,66 +420,10 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
     case Poppler::Document::SplashBackend:
     {
 #if defined(HAVE_SPLASH)
-      SplashColor bgColor;
-      bool overprintPreview = false;
-#ifdef SPLASH_CMYK
-      overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? true : false;
-      if (overprintPreview)
-      {
-        Guchar c, m, y, k;
-
-        c = 255 - m_page->parentDoc->paperColor.blue();
-        m = 255 - m_page->parentDoc->paperColor.red();
-        y = 255 - m_page->parentDoc->paperColor.green();
-        k = c;
-        if (m < k) {
-          k = m;
-        }
-        if (y < k) {
-          k = y;
-        }
-        bgColor[0] = c - k;
-        bgColor[1] = m - k;
-        bgColor[2] = y - k;
-        bgColor[3] = k;
-        for (int i = 4; i < SPOT_NCOMPS + 4; i++) {
-          bgColor[i] = 0;
-        }
-      }
-      else
-#endif
-      {
-        bgColor[0] = m_page->parentDoc->paperColor.blue();
-        bgColor[1] = m_page->parentDoc->paperColor.green();
-        bgColor[2] = m_page->parentDoc->paperColor.red();
-      }
-
-      SplashColorMode colorMode = splashModeXBGR8;
-#ifdef SPLASH_CMYK
-      if (overprintPreview) colorMode = splashModeDeviceN8;
-#endif
-
-      SplashThinLineMode thinLineMode = splashThinLineDefault;
-      if (m_page->parentDoc->m_hints & Document::ThinLineShape) thinLineMode = splashThinLineShape;
-      if (m_page->parentDoc->m_hints & Document::ThinLineSolid) thinLineMode = splashThinLineSolid;
-
-      const bool ignorePaperColor = m_page->parentDoc->m_hints & Document::IgnorePaperColor;
-
-      Qt5SplashOutputDev splash_output(
-                  colorMode, 4,
-                  false,
-                  ignorePaperColor,
-                  ignorePaperColor ? nullptr : bgColor,
-                  true,
-                  thinLineMode,
-                  overprintPreview);
+      SplashRenderSetup renderSetup(m_page->parentDoc->m_hints, m_page->parentDoc->paperColor);
+      Qt5SplashOutputDev splash_output(renderSetup);
 
       splash_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
-
-      splash_output.setFontAntialias(m_page->parentDoc->m_hints & Document::TextAntialiasing ? true : false);
-      splash_output.setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? true : false);
-      splash_output.setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? true : false,
-                                        m_page->parentDoc->m_hints & Document::TextSlightHinting ? true : false);
 
       splash_output.startDoc(m_page->parentDoc->doc);
 
