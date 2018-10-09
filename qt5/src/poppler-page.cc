@@ -364,17 +364,8 @@ static auto shouldAbortExtractionInternalCallback = [](void *user_data)
 // Needed to make the ternary operator happy.
 static bool (*nullAbortCallBack)(void *user_data) = nullptr;
 
-static bool renderToArthur(QImageDumpingArthurOutputDev *arthur_output, QPainter *painter, PageData *page, double xres, double yres, int x, int y, int w, int h, Page::Rotation rotate, Page::PainterFlags flags)
+static bool renderToArthur(QImageDumpingArthurOutputDev *arthur_output, PageData *page, double xres, double yres, int x, int y, int w, int h, Page::Rotation rotate, Page::PainterFlags flags)
 {
-  const bool savePainter = !(flags & Page:: DontSaveAndRestore);
-  if (savePainter)
-    painter->save();
-  if (page->parentDoc->m_hints & Document::Antialiasing)
-    painter->setRenderHint(QPainter::Antialiasing);
-  if (page->parentDoc->m_hints & Document::TextAntialiasing)
-    painter->setRenderHint(QPainter::TextAntialiasing);
-  painter->translate(x == -1 ? 0 : -x, y == -1 ? 0 : -y);
-
   arthur_output->startDoc(page->parentDoc->doc);
 
   const bool hideAnnotations = page->parentDoc->m_hints & Document::HideAnnotations;
@@ -396,8 +387,6 @@ static bool renderToArthur(QImageDumpingArthurOutputDev *arthur_output, QPainter
                                           abortHelper,
                                           (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack,
                                           nullptr, true);
-  if (savePainter)
-    painter->restore();
   return true;
 }
 
@@ -442,22 +431,12 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
     }
     case Poppler::Document::ArthurBackend:
     {
-      QSize size = pageSize();
-      QImage tmpimg(w == -1 ? qRound( size.width() * xres / 72.0 ) : w, h == -1 ? qRound( size.height() * yres / 72.0 ) : h, QImage::Format_ARGB32);
+      ImageArthurRenderSetup renderSetup(x, y, w, h, xres, yres, pageSize(), DontSaveAndRestore, m_page->parentDoc->paperColor, m_page->parentDoc->m_hints);
+      QImageDumpingArthurOutputDev arthur_output(renderSetup);
 
-      QColor bgColor(m_page->parentDoc->paperColor.red(),
-                     m_page->parentDoc->paperColor.green(),
-                     m_page->parentDoc->paperColor.blue(),
-                     m_page->parentDoc->paperColor.alpha());
-
-      tmpimg.fill(bgColor);
-
-      QPainter painter(&tmpimg);
-      QImageDumpingArthurOutputDev arthur_output(&painter, &tmpimg);
       arthur_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
-      renderToArthur(&arthur_output, &painter, m_page, xres, yres, x, y, w, h, rotate, DontSaveAndRestore);
-      painter.end();
-      img = tmpimg;
+      renderToArthur(&arthur_output, m_page, xres, yres, x, y, w, h, rotate, DontSaveAndRestore);
+      img = arthur_output.getImage();
       break;
     }
   }
@@ -479,8 +458,9 @@ bool Page::renderToPainter(QPainter* painter, double xres, double yres, int x, i
       return false;
     case Poppler::Document::ArthurBackend:
     {
-        QImageDumpingArthurOutputDev arthur_output(painter, nullptr);
-        return renderToArthur(&arthur_output, painter, m_page, xres, yres, x, y, w, h, rotate, flags);
+      ClientArthurRenderSetup renderSetup(x, y, painter, m_page->parentDoc->m_hints, flags);
+      QImageDumpingArthurOutputDev arthur_output(renderSetup);
+      return renderToArthur(&arthur_output, m_page, xres, yres, x, y, w, h, rotate, flags);
     }
   }
   return false;

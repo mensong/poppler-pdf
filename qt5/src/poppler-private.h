@@ -234,6 +234,49 @@ namespace Poppler {
 		QRectF box;
     };
 
+    class ArthurRenderSetup {
+    public:
+        ArthurRenderSetup(QPainter* painter);
+
+        QPainter* painter();
+
+        virtual QImage* destImage();
+
+        virtual ~ArthurRenderSetup();
+
+    protected:
+        void setupPainter(int docHints, int pageFlags, int x, int y);
+
+        void restore();
+
+    private:
+        QPainter* p_painter;
+        bool m_savePainter;
+    };
+
+    class ClientArthurRenderSetup : public ArthurRenderSetup {
+    public:
+        ClientArthurRenderSetup(int x, int y, QPainter* painter, int docHints, int pageFlags);
+
+        ~ClientArthurRenderSetup();
+    };
+
+    class ImageArthurRenderSetup : public ArthurRenderSetup {
+    public:
+        ImageArthurRenderSetup(int x, int y, int w, int h, double xres, double yres, QSize pageSize,
+                               int pageFlags, QColor& docPaperColor, int docHints);
+
+        QImage* destImage() override;
+
+        ~ImageArthurRenderSetup();
+
+    private:
+        QSize scale(QSize pageSize, double xres, double yres, int w, int h) const;
+
+        QImage m_image;
+        QPainter m_painter;
+    };
+
     class SplashRenderSetup {
     public:
         SplashRenderSetup(const int docHints, QColor docPaperColor);
@@ -281,12 +324,14 @@ namespace Poppler {
     class QImageDumpingArthurOutputDev : public ArthurOutputDev, public OutputDevCallbackHelper
     {
     public:
-        QImageDumpingArthurOutputDev(QPainter *painter, QImage *i);
+        QImageDumpingArthurOutputDev(ArthurRenderSetup& renderSetup);
 
         void dump() override;
 
+        QImage getImage() const;
+
     private:
-        QImage *image;
+        ArthurRenderSetup& m_renderSetup;
     };
 
 }

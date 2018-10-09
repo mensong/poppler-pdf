@@ -316,6 +316,68 @@ namespace Debug {
         }
     }
 
+    ArthurRenderSetup::ArthurRenderSetup(QPainter* painter)
+        : p_painter(painter), m_savePainter(false) {
+    }
+
+    QPainter* ArthurRenderSetup::painter() {
+        return p_painter;
+    }
+
+    QImage* ArthurRenderSetup::destImage() {
+        return nullptr;
+    }
+
+    ArthurRenderSetup::~ArthurRenderSetup() {
+    }
+
+    void ArthurRenderSetup::setupPainter(int docHints, int pageFlags, int x, int y) {
+        m_savePainter = !(pageFlags & Poppler::Page:: DontSaveAndRestore);
+        if (m_savePainter)
+            p_painter->save();
+        if (docHints & Poppler::Document::Antialiasing)
+            p_painter->setRenderHint(QPainter::Antialiasing);
+        if (docHints & Poppler::Document::TextAntialiasing)
+            p_painter->setRenderHint(QPainter::TextAntialiasing);
+        p_painter->translate(x == -1 ? 0 : -x, y == -1 ? 0 : -y);
+    }
+
+    void ArthurRenderSetup::restore() {
+        if (m_savePainter)
+            p_painter->restore();
+    }
+
+    ClientArthurRenderSetup::ClientArthurRenderSetup(int x, int y, QPainter* painter, int docHints, int pageFlags)
+        : ArthurRenderSetup(painter) {
+        setupPainter(docHints, pageFlags, x, y);
+    }
+
+    ClientArthurRenderSetup::~ClientArthurRenderSetup() {
+        restore();
+    }
+
+    ImageArthurRenderSetup::ImageArthurRenderSetup(int x, int y, int w, int h, double xres, double yres, QSize pageSize, int pageFlags, QColor& docPaperColor, int docHints)
+        : ArthurRenderSetup(&m_painter)
+        , m_image(scale(pageSize, xres, yres, w, h), QImage::Format_ARGB32)
+        , m_painter(&m_image) {
+        m_image.fill(docPaperColor);
+        setupPainter(docHints, pageFlags, x, y);
+    }
+
+    QImage* ImageArthurRenderSetup::destImage() {
+        return &m_image;
+    }
+
+    ImageArthurRenderSetup::~ImageArthurRenderSetup() {
+        restore();
+        m_painter.end();
+    }
+
+    QSize ImageArthurRenderSetup::scale(QSize pageSize, double xres, double yres, int w, int h) const {
+        return QSize(w == -1 ? qRound( pageSize.width() * xres / 72.0 ) : w,
+                     h == -1 ? qRound( pageSize.height() * yres / 72.0) : h );
+    }
+
     SplashRenderSetup::SplashRenderSetup(const int docHints, QColor docPaperColor)
         : bitmapRowPad(4)
         , reverseVideo(false)
@@ -442,16 +504,22 @@ namespace Debug {
         return QImage();
     }
 
-    QImageDumpingArthurOutputDev::QImageDumpingArthurOutputDev(QPainter *painter, QImage *i)
-        : ArthurOutputDev(painter)
-        , image(i)
-    {
+    QImageDumpingArthurOutputDev::QImageDumpingArthurOutputDev(ArthurRenderSetup& renderSetup)
+        : ArthurOutputDev(renderSetup.painter()), m_renderSetup(renderSetup) {
     }
 
     void QImageDumpingArthurOutputDev::dump()
     {
         if (partialUpdateCallback && shouldDoPartialUpdateCallback && shouldDoPartialUpdateCallback(payload)) {
-            partialUpdateCallback(*image, payload);
+            partialUpdateCallback(*m_renderSetup.destImage(), payload);
         }
+    }
+
+    QImage QImageDumpingArthurOutputDev::getImage() const {
+        QImage* image = m_renderSetup.destImage();
+        if (image) {
+            return *image;
+        }
+        return QImage();
     }
 }
