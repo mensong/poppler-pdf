@@ -364,14 +364,14 @@ static auto shouldAbortExtractionInternalCallback = [](void *user_data)
 // Needed to make the ternary operator happy.
 static bool (*nullAbortCallBack)(void *user_data) = nullptr;
 
-static bool renderToArthur(QImageDumpingArthurOutputDev *arthur_output, PageData *page, double xres, double yres, int x, int y, int w, int h, Page::Rotation rotate, Page::PainterFlags flags)
+static void renderToPage(Qt5OutputDev *outputDev, PageData *page, double xres, double yres, int x, int y, int w, int h, Page::Rotation rotate)
 {
-  arthur_output->startDoc(page->parentDoc->doc);
+  outputDev->startDoc(page->parentDoc->doc);
 
   const bool hideAnnotations = page->parentDoc->m_hints & Document::HideAnnotations;
 
-  OutputDevCallbackHelper *abortHelper = arthur_output;
-  page->parentDoc->doc->displayPageSlice(arthur_output,
+  OutputDevCallbackHelper *abortHelper = outputDev->callbackHelper();
+  page->parentDoc->doc->displayPageSlice(outputDev->outputDev(),
                                           page->index + 1,
                                           xres,
                                           yres,
@@ -387,7 +387,6 @@ static bool renderToArthur(QImageDumpingArthurOutputDev *arthur_output, PageData
                                           abortHelper,
                                           (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack,
                                           nullptr, true);
-  return true;
 }
 
 QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h, Rotation rotate) const
@@ -402,7 +401,6 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 
 QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h, Rotation rotate, RenderToImagePartialUpdateFunc partialUpdateCallback, ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback, ShouldAbortQueryFunc shouldAbortRenderCallback, const QVariant &payload) const
 {
-  int rotation = (int)rotate * 90;
   QImage img;
   switch(m_page->parentDoc->m_backend)
   {
@@ -413,17 +411,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       Qt5SplashOutputDev splash_output(renderSetup);
 
       splash_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
-
-      splash_output.startDoc(m_page->parentDoc->doc);
-
-      const bool hideAnnotations = m_page->parentDoc->m_hints & Document::HideAnnotations;
-
-      OutputDevCallbackHelper *abortHelper = &splash_output;
-      m_page->parentDoc->doc->displayPageSlice(&splash_output, m_page->index + 1, xres, yres,
-                                               rotation, false, true, false, x, y, w, h,
-                                               shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack, abortHelper,
-                                               (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack,
-                                               nullptr, true);
+      renderToPage(&splash_output, m_page, xres, yres, x, y, w, h, rotate);
 
       img = splash_output.getXBGRImage( true /* takeImageData */);
 #endif
@@ -435,7 +423,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       QImageDumpingArthurOutputDev arthur_output(renderSetup);
 
       arthur_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
-      renderToArthur(&arthur_output, m_page, xres, yres, x, y, w, h, rotate, DontSaveAndRestore);
+      renderToPage(&arthur_output, m_page, xres, yres, x, y, w, h, rotate);
       img = arthur_output.getImage();
       break;
     }
@@ -460,7 +448,7 @@ bool Page::renderToPainter(QPainter* painter, double xres, double yres, int x, i
     {
       ClientArthurRenderSetup renderSetup(x, y, painter, m_page->parentDoc->m_hints, flags);
       QImageDumpingArthurOutputDev arthur_output(renderSetup);
-      return renderToArthur(&arthur_output, m_page, xres, yres, x, y, w, h, rotate, flags);
+      renderToPage(&arthur_output, m_page, xres, yres, x, y, w, h, rotate);
     }
   }
   return false;

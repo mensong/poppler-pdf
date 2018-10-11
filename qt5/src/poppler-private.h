@@ -307,7 +307,19 @@ namespace Poppler {
         QVariant payload;
     };
 
-    class Qt5SplashOutputDev : public SplashOutputDev, public OutputDevCallbackHelper
+    class Qt5OutputDev
+    {
+    public:
+        virtual void startDoc(PDFDoc *docA) = 0;
+
+        virtual OutputDev* outputDev() = 0;
+
+        virtual OutputDevCallbackHelper* callbackHelper() = 0;
+
+        virtual ~Qt5OutputDev() {}
+    };
+
+    class Qt5SplashOutputDev : public SplashOutputDev, public OutputDevCallbackHelper, public Qt5OutputDev
     {
     public:
         Qt5SplashOutputDev(const SplashRenderSetup& settings);
@@ -316,12 +328,17 @@ namespace Poppler {
 
         QImage getXBGRImage(bool takeImageData);
 
+        void startDoc(PDFDoc *docA) override;
+
+        OutputDev* outputDev() override;
+
+        OutputDevCallbackHelper* callbackHelper() override;
+
     private:
         bool ignorePaperColor;
     };
 
-
-    class QImageDumpingArthurOutputDev : public ArthurOutputDev, public OutputDevCallbackHelper
+    class QImageDumpingArthurOutputDev : public ArthurOutputDev, public OutputDevCallbackHelper, public Qt5OutputDev
     {
     public:
         QImageDumpingArthurOutputDev(ArthurRenderSetup& renderSetup);
@@ -329,6 +346,12 @@ namespace Poppler {
         void dump() override;
 
         QImage getImage() const;
+
+        void startDoc(PDFDoc *docA) override;
+
+        OutputDev* outputDev() override;
+
+        OutputDevCallbackHelper* callbackHelper() override;
 
     private:
         ArthurRenderSetup& m_renderSetup;

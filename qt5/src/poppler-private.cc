@@ -504,6 +504,21 @@ namespace Debug {
         return QImage();
     }
 
+    void Qt5SplashOutputDev::startDoc(PDFDoc *docA)
+    {
+        SplashOutputDev::startDoc(docA);
+    }
+
+    OutputDev* Qt5SplashOutputDev::outputDev()
+    {
+        return this;
+    }
+
+    OutputDevCallbackHelper* Qt5SplashOutputDev::callbackHelper()
+    {
+        return this;
+    }
+
     QImageDumpingArthurOutputDev::QImageDumpingArthurOutputDev(ArthurRenderSetup& renderSetup)
         : ArthurOutputDev(renderSetup.painter()), m_renderSetup(renderSetup) {
     }
@@ -521,5 +536,20 @@ namespace Debug {
             return *image;
         }
         return QImage();
+    }
+
+    void QImageDumpingArthurOutputDev::startDoc(PDFDoc *docA)
+    {
+        ArthurOutputDev::startDoc(docA);
+    }
+
+    OutputDev* QImageDumpingArthurOutputDev::outputDev()
+    {
+        return this;
+    }
+
+    OutputDevCallbackHelper* QImageDumpingArthurOutputDev::callbackHelper()
+    {
+        return this;
     }
 }
