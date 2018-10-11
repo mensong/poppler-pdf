@@ -216,6 +216,10 @@ public:
                         bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
                         void *annotDisplayDecideCbkData = nullptr, bool copyXRef = false);
 
+  // Display annotation at origin of the output device
+  void displayAnnot(OutputDev *out, Annot *annot,
+                    double hDPI, double vDPI, int rotate);
+
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
   int findPage(int num, int gen) { return catalog->findPage(num, gen); }

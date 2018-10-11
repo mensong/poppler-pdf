@@ -67,6 +67,7 @@
 #include "goo/GooString.h"
 #include "goo/gfile.h"
 #include "poppler-config.h"
+#include "Gfx.h"
 #include "GlobalParams.h"
 #include "Page.h"
 #include "Catalog.h"
@@ -667,6 +668,21 @@ void PDFDoc::displayPageSlice(OutputDev *out, int page,
 					 printing,
 					 abortCheckCbk, abortCheckCbkData,
 					 annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
+}
+
+void PDFDoc::displayAnnot(OutputDev *out, Annot *annot,
+                          double hDPI, double vDPI, int rotate) {
+  int pageNum = annot->getPageNum();
+  PDFRectangle* annotRect = annot->getRect();
+  XRef *origXRef = annot->getXRef();
+  if (getPage(pageNum) && origXRef) {
+    PDFRectangle box(annotRect->x1, annotRect->y1, annotRect->x2, annotRect->y2);
+    std::unique_ptr<Gfx> gfx(new Gfx(this, out, pageNum, getPage(pageNum)->getResourceDict(),
+                            hDPI, vDPI, &box, nullptr,
+                            rotate, nullptr, nullptr, origXRef->copy()));
+    out->dump();
+    annot->draw(gfx.get(), false);
+  }
 }
 
 Links *PDFDoc::getLinks(int page) {
