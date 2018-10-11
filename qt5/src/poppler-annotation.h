@@ -290,6 +290,17 @@ class POPPLER_QT5_EXPORT Annotation
     void setBoundary( const QRectF &boundary );
 
     /**
+     * Renders the annotations into a QImage.
+     *
+     * The closed state of the "normal" appearance will be rendered.
+     * It is drawn onto transparent background.
+     * Resulting QImage is in Format_ARGB32_Premultiplied format.
+     *
+     * \since 0.70
+     */
+    QImage renderToImage( double hDPI, double vDPI ) const;
+
+    /**
      * \short Container class for Annotation style information
      *
      * \since 0.20

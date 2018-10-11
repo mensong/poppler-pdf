@@ -43,6 +43,7 @@
 #include "poppler-annotation-private.h"
 #include "poppler-page-private.h"
 #include "poppler-private.h"
+#include "ArthurOutputDev.h"
 
 // poppler includes
 #include <Page.h>
@@ -831,6 +832,45 @@ void AnnotationPrivate::removeAnnotationFromPage(::Page *pdfPage, const Annotati
 
     // Destroy object
     delete ann;
+}
+
+QImage Annotation::renderToImage( double hDPI, double vDPI ) const
+{
+    Q_D( const Annotation );
+    QImage img;
+
+    if ( !d->pdfAnnot ) {
+        return img;
+    }
+
+    const int hints = d->parentDoc->m_hints | Poppler::Document::IgnorePaperColor;
+    switch( d->parentDoc->m_backend )
+    {
+        case Poppler::Document::SplashBackend:
+        {
+#if defined(HAVE_SPLASH)
+            SplashRenderSetup splashSettings( hints, d->parentDoc->paperColor );
+            Qt5SplashOutputDev splash_output( splashSettings );
+            splash_output.startDoc( d->parentDoc->doc );
+            d->parentDoc->doc->displayAnnot( splash_output.outputDev(), d->pdfAnnot, hDPI, vDPI, 0 );
+            splash_output.dump();
+            img = splash_output.getXBGRImage( true );
+#endif
+            break;
+        }
+        case Poppler::Document::ArthurBackend:
+        {
+            int w = qRound( d->pdfAnnot->getRect()->x2 - d->pdfAnnot->getRect()->x1 );
+            int h = qRound( d->pdfAnnot->getRect()->y2 - d->pdfAnnot->getRect()->y1 );
+            QSize size( w, h );
+            ImageArthurRenderSetup arthurRenderSetup( 0, 0, -1, -1, hDPI, vDPI, size, d->flags, d->parentDoc->paperColor, hints );
+            QImageDumpingArthurOutputDev arthur_output( arthurRenderSetup );
+            arthur_output.startDoc( d->parentDoc->doc );
+            d->parentDoc->doc->displayAnnot( arthur_output.outputDev(), d->pdfAnnot, hDPI, vDPI, 0 );
+            img = arthur_output.getImage();
+        }
+    }
+    return img;
 }
 
 class Annotation::Style::Private : public QSharedData
