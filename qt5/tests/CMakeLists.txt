@@ -29,12 +29,13 @@ macro(QT5_ADD_SIMPLETEST exe source)
 endmacro(QT5_ADD_SIMPLETEST)
 
 macro(QT5_ADD_QTEST exe source)
+  set(needX FALSE)
   if (Qt5Test_FOUND)	
     string(REPLACE "-" "" test_name ${exe})
     set(${test_name}_SOURCES
       ${source}
     )
-    poppler_add_unittest(${exe} BUILD_QT5_TESTS ${${test_name}_SOURCES})
+    poppler_add_unittest(${exe} BUILD_QT5_TESTS ${needX} ${${test_name}_SOURCES})
     target_link_libraries(${exe} poppler-qt5 ${Qt5Widgets_LIBRARIES} ${Qt5Test_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES})
     if(MSVC)
       target_link_libraries(${exe} poppler ${poppler_LIBS})
@@ -42,6 +43,20 @@ macro(QT5_ADD_QTEST exe source)
   endif ()
 endmacro(QT5_ADD_QTEST)
 
+macro(QT5_ADD_GUI_QTEST exe source)
+  set(needX TRUE)
+  if (Qt5Test_FOUND)
+    string(REPLACE "-" "" test_name ${exe})
+    set(${test_name}_SOURCES
+      ${source}
+    )
+    poppler_add_unittest(${exe} BUILD_QT5_TESTS ${needX} ${${test_name}_SOURCES})
+    target_link_libraries(${exe} poppler-qt5 ${Qt5Widgets_LIBRARIES} ${Qt5Test_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES})
+    if(MSVC)
+      target_link_libraries(${exe} poppler ${poppler_LIBS})
+    endif()
+  endif ()
+endmacro(QT5_ADD_GUI_QTEST)
 
 qt5_add_simpletest(test-poppler-qt5 test-poppler-qt5.cpp)
 qt5_add_simpletest(test-password-qt5 test-password-qt5.cpp)

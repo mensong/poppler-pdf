@@ -91,6 +91,13 @@ if(NOT (EXISTS ${TESTDATADIR} AND EXISTS ${TESTDATADIR}/test-poppler.c))
  poppler source folder or specify the location of your
  checkout with -DTESTDATADIR=/path/to/checkoutdir/test.
   ")
+else()
+  if(NOT WIN32 AND (BUILD_GTK_TESTS OR BUILD_QT5_TESTS))
+    find_program(XVFB_RUN NAMES xvfb-run)
+    if (NOT ${XVFB_RUN} MATCHES "XVFB_RUN-NOTFOUND")
+      set(XVFB_EXEC ${XVFB_RUN} -a)
+    endif()
+  endif()
 endif()
 
 if(WIN32)

@@ -22,14 +22,18 @@ macro(POPPLER_ADD_TEST exe build_flag)
   endif(NOT build_test AND NOT MSVC_IDE)
 endmacro(POPPLER_ADD_TEST)
 
-macro(POPPLER_ADD_UNITTEST exe build_flag)
+macro(POPPLER_ADD_UNITTEST exe build_flag needX)
   set(build_test ${${build_flag}})
   if(NOT build_test)
     set(_add_executable_param ${_add_executable_param} EXCLUDE_FROM_ALL)
   endif(NOT build_test)
 
   add_executable(${exe} ${_add_executable_param} ${ARGN})
-  add_test(${exe} ${EXECUTABLE_OUTPUT_PATH}/${exe})
+  if(NOT needX)
+    add_test(${exe} ${exe})
+  else (NOT needX)
+    add_test(NAME ${exe} COMMAND ${XVFB_EXEC} $<TARGET_FILE:${exe}>)
+  endif(NOT needX)
 
   # if the tests are EXCLUDE_FROM_ALL, add a target "buildtests" to build all tests
   if(NOT build_test)
