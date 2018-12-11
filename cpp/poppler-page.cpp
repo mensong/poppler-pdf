@@ -27,6 +27,7 @@
  */
 #include "poppler-page.h"
 #include "poppler-page-transition.h"
+#include "poppler-image-renderer.h"
 
 #include "poppler-document-private.h"
 #include "poppler-page-private.h"
@@ -392,4 +393,18 @@ std::vector<text_box> page::text_list() const
     }
 
     return output_list;
+}
+
+std::vector<image> page::get_images() const
+{
+    std::vector<image> images;
+
+    image_renderer *imgOut = new image_renderer(images);
+
+    d->doc->doc->displayPage(imgOut, d->index + 1, 72, 72, 0,
+                      true, false, false);
+
+    delete imgOut;
+
+    return images;
 }

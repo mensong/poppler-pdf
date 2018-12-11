@@ -15,6 +15,7 @@ set(poppler_cpp_SRCS
   poppler-font.cpp
   poppler-global.cpp
   poppler-image.cpp
+  poppler-image-renderer.cpp
   poppler-page.cpp
   poppler-page-renderer.cpp
   poppler-page-transition.cpp
@@ -40,6 +41,7 @@ install(FILES
   poppler-font.h
   poppler-global.h
   poppler-image.h
+  poppler-image-renderer.h
   poppler-page.h
   poppler-page-renderer.h
   poppler-page-transition.h
@@ -47,4 +49,3 @@ install(FILES
   poppler-toc.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
   DESTINATION include/poppler/cpp)
-

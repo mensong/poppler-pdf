@@ -25,6 +25,7 @@
 
 #include "poppler-global.h"
 #include "poppler-rectangle.h"
+#include "poppler-image.h"
 
 #include <memory>
 
@@ -45,6 +46,11 @@ public:
     rectf     bbox() const;
 
     /**
+       Get the rotation of the text box
+
+       This method returns the rotation of the text box
+       divided by 90 degrees.
+
       \since 0.68
     */
     int       rotation() const;
@@ -127,6 +133,14 @@ public:
        \warning This method is not tested with Asian scripts
     */
     std::vector<text_box> text_list() const;
+
+    /**
+       Returns a list of images of the page
+
+       This method returns a std::vector of image that contain all the
+       images of the page
+     */
+    std::vector<image> get_images() const;
 
 private:
     page(document_private *doc, int index);
