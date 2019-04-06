@@ -303,9 +303,17 @@ Operator Gfx::opTab[] = {
 
 #define numOps (sizeof(opTab) / sizeof(Operator))
 
-static inline bool isSameGfxColor(const GfxColor &colorA, const GfxColor &colorB, unsigned int nComps, double delta) {
+static inline bool isSameGfxColor(const GfxColor &colorA, const GfxColor &colorB, unsigned int nComps, unsigned int delta) {
   for (unsigned int k = 0; k < nComps; ++k) {
-    if (abs(colorA.c[k] - colorB.c[k]) > delta) {
+    GfxColorComp minc = std::min(colorA.c[k],colorB.c[k]);
+    GfxColorComp maxc = std::max(colorA.c[k],colorB.c[k]);
+    // Difference can't be more than INT_MAX
+    if (maxc < 0) {
+      if (static_cast<unsigned int>(maxc - minc) > delta) {
+	return false;
+      }
+    }
+    if (static_cast<unsigned int>(maxc)-minc > delta) {
       return false;
     }
   }
