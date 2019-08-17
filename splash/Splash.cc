@@ -91,9 +91,21 @@ static inline int imgCoordMungeUpper(SplashCoord x) {
 }
 #else
 static inline int imgCoordMungeLower(SplashCoord x) {
+#if !defined(USE_FIXEDPOINT)
+  if( x > INT_MAX )
+      return INT_MAX;
+  if( x < INT_MIN )
+      return INT_MIN;
+#endif
   return splashFloor(x);
 }
 static inline int imgCoordMungeUpper(SplashCoord x) {
+#if !defined(USE_FIXEDPOINT)
+  if( x > INT_MAX )
+      return INT_MAX;
+  if( x < INT_MIN )
+      return INT_MIN;
+#endif
   return splashFloor(x) + 1;
 }
 static inline int imgCoordMungeLowerC(SplashCoord x, bool glyphMode) {
@@ -3906,6 +3918,14 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
   opClipRes = clipRes;
   if (clipRes == splashClipAllOutside) {
     return splashOk;
+  }
+
+  // avoids later potential overflows
+  if( xMin < INT_MIN / 2 || xMin > INT_MAX / 2 ||
+      yMin < INT_MIN / 2 || yMin > INT_MAX / 2 ||
+      xMax < INT_MIN / 2 || xMax > INT_MAX / 2 ||
+      yMax < INT_MIN / 2 || yMax > INT_MAX / 2 ) {
+    return splashErrGeneric;
   }
 
   // compute the scale factors
