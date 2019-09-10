@@ -76,7 +76,7 @@ void image_renderer::drawImage(GfxState *state, Object *ref, Stream *str,
     EmbedStream *embedStr;
     ImageStream *imgStr = nullptr;
     unsigned char *rowp;
-    u_char *p;
+    unsigned char *p;
     GfxRGB rgb;
     //GfxCMYK cmyk;
     GfxGray gray;
@@ -140,7 +140,7 @@ void image_renderer::drawImage(GfxState *state, Object *ref, Stream *str,
     // the mask we leave the data unchanged.
     invert_bits = 0xff;
     if (monochrome && colorMap) {
-        u_char zero[gfxColorMaxComps];
+        unsigned char zero[gfxColorMaxComps];
         memset(zero, 0, sizeof(zero));
         colorMap->getGray(zero, &gray);
         if (colToByte(gray) == 0)
