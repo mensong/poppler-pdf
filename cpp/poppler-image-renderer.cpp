@@ -67,7 +67,7 @@ long image_renderer::getInlineImageLength(Stream *str, int width, int height,
 void image_renderer::drawImage(GfxState *state, Object *ref, Stream *str,
              int width, int height,
              GfxImageColorMap *colorMap,
-             bool interpolate, int *maskColors, bool inlineImg) {
+             bool interpolate, const int *maskColors, bool inlineImg) {
     ImageFormat format;
     image::format_enum outformat;
     char *imgdata = nullptr;
