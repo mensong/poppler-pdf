@@ -4916,14 +4916,15 @@ int FlateStream::getHuffmanCodeWord(FlateHuffmanTab *tab) {
   const FlateCode *code;
   int c;
 
-  while (codeSize < tab->maxLen) {
+  code = &tab->codes[codeBuf & ((1 << tab->maxLen) - 1)];
+  while (codeSize < code->len) {
     if ((c = str->getChar()) == EOF) {
       break;
     }
     codeBuf |= (c & 0xff) << codeSize;
     codeSize += 8;
+    code = &tab->codes[codeBuf & ((1 << tab->maxLen) - 1)];
   }
-  code = &tab->codes[codeBuf & ((1 << tab->maxLen) - 1)];
   if (codeSize == 0 || codeSize < code->len || code->len == 0) {
     return EOF;
   }
