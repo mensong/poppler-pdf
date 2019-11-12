@@ -46,6 +46,11 @@ public:
   virtual GooString *getPSFilter(int psLevel, const char *indent) override;
   virtual bool isBinary(bool last = true) override;
 
+  // Creates a new FlateStream. Verifies the Adler-32 checksum and returns
+  // nullptr if verification fails.
+  static FlateStream *createVerified(Stream *strA, int predictor, int columns,
+                                     int colors, int bits);
+
 private:
   inline int doGetRawChar() {
     if (fill_buffer())
@@ -55,6 +60,10 @@ private:
   }
 
   int fill_buffer(void);
+
+  // Verifies the Adler-32 checksum. Returns true if verification passes.
+  bool checkAdler32();
+
   z_stream d_stream;
   StreamPredictor *pred;
   int status;

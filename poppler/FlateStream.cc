@@ -137,4 +137,47 @@ bool FlateStream::isBinary(bool last) {
   return str->isBinary(true);
 }
 
+bool FlateStream::checkAdler32() {
+  int c = 0;
+
+  reset();
+  d_stream.avail_out = sizeof(out_buf);
+
+  // decompress all data. zlib will report an error if the checksum failed.
+  while (status == Z_OK) {
+    // fill input buffer
+    if (d_stream.avail_in == 0 && c != EOF) {
+      while (d_stream.avail_in < sizeof(in_buf) &&
+             (c = str->getChar()) != EOF) {
+        in_buf[d_stream.avail_in++] = c;
+      }
+      d_stream.next_in = in_buf;
+    }
+
+    // break if out of input data and no more to flush out from zlib
+    if (d_stream.avail_in == 0 && d_stream.avail_out != 0)
+      break;
+
+    d_stream.next_out = out_buf;
+    d_stream.avail_out = sizeof(out_buf);
+    status = inflate(&d_stream, Z_NO_FLUSH);
+  }
+
+  close();
+  return (status == Z_STREAM_END);
+}
+
+FlateStream *FlateStream::createVerified(Stream *strA, int predictor,
+                                         int columns, int colors, int bits) {
+  FlateStream *flateStr = new FlateStream(strA, predictor, columns, colors,
+                                          bits);
+  if (!flateStr->checkAdler32()) {
+    flateStr->str = nullptr; // steal back stream so it isn't also deleted
+    delete flateStr;
+    return nullptr;
+  }
+
+  return flateStr;
+}
+
 #endif

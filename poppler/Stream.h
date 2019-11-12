@@ -1094,6 +1094,11 @@ public:
   bool isBinary(bool last = true) override;
   void unfilteredReset () override;
 
+  // Creates a new FlateStream. Verifies the Adler-32 checksum and returns
+  // nullptr if verification fails.
+  static FlateStream *createVerified(Stream *strA, int predictor, int columns,
+                                     int colors, int bits);
+
 private:
   void flateReset(bool unfiltered);
   inline int doGetRawChar() {
@@ -1112,6 +1117,9 @@ private:
 
   bool hasGetChars() override { return true; }
   int getChars(int nChars, unsigned char *buffer) override;
+
+  // Verifies the Adler-32 checksum. Returns true if verification passes.
+  bool checkAdler32();
 
   StreamPredictor *pred;	// predictor
   unsigned char buf[flateWindow];	// output data buffer

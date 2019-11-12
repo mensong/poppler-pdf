@@ -326,7 +326,24 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
       if (obj.isInt())
 	bits = obj.getInt();
     }
-    str = new FlateStream(str, pred, columns, colors, bits);
+    if (str->isEncrypted()) {
+      // be more strict for encrypted documents
+      FlateStream *flateStr = FlateStream::createVerified(str, pred, columns,
+                                                          colors, bits);
+      if (flateStr) {
+        str = flateStr;
+      } else {
+        // There may be a security issue if the checksum failed. A variant of
+        // the PDFex vulnerabaility modifies Deflate data of an encrypted
+        // object to build a URL, but this results in some random bytes in the
+        // decompressed output, breaking the checksum.
+        error(errSyntaxError, getPos(), "FlateStream failed Adler32 checksum");
+        str = new EOFStream(str);
+      }
+    } else {
+      // less strict for unencrypted documents to save time
+      str = new FlateStream(str, pred, columns, colors, bits);
+    }
   } else if (!strcmp(name, "JBIG2Decode")) {
     Object globals;
     if (params->isDict()) {
@@ -4621,6 +4638,39 @@ bool FlateStream::isBinary(bool last) {
   return str->isBinary(true);
 }
 
+bool FlateStream::checkAdler32() {
+  uint32_t calcAdler = 0;
+  uint32_t fileAdler = 0;
+  int c;
+
+  reset();
+
+  // calculate adler32 checksum from decompressed data
+  int a = 1;
+  int b = 0;
+
+  c = getRawChar();
+  while (c != EOF) {
+    a = (a + c) % 65521;
+    b = (b + a) % 65521;
+    c = getRawChar();
+  }
+  calcAdler = (b << 16) | a;
+
+  // read adler32 checksum from stream
+  for (int i = 0; i < 4; ++i) {
+    if ((c = str->getChar()) == EOF) {
+      error(errSyntaxError, getPos(), "FlateStream is missing Adler32 checksum");
+      close();
+      return false;
+    }
+    fileAdler = (fileAdler << 8) | c;
+  }
+
+  close();
+  return (calcAdler == fileAdler);
+}
+
 void FlateStream::readSome() {
   int code1, code2;
   int len, dist;
@@ -4946,6 +4996,19 @@ int FlateStream::getCodeWord(int bits) {
   codeBuf >>= bits;
   codeSize -= bits;
   return c;
+}
+
+FlateStream *FlateStream::createVerified(Stream *strA, int predictor,
+                                         int columns, int colors, int bits) {
+  FlateStream *flateStr = new FlateStream(strA, predictor, columns, colors,
+                                          bits);
+  if (!flateStr->checkAdler32()) {
+    flateStr->str = nullptr; // steal back stream so it isn't also deleted
+    delete flateStr;
+    return nullptr;
+  }
+
+  return flateStr;
 }
 #endif
 
