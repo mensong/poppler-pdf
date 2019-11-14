@@ -225,6 +225,9 @@ public:
   // Returns the new stream.
   Stream *addFilters(Dict *dict, int recursion = 0);
 
+  // Returns true if this stream includes a crypt filter.
+  bool isEncrypted();
+
 private:
   friend class Object; // for incRef/decRef
 

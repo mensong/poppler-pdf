@@ -175,6 +175,14 @@ Stream *Stream::addFilters(Dict *dict, int recursion) {
   return str;
 }
 
+bool Stream::isEncrypted() {
+  for (Stream *str = this; str != nullptr; str = str->getNextStream()) {
+    if (str->getKind() == strCrypt)
+      return true;
+  }
+  return false;
+}
+
 class BaseStreamStream : public Stream
 {
 public:
