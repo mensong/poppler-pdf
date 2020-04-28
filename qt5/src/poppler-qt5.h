@@ -1182,7 +1182,8 @@ public:
     {
         SplashBackend, ///< Splash backend
         ArthurBackend, ///< \deprecated The old name of the QPainter backend
-        QPainterBackend = ArthurBackend ///< @since 20.11
+        QPainterBackend = ArthurBackend, ///< @since 20.11
+        CairoBackend ///< @since 20.11
     };
 
     /**
