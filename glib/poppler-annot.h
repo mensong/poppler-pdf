@@ -72,6 +72,10 @@ G_BEGIN_DECLS
 #define POPPLER_ANNOT_SQUARE(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ANNOT_SQUARE, PopplerAnnotSquare))
 #define POPPLER_IS_ANNOT_SQUARE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_ANNOT_SQUARE))
 
+#define POPPLER_TYPE_ANNOT_INK (poppler_annot_ink_get_type())
+#define POPPLER_ANNOT_INK(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ANNOT_INK, PopplerAnnotInk))
+#define POPPLER_IS_ANNOT_INK(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_ANNOT_INK))
+
 typedef enum
 {
     POPPLER_ANNOT_UNKNOWN,
@@ -327,6 +331,17 @@ POPPLER_PUBLIC
 void poppler_annot_square_set_interior_color(PopplerAnnotSquare *poppler_annot, PopplerColor *poppler_color);
 POPPLER_PUBLIC
 PopplerColor *poppler_annot_square_get_interior_color(PopplerAnnotSquare *poppler_annot);
+
+/* PopplerAnnotInk */
+POPPLER_PUBLIC
+GType poppler_annot_ink_get_type(void) G_GNUC_CONST;
+
+POPPLER_PUBLIC
+PopplerAnnot *poppler_annot_ink_new(PopplerDocument *doc, PopplerRectangle *rect);
+POPPLER_PUBLIC
+void poppler_annot_ink_set_ink_list(PopplerAnnotInk *poppler_annot, const GPtrArray *poppler_paths);
+POPPLER_PUBLIC
+gint poppler_annot_ink_get_ink_list_size(PopplerAnnotInk *poppler_annot) G_GNUC_CONST;
 
 G_END_DECLS
 

@@ -135,6 +135,7 @@ PopplerAnnot *_poppler_annot_screen_new(PopplerDocument *doc, Annot *annot);
 PopplerAnnot *_poppler_annot_line_new(Annot *annot);
 PopplerAnnot *_poppler_annot_circle_new(Annot *annot);
 PopplerAnnot *_poppler_annot_square_new(Annot *annot);
+PopplerAnnot *_poppler_annot_ink_new(Annot *annot);
 
 const PDFRectangle *_poppler_annot_get_cropbox(PopplerAnnot *poppler_annot);
 

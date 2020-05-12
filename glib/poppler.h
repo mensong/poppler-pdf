@@ -207,6 +207,7 @@ typedef struct _PopplerAnnotCalloutLine PopplerAnnotCalloutLine;
 typedef struct _PopplerAnnotLine PopplerAnnotLine;
 typedef struct _PopplerAnnotCircle PopplerAnnotCircle;
 typedef struct _PopplerAnnotSquare PopplerAnnotSquare;
+typedef struct _PopplerAnnotInk PopplerAnnotInk;
 typedef struct _PopplerQuadrilateral PopplerQuadrilateral;
 typedef struct _PopplerStructureElement PopplerStructureElement;
 typedef struct _PopplerStructureElementIter PopplerStructureElementIter;

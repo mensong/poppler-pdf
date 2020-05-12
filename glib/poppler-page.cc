@@ -1277,6 +1277,9 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
         case Annot::typeSquare:
             mapping->annot = _poppler_annot_square_new(annot);
             break;
+        case Annot::typeInk:
+            mapping->annot = _poppler_annot_ink_new(annot);
+            break;
         case Annot::typeCircle:
             mapping->annot = _poppler_annot_circle_new(annot);
             break;

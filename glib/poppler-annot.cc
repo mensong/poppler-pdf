@@ -26,6 +26,7 @@
 #define ZERO_CROPBOX(c) (!(c && (c->x1 > 0.01 || c->y1 > 0.01)))
 
 const PDFRectangle *_poppler_annot_get_cropbox_and_page(PopplerAnnot *poppler_annot, Page **page_out);
+#include <vector>
 
 /**
  * SECTION:poppler-annot
@@ -44,6 +45,7 @@ typedef struct _PopplerAnnotScreenClass PopplerAnnotScreenClass;
 typedef struct _PopplerAnnotLineClass PopplerAnnotLineClass;
 typedef struct _PopplerAnnotCircleClass PopplerAnnotCircleClass;
 typedef struct _PopplerAnnotSquareClass PopplerAnnotSquareClass;
+typedef struct _PopplerAnnotInkClass PopplerAnnotInkClass;
 
 struct _PopplerAnnotClass
 {
@@ -154,6 +156,16 @@ struct _PopplerAnnotSquareClass
     PopplerAnnotMarkupClass parent_class;
 };
 
+struct _PopplerAnnotInk
+{
+    PopplerAnnotMarkup parent_instance;
+};
+
+struct _PopplerAnnotInkClass
+{
+    PopplerAnnotMarkupClass parent_class;
+};
+
 G_DEFINE_TYPE(PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE(PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE(PopplerAnnotTextMarkup, poppler_annot_text_markup, POPPLER_TYPE_ANNOT_MARKUP)
@@ -165,6 +177,7 @@ G_DEFINE_TYPE(PopplerAnnotScreen, poppler_annot_screen, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE(PopplerAnnotLine, poppler_annot_line, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE(PopplerAnnotCircle, poppler_annot_circle, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE(PopplerAnnotSquare, poppler_annot_square, POPPLER_TYPE_ANNOT_MARKUP)
+G_DEFINE_TYPE(PopplerAnnotInk, poppler_annot_ink, POPPLER_TYPE_ANNOT_MARKUP)
 
 static PopplerAnnot *_poppler_create_annot(GType annot_type, Annot *annot)
 {
@@ -595,6 +608,38 @@ PopplerAnnot *poppler_annot_square_new(PopplerDocument *doc, PopplerRectangle *r
     annot = new AnnotGeometry(doc->doc, &pdf_rect, Annot::typeSquare);
 
     return _poppler_annot_square_new(annot);
+}
+
+PopplerAnnot *_poppler_annot_ink_new(Annot *annot)
+{
+    return _poppler_create_annot(POPPLER_TYPE_ANNOT_INK, annot);
+}
+
+static void poppler_annot_ink_init(PopplerAnnotInk *poppler_annot) { }
+
+static void poppler_annot_ink_class_init(PopplerAnnotInkClass *klass) { }
+
+/**
+ * poppler_annot_ink_new:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ *
+ * Creates a new Ink annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot()
+ *
+ * Return value: a newly created #PopplerAnnotInk annotation
+ *
+ * Since: 0.89
+ **/
+PopplerAnnot *poppler_annot_ink_new(PopplerDocument *doc, PopplerRectangle *rect)
+{
+    Annot *annot;
+    PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
+
+    annot = new AnnotInk(doc->doc, &pdf_rect);
+
+    return _poppler_annot_ink_new(annot);
 }
 
 /* Public methods */
@@ -1908,4 +1953,62 @@ void poppler_annot_square_set_interior_color(PopplerAnnotSquare *poppler_annot, 
     g_return_if_fail(POPPLER_IS_ANNOT_SQUARE(poppler_annot));
 
     poppler_annot_geometry_set_interior_color(POPPLER_ANNOT(poppler_annot), poppler_color);
+}
+
+/**
+ * poppler_annot_ink_set_ink_list:
+ * @poppler_annot: a #PopplerAnnotInk
+ * @poppler_paths: a #GPtrArray of #GArray of #PopplerPoint
+ *
+ * Sets the ink list of  @poppler_annot. The ink list is a list of one ore more paths.
+ * @annot_paths is therefore a nested array of paths. @annot_paths can be safely
+ * disposed after invoking this method.
+ *
+ * Since: 0.89
+ */
+void poppler_annot_ink_set_ink_list(PopplerAnnotInk *poppler_annot, const GPtrArray *poppler_paths)
+{
+    g_return_if_fail(POPPLER_IS_ANNOT_INK(poppler_annot));
+
+    const guint paths_len = poppler_paths->len;
+    AnnotPath **paths = new AnnotPath *[paths_len];
+
+    for (guint i = 0; i < paths_len; i++) {
+        const GArray *coord_array = (GArray *)g_ptr_array_index(poppler_paths, i); /* an array of PopplerPoint */
+
+        std::vector<AnnotCoord> coords;
+        coords.reserve(coord_array->len);
+        for (guint j = 0; j < coord_array->len; j++) {
+            PopplerPoint *p = &g_array_index(coord_array, PopplerPoint, j);
+            coords.emplace_back(AnnotCoord { p->x, p->y });
+        }
+
+        paths[i] = new AnnotPath { std::move(coords) };
+    }
+
+    AnnotInk *annot = static_cast<AnnotInk *>(POPPLER_ANNOT(poppler_annot)->annot);
+    annot->setInkList(paths, paths_len);
+
+    for (guint i = 0; i < paths_len; i++) {
+        delete paths[i];
+    }
+    delete[] paths;
+}
+
+/**
+ * poppler_annot_ink_get_ink_list_size:
+ * @poppler_annot: a #PopplerAnnotInk
+ *
+ * Returns how many paths are contained in the @poppler_annot ink list.
+ *
+ * Return Value: the ink list size or -1 when called on the wrong object
+ *
+ * Since: 0.89
+ */
+gint poppler_annot_ink_get_ink_list_size(PopplerAnnotInk *poppler_annot)
+{
+    g_return_val_if_fail(POPPLER_IS_ANNOT_INK(poppler_annot), -1);
+
+    AnnotInk *annot = static_cast<AnnotInk *>(POPPLER_ANNOT(poppler_annot)->annot);
+    return annot->getInkListLength();
 }
