@@ -83,6 +83,24 @@ inline void Guswap(T &a, T &b)
     b = tmp;
 }
 
+// Simple bitmap contents initialization helpers
+
+static void fillBitmapData(SplashBitmap *bitmap, unsigned char fill)
+{
+    size_t height = bitmap->getHeight();
+    int rowSize = bitmap->getRowSize();
+    // For non-top-down bitmaps rowSize is negative and the data is offset
+    ptrdiff_t offset = (rowSize < 0) * rowSize * (height - 1);
+    memset(bitmap->getDataPtr() + offset, fill, abs(rowSize) * height);
+}
+
+static void fillBitmapAlpha(SplashBitmap *bitmap, unsigned char fill)
+{
+    size_t height = bitmap->getHeight();
+    size_t width = bitmap->getWidth();
+    memset(bitmap->getAlphaPtr(), fill, height * width);
+}
+
 // The PDF spec says that all pixels whose *centers* lie within the
 // image target region get painted, so we want to round n+0.5 down to
 // n.  But this causes problems, e.g., with PDF files that fill a
@@ -1295,7 +1313,7 @@ inline void Splash::drawAAPixel(SplashPipe *pipe, int x, int y)
 
     // update aaBuf
     if (y != aaBufY) {
-        memset(aaBuf->getDataPtr(), 0xff, aaBuf->getRowSize() * aaBuf->getHeight());
+        fillBitmapData(aaBuf, 0xff);
         x0 = 0;
         x1 = bitmap->width - 1;
         state->clip->clipAALine(aaBuf, &x0, &x1, y);
@@ -1754,32 +1772,18 @@ SplashError Splash::restoreState()
 void Splash::clear(SplashColorPtr color, unsigned char alpha)
 {
     SplashColorPtr row, p;
-    unsigned char mono;
     int x, y;
 
     switch (bitmap->mode) {
     case splashModeMono1:
-        mono = (color[0] & 0x80) ? 0xff : 0x00;
-        if (bitmap->rowSize < 0) {
-            memset(bitmap->data + bitmap->rowSize * (bitmap->height - 1), mono, -bitmap->rowSize * bitmap->height);
-        } else {
-            memset(bitmap->data, mono, bitmap->rowSize * bitmap->height);
-        }
+        fillBitmapData(bitmap, (color[0] & 0x80) ? 0xff : 0x00);
         break;
     case splashModeMono8:
-        if (bitmap->rowSize < 0) {
-            memset(bitmap->data + bitmap->rowSize * (bitmap->height - 1), color[0], -bitmap->rowSize * bitmap->height);
-        } else {
-            memset(bitmap->data, color[0], bitmap->rowSize * bitmap->height);
-        }
+        fillBitmapData(bitmap, color[0]);
         break;
     case splashModeRGB8:
         if (color[0] == color[1] && color[1] == color[2]) {
-            if (bitmap->rowSize < 0) {
-                memset(bitmap->data + bitmap->rowSize * (bitmap->height - 1), color[0], -bitmap->rowSize * bitmap->height);
-            } else {
-                memset(bitmap->data, color[0], bitmap->rowSize * bitmap->height);
-            }
+            fillBitmapData(bitmap, color[0]);
         } else {
             row = bitmap->data;
             for (y = 0; y < bitmap->height; ++y) {
@@ -1795,11 +1799,7 @@ void Splash::clear(SplashColorPtr color, unsigned char alpha)
         break;
     case splashModeXBGR8:
         if (color[0] == color[1] && color[1] == color[2]) {
-            if (bitmap->rowSize < 0) {
-                memset(bitmap->data + bitmap->rowSize * (bitmap->height - 1), color[0], -bitmap->rowSize * bitmap->height);
-            } else {
-                memset(bitmap->data, color[0], bitmap->rowSize * bitmap->height);
-            }
+            fillBitmapData(bitmap, color[0]);
         } else {
             row = bitmap->data;
             for (y = 0; y < bitmap->height; ++y) {
@@ -1816,11 +1816,7 @@ void Splash::clear(SplashColorPtr color, unsigned char alpha)
         break;
     case splashModeBGR8:
         if (color[0] == color[1] && color[1] == color[2]) {
-            if (bitmap->rowSize < 0) {
-                memset(bitmap->data + bitmap->rowSize * (bitmap->height - 1), color[0], -bitmap->rowSize * bitmap->height);
-            } else {
-                memset(bitmap->data, color[0], bitmap->rowSize * bitmap->height);
-            }
+            fillBitmapData(bitmap, color[0]);
         } else {
             row = bitmap->data;
             for (y = 0; y < bitmap->height; ++y) {
@@ -1836,11 +1832,7 @@ void Splash::clear(SplashColorPtr color, unsigned char alpha)
         break;
     case splashModeCMYK8:
         if (color[0] == color[1] && color[1] == color[2] && color[2] == color[3]) {
-            if (bitmap->rowSize < 0) {
-                memset(bitmap->data + bitmap->rowSize * (bitmap->height - 1), color[0], -bitmap->rowSize * bitmap->height);
-            } else {
-                memset(bitmap->data, color[0], bitmap->rowSize * bitmap->height);
-            }
+            fillBitmapData(bitmap, color[0]);
         } else {
             row = bitmap->data;
             for (y = 0; y < bitmap->height; ++y) {
@@ -1869,7 +1861,7 @@ void Splash::clear(SplashColorPtr color, unsigned char alpha)
     }
 
     if (bitmap->alpha) {
-        memset(bitmap->alpha, alpha, bitmap->width * bitmap->height);
+        fillBitmapAlpha(bitmap, alpha);
     }
 }
 
@@ -5182,7 +5174,7 @@ void Splash::compositeBackground(SplashColorConstPtr color)
         }
         break;
     }
-    memset(bitmap->alpha, 255, bitmap->width * bitmap->height);
+    fillBitmapAlpha(bitmap, 255);
 }
 
 bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
@@ -5236,9 +5228,7 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
         bitmapAlpha = blitTarget->getAlphaPtr();
 
         // initialisation seems to be necessary:
-        const int S = bitmap->getWidth() * bitmap->getHeight();
-        for (int i = 0; i < S; ++i)
-            bitmapAlpha[i] = 0;
+        fillBitmapAlpha(blitTarget, 0);
         hasAlpha = true;
     }
 
