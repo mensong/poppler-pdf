@@ -321,7 +321,7 @@ void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool a
     if (xx0 < xx1) {
         xx0 &= ~7;
         for (yy = 0; yy < splashAASize; ++yy) {
-            p = aaBuf->getDataPtr() + yy * aaBuf->getRowSize() + (xx0 >> 3);
+            p = aaBuf->dataAt(xx0 >> 3, yy);
             for (xx = xx0; xx + 7 < xx1; xx += 8) {
                 *p++ = 0;
             }
@@ -340,7 +340,7 @@ void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool a
     xx1 = (*x1 + 1) * splashAASize;
     if (xx0 < xx1 && !adjustVertLine) {
         for (yy = 0; yy < splashAASize; ++yy) {
-            p = aaBuf->getDataPtr() + yy * aaBuf->getRowSize() + (xx0 >> 3);
+            p = aaBuf->dataAt(xx0 >> 3, yy);
             xx = xx0;
             if (xx & 7) {
                 *p &= 0xff00 >> (xx & 7);
