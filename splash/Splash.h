@@ -304,7 +304,7 @@ private:
     void scaleImageYdownXup(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     void scaleImageYupXdown(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     void scaleImageYupXup(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
-    void scaleImageYupXupBilinear(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
+    void scaleImageBilinear(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     void vertFlipImage(SplashBitmap *img, int width, int height, int nComps);
     void blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest, SplashClipResult clipRes);
     void blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int ySrc, int xDest, int yDest, int w, int h);

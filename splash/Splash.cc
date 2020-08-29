@@ -3912,6 +3912,11 @@ static bool isImageInterpolationRequired(int srcWidth, int srcHeight, int scaled
     if (scaledWidth / srcWidth >= 4 || scaledHeight / srcHeight >= 4)
         return false;
 
+    /* Compromise for downscaling: Bilinear is less blurry than averaging, but gets lossy when heading towards 50%. */
+    if ((double)scaledWidth / srcWidth < 0.75 || (double)scaledHeight / srcHeight < 0.75) {
+        return false;
+    }
+
     return true;
 }
 
@@ -3922,18 +3927,18 @@ SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData, SplashCol
 
     dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha, true, bitmap->getSeparationList());
     if (dest->getDataPtr() != nullptr && srcHeight > 0 && srcWidth > 0) {
-        if (scaledHeight < srcHeight) {
-            if (scaledWidth < srcWidth) {
-                scaleImageYdownXdown(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
-            } else {
-                scaleImageYdownXup(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
-            }
+        if (!tilingPattern && isImageInterpolationRequired(srcWidth, srcHeight, scaledWidth, scaledHeight, interpolate)) {
+            scaleImageBilinear(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
         } else {
-            if (scaledWidth < srcWidth) {
-                scaleImageYupXdown(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+            if (scaledHeight < srcHeight) {
+                if (scaledWidth < srcWidth) {
+                    scaleImageYdownXdown(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+                } else {
+                    scaleImageYdownXup(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+                }
             } else {
-                if (!tilingPattern && isImageInterpolationRequired(srcWidth, srcHeight, scaledWidth, scaledHeight, interpolate)) {
-                    scaleImageYupXupBilinear(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+                if (scaledWidth < srcWidth) {
+                    scaleImageYupXdown(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
                 } else {
                     scaleImageYupXup(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
                 }
@@ -4670,8 +4675,8 @@ void Splash::scaleImageYupXup(SplashImageSource src, void *srcData, SplashColorM
     gfree(lineBuf);
 }
 
-// expand source row to scaledWidth using linear interpolation
-static void expandRow(unsigned char *srcBuf, unsigned char *dstBuf, int srcWidth, int scaledWidth, int nComps)
+// resample source row to scaledWidth using linear interpolation
+static void bilinearInterpolateRow(unsigned char *srcBuf, unsigned char *dstBuf, int srcWidth, int scaledWidth, int nComps)
 {
     double xStep = (double)srcWidth / scaledWidth;
     double xSrc = 0.0;
@@ -4694,8 +4699,8 @@ static void expandRow(unsigned char *srcBuf, unsigned char *dstBuf, int srcWidth
     }
 }
 
-// Scale up image using bilinear interpolation
-void Splash::scaleImageYupXupBilinear(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest)
+// Scale up or down image using bilinear interpolation
+void Splash::scaleImageBilinear(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest)
 {
     unsigned char *srcBuf, *lineBuf1, *lineBuf2, *alphaSrcBuf, *alphaLineBuf1, *alphaLineBuf2;
     unsigned int pix[splashMaxColorComps];
@@ -4724,28 +4729,58 @@ void Splash::scaleImageYupXupBilinear(SplashImageSource src, void *srcData, Spla
     double yFrac, yInt;
     int currentSrcRow = -1;
     (*src)(srcData, srcBuf, alphaSrcBuf);
-    expandRow(srcBuf, lineBuf2, srcWidth, scaledWidth, nComps);
+    bilinearInterpolateRow(srcBuf, lineBuf2, srcWidth, scaledWidth, nComps);
     if (srcAlpha)
-        expandRow(alphaSrcBuf, alphaLineBuf2, srcWidth, scaledWidth, 1);
+        bilinearInterpolateRow(alphaSrcBuf, alphaLineBuf2, srcWidth, scaledWidth, 1);
 
     destPtr0 = dest->data;
     destAlphaPtr0 = dest->alpha;
     for (int y = 0; y < scaledHeight; y++) {
         yFrac = modf(ySrc, &yInt);
         if ((int)yInt > currentSrcRow) {
-            currentSrcRow++;
-            // Copy line2 data to line1 and get next line2 data.
-            // If line2 already contains the last source row we don't touch it.
-            // This effectively adds an extra row of padding for interpolating the
-            // last source row with.
-            memcpy(lineBuf1, lineBuf2, scaledWidth * nComps);
-            if (srcAlpha)
-                memcpy(alphaLineBuf1, alphaLineBuf2, scaledWidth);
-            if (currentSrcRow < srcHeight - 1) {
+            unsigned char *lineBufPtr[2];
+            unsigned char *alphaBufPtr[2];
+
+            // srcRowReads == 1: Fetch one new line, and reuse the other line from last iteration. If upscaling, this is the only case ever happening.
+            // srcRowReads == 2: Fetch two new source lines. Happens at some destination rows when downscaling.
+            // srcRowReads > 2: Skip some source lines, then fetch two new source lines. Happens at some destination rows when downscaling to < 0.5.
+            int srcRowReads = (int)yInt - currentSrcRow;
+
+            // skip source lines that are outside the two rows where we want to interpolate in between
+            const int skipRows = srcRowReads - 2;
+            for (int j = 0; j < skipRows; j++) {
+                currentSrcRow++;
                 (*src)(srcData, srcBuf, alphaSrcBuf);
-                expandRow(srcBuf, lineBuf2, srcWidth, scaledWidth, nComps);
+                srcRowReads--;
+            }
+
+            if (srcRowReads == 1) {
+                // Copy line2 data to line1 and get next line2 data.
+                memcpy(lineBuf1, lineBuf2, scaledWidth * nComps);
                 if (srcAlpha)
-                    expandRow(alphaSrcBuf, alphaLineBuf2, srcWidth, scaledWidth, 1);
+                    memcpy(alphaLineBuf1, alphaLineBuf2, scaledWidth);
+                lineBufPtr[0] = lineBuf2;
+                alphaBufPtr[0] = alphaLineBuf2;
+            } else {
+                // In case of source row overrun we have to fetch two new lines.
+                lineBufPtr[0] = lineBuf1;
+                lineBufPtr[1] = lineBuf2;
+                alphaBufPtr[0] = alphaLineBuf1;
+                alphaBufPtr[1] = alphaLineBuf2;
+            }
+
+            assert(srcRowReads >= 1 && srcRowReads <= 2);
+            for (int j = 0; j < srcRowReads; j++) {
+                currentSrcRow++;
+                // If line2 already contains the last source row we don't touch it.
+                // This effectively adds an extra row of padding for interpolating the
+                // last source row with.
+                if (currentSrcRow < srcHeight - 1) {
+                    (*src)(srcData, srcBuf, alphaSrcBuf);
+                    bilinearInterpolateRow(srcBuf, lineBufPtr[j], srcWidth, scaledWidth, nComps);
+                    if (srcAlpha)
+                        bilinearInterpolateRow(alphaSrcBuf, alphaBufPtr[j], srcWidth, scaledWidth, 1);
+                }
             }
         }
 
