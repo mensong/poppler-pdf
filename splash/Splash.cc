@@ -87,17 +87,17 @@ inline void Guswap(T &a, T &b)
 
 static void fillBitmapData(SplashBitmap *bitmap, unsigned char fill)
 {
-    size_t height = bitmap->getHeight();
-    int rowSize = bitmap->getRowSize();
+    const size_t height = bitmap->getHeight();
+    const int rowSize = bitmap->getRowSize();
     // For non-top-down bitmaps rowSize is negative and the data is offset
-    ptrdiff_t offset = (rowSize < 0) * rowSize * (height - 1);
+    const ptrdiff_t offset = (rowSize < 0) ? rowSize * (height - 1) : 0;
     memset(bitmap->getDataPtr() + offset, fill, abs(rowSize) * height);
 }
 
 static void fillBitmapAlpha(SplashBitmap *bitmap, unsigned char fill)
 {
-    size_t height = bitmap->getHeight();
-    size_t width = bitmap->getWidth();
+    const size_t height = bitmap->getHeight();
+    const size_t width = bitmap->getWidth();
     memset(bitmap->getAlphaPtr(), fill, height * width);
 }
 
@@ -1775,9 +1775,11 @@ void Splash::clear(SplashColorPtr color, unsigned char alpha)
     int x, y;
 
     switch (bitmap->mode) {
-    case splashModeMono1:
-        fillBitmapData(bitmap, (color[0] & 0x80) ? 0xff : 0x00);
+    case splashModeMono1: {
+        const unsigned char mono = (color[0] & 0x80) ? 0xff : 0x00;
+        fillBitmapData(bitmap, mono);
         break;
+    }
     case splashModeMono8:
         fillBitmapData(bitmap, color[0]);
         break;
