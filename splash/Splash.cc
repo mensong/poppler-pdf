@@ -3946,6 +3946,21 @@ SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData, SplashCol
     return dest;
 }
 
+static void accumulateLine(unsigned int *lineAccu, unsigned int *alphaLineAccu, unsigned char *lineBuf, unsigned char *alphaLineBuf, int srcWidth, int nComps, bool srcAlpha, int weight)
+{
+    int x;
+    assert(lineAccu && lineBuf);
+    for (x = 0; x < srcWidth * nComps; ++x) {
+        lineAccu[x] += weight * lineBuf[x];
+    }
+    if (srcAlpha) {
+        assert(alphaLineAccu && alphaLineBuf);
+        for (x = 0; x < srcWidth; ++x) {
+            alphaLineAccu[x] += weight * alphaLineBuf[x];
+        }
+    }
+}
+
 void Splash::scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest)
 {
     unsigned char *lineBuf, *alphaLineBuf;
@@ -3955,8 +3970,8 @@ void Splash::scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashCo
     unsigned int pix[SPOT_NCOMPS + 4], cp;
     unsigned int alpha;
     unsigned char *destPtr, *destAlphaPtr;
-    int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, xxa, d, d0, d1;
-    int i, j;
+    int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, xxa, i;
+    const unsigned int srcSize = srcHeight * srcWidth;
 
     // Bresenham parameters for y scale
     yp = srcHeight / scaledHeight;
@@ -3989,7 +4004,9 @@ void Splash::scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashCo
 
     destPtr = dest->data;
     destAlphaPtr = dest->alpha;
+    (*src)(srcData, lineBuf, alphaLineBuf);
     for (y = 0; y < scaledHeight; ++y) {
+        unsigned int yWeight = scaledHeight - yt;
 
         // y scale Bresenham
         if ((yt += yq) >= scaledHeight) {
@@ -4005,66 +4022,66 @@ void Splash::scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashCo
             memset(alphaPixBuf, 0, srcWidth * sizeof(int));
         }
         for (i = 0; i < yStep; ++i) {
+            accumulateLine(pixBuf, alphaPixBuf, lineBuf, alphaLineBuf, srcWidth, nComps, srcAlpha, yWeight);
             (*src)(srcData, lineBuf, alphaLineBuf);
-            for (j = 0; j < srcWidth * nComps; ++j) {
-                pixBuf[j] += lineBuf[j];
-            }
-            if (srcAlpha) {
-                for (j = 0; j < srcWidth; ++j) {
-                    alphaPixBuf[j] += alphaLineBuf[j];
-                }
-            }
+            yWeight = scaledHeight;
+        }
+        if (yt > 0) {
+            // partial pixels - process 1st part, then don't fetch so that next iteration will process 2nd part
+            accumulateLine(pixBuf, alphaPixBuf, lineBuf, alphaLineBuf, srcWidth, nComps, srcAlpha, yt);
         }
 
         // init x scale Bresenham
         xt = 0;
-        d0 = (1 << 23) / (yStep * xp);
-        d1 = (1 << 23) / (yStep * (xp + 1));
-
         xx = xxa = 0;
         for (x = 0; x < scaledWidth; ++x) {
+            unsigned int xWeight = scaledWidth - xt;
 
             // x scale Bresenham
             if ((xt += xq) >= scaledWidth) {
                 xt -= scaledWidth;
                 xStep = xp + 1;
-                d = d1;
             } else {
                 xStep = xp;
-                d = d0;
             }
 
             switch (srcMode) {
 
             case splashModeMono8:
-
                 // compute the final pixel
                 pix0 = 0;
                 for (i = 0; i < xStep; ++i) {
-                    pix0 += pixBuf[xx++];
+                    pix0 += xWeight * pixBuf[xx++];
+                    xWeight = scaledWidth;
                 }
-                // pix / xStep * yStep
-                pix0 = (pix0 * d) >> 23;
-
+                if (xt > 0) {
+                    pix0 += xt * pixBuf[xx];
+                }
+                // finish weighted average
+                pix0 = pix0 / srcSize;
                 // store the pixel
                 *destPtr++ = (unsigned char)pix0;
                 break;
 
             case splashModeRGB8:
-
                 // compute the final pixel
                 pix0 = pix1 = pix2 = 0;
                 for (i = 0; i < xStep; ++i) {
-                    pix0 += pixBuf[xx];
-                    pix1 += pixBuf[xx + 1];
-                    pix2 += pixBuf[xx + 2];
+                    pix0 += xWeight * pixBuf[xx];
+                    pix1 += xWeight * pixBuf[xx + 1];
+                    pix2 += xWeight * pixBuf[xx + 2];
                     xx += 3;
+                    xWeight = scaledWidth;
                 }
-                // pix / xStep * yStep
-                pix0 = (pix0 * d) >> 23;
-                pix1 = (pix1 * d) >> 23;
-                pix2 = (pix2 * d) >> 23;
-
+                if (xt > 0) {
+                    pix0 += xt * pixBuf[xx];
+                    pix1 += xt * pixBuf[xx + 1];
+                    pix2 += xt * pixBuf[xx + 2];
+                }
+                // finish weighted average
+                pix0 = pix0 / srcSize;
+                pix1 = pix1 / srcSize;
+                pix2 = pix2 / srcSize;
                 // store the pixel
                 *destPtr++ = (unsigned char)pix0;
                 *destPtr++ = (unsigned char)pix1;
@@ -4072,20 +4089,24 @@ void Splash::scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashCo
                 break;
 
             case splashModeXBGR8:
-
                 // compute the final pixel
                 pix0 = pix1 = pix2 = 0;
                 for (i = 0; i < xStep; ++i) {
-                    pix0 += pixBuf[xx];
-                    pix1 += pixBuf[xx + 1];
-                    pix2 += pixBuf[xx + 2];
+                    pix0 += xWeight * pixBuf[xx];
+                    pix1 += xWeight * pixBuf[xx + 1];
+                    pix2 += xWeight * pixBuf[xx + 2];
                     xx += 4;
+                    xWeight = scaledWidth;
                 }
-                // pix / xStep * yStep
-                pix0 = (pix0 * d) >> 23;
-                pix1 = (pix1 * d) >> 23;
-                pix2 = (pix2 * d) >> 23;
-
+                if (xt > 0) {
+                    pix0 += xt * pixBuf[xx];
+                    pix1 += xt * pixBuf[xx + 1];
+                    pix2 += xt * pixBuf[xx + 2];
+                }
+                // finish weighted average
+                pix0 = pix0 / srcSize;
+                pix1 = pix1 / srcSize;
+                pix2 = pix2 / srcSize;
                 // store the pixel
                 *destPtr++ = (unsigned char)pix2;
                 *destPtr++ = (unsigned char)pix1;
@@ -4094,20 +4115,24 @@ void Splash::scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashCo
                 break;
 
             case splashModeBGR8:
-
                 // compute the final pixel
                 pix0 = pix1 = pix2 = 0;
                 for (i = 0; i < xStep; ++i) {
-                    pix0 += pixBuf[xx];
-                    pix1 += pixBuf[xx + 1];
-                    pix2 += pixBuf[xx + 2];
+                    pix0 += xWeight * pixBuf[xx];
+                    pix1 += xWeight * pixBuf[xx + 1];
+                    pix2 += xWeight * pixBuf[xx + 2];
                     xx += 3;
+                    xWeight = scaledWidth;
                 }
-                // pix / xStep * yStep
-                pix0 = (pix0 * d) >> 23;
-                pix1 = (pix1 * d) >> 23;
-                pix2 = (pix2 * d) >> 23;
-
+                if (xt > 0) {
+                    pix0 += xt * pixBuf[xx];
+                    pix1 += xt * pixBuf[xx + 1];
+                    pix2 += xt * pixBuf[xx + 2];
+                }
+                // finish weighted average
+                pix0 = pix0 / srcSize;
+                pix1 = pix1 / srcSize;
+                pix2 = pix2 / srcSize;
                 // store the pixel
                 *destPtr++ = (unsigned char)pix2;
                 *destPtr++ = (unsigned char)pix1;
@@ -4115,43 +4140,53 @@ void Splash::scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashCo
                 break;
 
             case splashModeCMYK8:
-
                 // compute the final pixel
                 pix0 = pix1 = pix2 = pix3 = 0;
                 for (i = 0; i < xStep; ++i) {
-                    pix0 += pixBuf[xx];
-                    pix1 += pixBuf[xx + 1];
-                    pix2 += pixBuf[xx + 2];
-                    pix3 += pixBuf[xx + 3];
+                    pix0 += xWeight * pixBuf[xx];
+                    pix1 += xWeight * pixBuf[xx + 1];
+                    pix2 += xWeight * pixBuf[xx + 2];
+                    pix3 += xWeight * pixBuf[xx + 3];
                     xx += 4;
+                    xWeight = scaledWidth;
                 }
-                // pix / xStep * yStep
-                pix0 = (pix0 * d) >> 23;
-                pix1 = (pix1 * d) >> 23;
-                pix2 = (pix2 * d) >> 23;
-                pix3 = (pix3 * d) >> 23;
-
+                if (xt > 0) {
+                    pix0 += xt * pixBuf[xx];
+                    pix1 += xt * pixBuf[xx + 1];
+                    pix2 += xt * pixBuf[xx + 2];
+                    pix3 += xt * pixBuf[xx + 3];
+                }
+                // finish weighted average
+                pix0 = pix0 / srcSize;
+                pix1 = pix1 / srcSize;
+                pix2 = pix2 / srcSize;
+                pix3 = pix3 / srcSize;
                 // store the pixel
                 *destPtr++ = (unsigned char)pix0;
                 *destPtr++ = (unsigned char)pix1;
                 *destPtr++ = (unsigned char)pix2;
                 *destPtr++ = (unsigned char)pix3;
                 break;
-            case splashModeDeviceN8:
 
+            case splashModeDeviceN8:
                 // compute the final pixel
                 for (cp = 0; cp < SPOT_NCOMPS + 4; cp++)
                     pix[cp] = 0;
                 for (i = 0; i < xStep; ++i) {
                     for (cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
-                        pix[cp] += pixBuf[xx + cp];
+                        pix[cp] += xWeight * pixBuf[xx + cp];
                     }
                     xx += (SPOT_NCOMPS + 4);
+                    xWeight = scaledWidth;
                 }
-                // pix / xStep * yStep
+                if (xt > 0) {
+                    for (cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
+                        pix[cp] += xt * pixBuf[xx + cp];
+                    }
+                }
+                // finish weighted average
                 for (cp = 0; cp < SPOT_NCOMPS + 4; cp++)
-                    pix[cp] = (pix[cp] * d) >> 23;
-
+                    pix[cp] = pix[cp] / srcSize;
                 // store the pixel
                 for (cp = 0; cp < SPOT_NCOMPS + 4; cp++)
                     *destPtr++ = (unsigned char)pix[cp];
@@ -4164,12 +4199,17 @@ void Splash::scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashCo
 
             // process alpha
             if (srcAlpha) {
+                xWeight = scaledWidth - xt;
                 alpha = 0;
                 for (i = 0; i < xStep; ++i, ++xxa) {
-                    alpha += alphaPixBuf[xxa];
+                    alpha += xWeight * alphaPixBuf[xxa];
+                    xWeight = scaledWidth;
                 }
-                // alpha / xStep * yStep
-                alpha = (alpha * d) >> 23;
+                if (xt > 0) {
+                    alpha += xt * alphaPixBuf[xxa];
+                }
+                // finish weighted average for alpha
+                alpha = alpha / srcSize;
                 *destAlphaPtr++ = (unsigned char)alpha;
             }
         }
@@ -4188,8 +4228,7 @@ void Splash::scaleImageYdownXup(SplashImageSource src, void *srcData, SplashColo
     unsigned int pix[splashMaxColorComps];
     unsigned int alpha;
     unsigned char *destPtr, *destAlphaPtr;
-    int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, d;
-    int i, j;
+    int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, d, i;
 
     // Bresenham parameters for y scale
     yp = srcHeight / scaledHeight;
@@ -4236,14 +4275,7 @@ void Splash::scaleImageYdownXup(SplashImageSource src, void *srcData, SplashColo
         }
         for (i = 0; i < yStep; ++i) {
             (*src)(srcData, lineBuf, alphaLineBuf);
-            for (j = 0; j < srcWidth * nComps; ++j) {
-                pixBuf[j] += lineBuf[j];
-            }
-            if (srcAlpha) {
-                for (j = 0; j < srcWidth; ++j) {
-                    alphaPixBuf[j] += alphaLineBuf[j];
-                }
-            }
+            accumulateLine(pixBuf, alphaPixBuf, lineBuf, alphaLineBuf, srcWidth, nComps, srcAlpha, 1);
         }
 
         // init x scale Bresenham
