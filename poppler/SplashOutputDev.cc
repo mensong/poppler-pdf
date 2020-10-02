@@ -1324,6 +1324,33 @@ void SplashOutputDev::startDoc(PDFDoc *docA)
         delete t3FontCache[i];
     }
     nT3Fonts = 0;
+
+#ifdef USE_CMS
+    // TODO: this should not happen here, but somewhere in the user-facing applications,
+    //       giving the user the possibility to override this setting
+    Object catDict = doc->getXRef()->getCatalog();
+    if (catDict.isDict()) {
+        Object outputIntents = catDict.dictLookup("OutputIntents");
+        if (outputIntents.isArray() && outputIntents.arrayGetLength() == 1) {
+            Object firstElement = outputIntents.arrayGet(0);
+            if (firstElement.isDict()) {
+                Object profile = firstElement.dictLookup("DestOutputProfile");
+                if (profile.isStream()) {
+                    Stream *iccStream = profile.getStream();
+                    int length = 0;
+                    unsigned char *profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
+                    auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf, length));
+                    if (!hp) {
+                        error(errSyntaxWarning, -1, "read ICCBased color space profile error");
+                    } else {
+                        proofingProfiles.insert(proofingProfiles.begin(), hp);
+                    }
+                    gfree(profBuf);
+                }
+            }
+        }
+    }
+#endif
 }
 
 void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
