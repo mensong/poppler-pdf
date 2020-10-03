@@ -52,12 +52,8 @@
 // SplashBitmap
 //------------------------------------------------------------------------
 
-SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode modeA, bool alphaA, bool topDown, std::vector<GfxSeparationColorSpace *> *separationListA)
+SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode modeA, bool alphaA, bool topDown, std::vector<GfxSeparationColorSpace *> *separationListA) : width(widthA), height(heightA), rowPad(rowPadA), mode(modeA)
 {
-    width = widthA;
-    height = heightA;
-    mode = modeA;
-    rowPad = rowPadA;
     switch (mode) {
     case splashModeMono1:
         if (width > 0) {

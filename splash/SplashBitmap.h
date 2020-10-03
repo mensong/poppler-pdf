@@ -110,8 +110,8 @@ public:
     SplashColorPtr takeData();
 
 private:
-    int width, height; // size of bitmap
-    int rowPad;
+    const int width, height; // size of bitmap
+    const int rowPad;
     int rowSize; // size of one row of data, in bytes
                  //   - negative for bottom-up bitmaps
     SplashColorMode mode; // color mode
