@@ -107,19 +107,24 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode
         rowSize += rowPad - 1;
         rowSize -= rowSize % rowPad;
     }
-    data = (SplashColorPtr)gmallocn_checkoverflow(rowSize, height);
-    if (data != nullptr) {
-        if (!topDown) {
-            data += (height - 1) * static_cast<ptrdiff_t>(rowSize);
-            rowSize = -rowSize;
+    alpha = nullptr;
+    data = (SplashColorPtr)gmalloc_checkoverflow(static_cast<size_t>(rowSize) * height);
+    // Leave bitmap without data if allocation fails
+    if (data == nullptr) {
+        return;
+    }
+    if (alphaA) {
+        alpha = (unsigned char *)gmalloc_checkoverflow(static_cast<size_t>(width) * height);
+        // Clear bitmap data if alpha allocation fails
+        if (alpha == nullptr) {
+            gfree(data);
+            data = nullptr;
+            return;
         }
-        if (alphaA) {
-            alpha = (unsigned char *)gmallocn(width, height);
-        } else {
-            alpha = nullptr;
-        }
-    } else {
-        alpha = nullptr;
+    }
+    if (!topDown) {
+        data += (height - 1) * static_cast<ptrdiff_t>(rowSize);
+        rowSize = -rowSize;
     }
     separationList = new std::vector<GfxSeparationColorSpace *>();
     if (separationListA != nullptr)
