@@ -120,8 +120,6 @@ private:
                           //   (always top-down)
     std::vector<GfxSeparationColorSpace *> *separationList; // list of spot colorants and their mapping functions
 
-    friend class Splash;
-
     void setJpegParams(ImgWriter *writer, WriteImgParams *params);
 };
 
