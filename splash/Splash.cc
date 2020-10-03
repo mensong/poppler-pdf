@@ -101,6 +101,37 @@ static void fillBitmapAlpha(SplashBitmap *bitmap, unsigned char fill)
     memset(bitmap->getAlphaPtr(), fill, height * width);
 }
 
+static void vertFlipImage(SplashBitmap *img)
+{
+    unsigned char *lineBuf;
+    unsigned char *p0, *p1;
+    const ptrdiff_t height = img->getHeight();
+    const ptrdiff_t rowSize = abs(img->getRowSize());
+
+    p0 = img->getDataPtr();
+    if (unlikely(p0 == nullptr)) {
+        error(errInternal, -1, "img->data is NULL in vertFlipImage");
+        return;
+    }
+
+    lineBuf = (unsigned char *)gmalloc(rowSize);
+    for (p1 = p0 + (height - 1) * rowSize; p0 < p1; p0 += rowSize, p1 -= rowSize) {
+        memcpy(lineBuf, p0, rowSize);
+        memcpy(p0, p1, rowSize);
+        memcpy(p1, lineBuf, rowSize);
+    }
+    p0 = img->getAlphaPtr();
+    if (p0 != nullptr) {
+        const ptrdiff_t width = img->getWidth();
+        for (p1 = p0 + (height - 1) * width; p0 < p1; p0 += width, p1 -= width) {
+            memcpy(lineBuf, p0, width);
+            memcpy(p0, p1, width);
+            memcpy(p1, lineBuf, width);
+        }
+    }
+    gfree(lineBuf);
+}
+
 // The PDF spec says that all pixels whose *centers* lie within the
 // image target region get painted, so we want to round n+0.5 down to
 // n.  But this causes problems, e.g., with PDF files that fill a
@@ -2787,7 +2818,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
                 return splashErrBadArg;
             }
             scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
-            vertFlipImage(scaledMask, scaledWidth, scaledHeight, 1);
+            vertFlipImage(scaledMask);
             blitMask(scaledMask, x0, y0, clipRes);
             delete scaledMask;
         }
@@ -3581,7 +3612,7 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
             if (tf != nullptr) {
                 (*tf)(srcData, scaledImg);
             }
-            vertFlipImage(scaledImg, scaledWidth, scaledHeight, nComps);
+            vertFlipImage(scaledImg);
             blitImage(scaledImg, srcAlpha, x0, y0, clipRes);
             delete scaledImg;
         }
@@ -4770,34 +4801,6 @@ void Splash::scaleImageYupXupBilinear(SplashImageSource src, void *srcData, Spla
     gfree(srcBuf);
     gfree(lineBuf1);
     gfree(lineBuf2);
-}
-
-void Splash::vertFlipImage(SplashBitmap *img, int width, int height, int nComps)
-{
-    unsigned char *lineBuf;
-    unsigned char *p0, *p1;
-    int w;
-
-    if (unlikely(img->data == nullptr)) {
-        error(errInternal, -1, "img->data is NULL in Splash::vertFlipImage");
-        return;
-    }
-
-    w = width * nComps;
-    lineBuf = (unsigned char *)gmalloc(w);
-    for (p0 = img->data, p1 = img->data + (height - 1) * w; p0 < p1; p0 += w, p1 -= w) {
-        memcpy(lineBuf, p0, w);
-        memcpy(p0, p1, w);
-        memcpy(p1, lineBuf, w);
-    }
-    if (img->alpha) {
-        for (p0 = img->alpha, p1 = img->alpha + (height - 1) * width; p0 < p1; p0 += width, p1 -= width) {
-            memcpy(lineBuf, p0, width);
-            memcpy(p0, p1, width);
-            memcpy(p1, lineBuf, width);
-        }
-    }
-    gfree(lineBuf);
 }
 
 void Splash::blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest)
