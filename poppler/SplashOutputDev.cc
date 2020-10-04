@@ -2716,14 +2716,9 @@ void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMa
     double bbox[4] = { 0, 0, 1, 1 }; // dummy
 
     /* transfer mask to alpha channel! */
-    // memcpy(maskBitmap->getAlphaPtr(), maskBitmap->getDataPtr(), bitmap->getRowSize() * bitmap->getHeight());
-    // memset(maskBitmap->getDataPtr(), 0, bitmap->getRowSize() * bitmap->getHeight());
     if (transpGroupStack->softmask != nullptr) {
-        unsigned char *dest = bitmap->getAlphaPtr();
-        unsigned char *src = transpGroupStack->softmask->getDataPtr();
-        for (int c = 0; c < transpGroupStack->softmask->getRowSize() * transpGroupStack->softmask->getHeight(); c++) {
-            dest[c] = src[c];
-        }
+        assert(bitmap->getWidth() == transpGroupStack->softmask->getRowSize());
+        memcpy(bitmap->getAlphaPtr(), transpGroupStack->softmask->getDataPtr(), static_cast<size_t>(bitmap->getWidth()) * bitmap->getHeight());
         delete transpGroupStack->softmask;
         transpGroupStack->softmask = nullptr;
     }
@@ -2985,7 +2980,7 @@ void SplashOutputDev::iccTransform(void *data, SplashBitmap *bitmap)
     unsigned char *colorLine = (unsigned char *)gmalloc(nComps * bitmap->getWidth());
     unsigned char *rgbxLine = (imgData->colorMode == splashModeXBGR8) ? (unsigned char *)gmalloc(3 * bitmap->getWidth()) : nullptr;
     for (int i = 0; i < bitmap->getHeight(); i++) {
-        unsigned char *p = bitmap->getDataPtr() + i * bitmap->getRowSize();
+        unsigned char *p = bitmap->dataAt(0, i);
         switch (imgData->colorMode) {
         case splashModeMono1:
         case splashModeMono8:
@@ -3166,10 +3161,10 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
                 }
             }
         } else {
-            const int n = imgData->bitmap->getRowSize();
+            const int n = abs(imgData->bitmap->getRowSize());
             SplashColorPtr p;
             for (int m = 0; m < imgData->repeatX; m++) {
-                p = imgData->bitmap->getDataPtr() + imgData->y * imgData->bitmap->getRowSize();
+                p = imgData->bitmap->dataAt(0, imgData->y);
                 for (int x = 0; x < n; ++x) {
                     *q++ = *p++;
                 }
@@ -3180,7 +3175,7 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
             SplashColorPtr p;
             const int n = imgData->bitmap->getWidth() - 1;
             for (int m = 0; m < imgData->repeatX; m++) {
-                p = imgData->bitmap->getAlphaPtr() + imgData->y * imgData->bitmap->getWidth();
+                p = imgData->bitmap->alphaAt(0, imgData->y);
                 for (int x = 0; x < n; ++x) {
                     *aq++ = *p++;
                 }
@@ -3211,7 +3206,7 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
             SplashColorPtr p;
             const int n = imgData->bitmap->getWidth();
             for (int m = 0; m < imgData->repeatX; m++) {
-                p = imgData->bitmap->getAlphaPtr() + y * imgData->bitmap->getWidth();
+                p = imgData->bitmap->alphaAt(0, y);
                 for (int x = 0; x < n; ++x) {
                     *aq++ = *p++;
                 }
@@ -3392,7 +3387,7 @@ bool SplashOutputDev::maskedImageSrc(void *data, SplashColorPtr colorLine, unsig
 
     nComps = imgData->colorMap->getNumPixelComps();
 
-    maskPtr = imgData->mask->getDataPtr() + imgData->y * imgData->mask->getRowSize();
+    maskPtr = imgData->mask->dataAt(0, imgData->y);
     maskBit = 0x80;
     for (x = 0, q = colorLine, aq = alphaLine; x < imgData->width; ++x, p += nComps) {
         alpha = (*maskPtr & maskBit) ? 0xff : 0x00;
@@ -4075,8 +4070,8 @@ void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alph
         transpGroupStack->blendingColorSpace->getGray(backdropColor, &gray);
         fill = colToByte(gray);
     }
-    memset(softMask->getDataPtr(), fill, softMask->getRowSize() * softMask->getHeight());
-    p = softMask->getDataPtr() + ty * softMask->getRowSize() + tx;
+    memset(softMask->getDataPtr(), fill, static_cast<size_t>(softMask->getRowSize()) * softMask->getHeight());
+    p = softMask->dataAt(tx, ty);
     int xMax = tBitmap->getWidth();
     int yMax = tBitmap->getHeight();
     if (xMax > bitmap->getWidth() - tx)
