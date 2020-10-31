@@ -54,6 +54,10 @@
 #include "Splash.h"
 #include <algorithm>
 
+#ifdef USE_CMS
+#include <lcms2.h>
+#endif
+
 //------------------------------------------------------------------------
 
 #define splashAAGamma 1.5
@@ -4978,21 +4982,86 @@ void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int yS
     }
 }
 
-SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, int yDest, int w, int h, bool noClip, bool nonIsolated, bool knockout, SplashCoord knockoutOpacity)
+SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, int yDest, int w, int h, bool noClip, bool nonIsolated, bool knockout, SplashCoord knockoutOpacity, void* colortransform)
 {
     SplashPipe pipe;
     SplashColor pixel;
     unsigned char alpha;
     unsigned char *ap;
     int x, y;
+    unsigned char* tmp_buf1 = nullptr;
+    unsigned char* tmp_buf2 = nullptr;
+    size_t bytes_per_comp = 1;
+    size_t src_bytes_per_comp = 1;
 
-    if (src->mode != bitmap->mode) {
+    if (unlikely(src->mode == splashModeMono1 || bitmap->mode == splashModeMono1)) {
+        // not supported. There is no use-case yet
         return splashErrModeMismatch;
     }
+
+#ifdef USE_CMS
+    if (unlikely(src->mode != bitmap->mode && !colortransform)) {
+        return splashErrModeMismatch;
+    }
+#else
+    if (unlikely(src->mode != bitmap->mode)) {
+        return splashErrModeMismatch;
+    }
+#endif
 
     if (unlikely(!bitmap->data)) {
         return splashErrZeroImage;
     }
+
+    switch(src->mode) {
+    case splashModeMono8:
+        src_bytes_per_comp = 1;
+        break;
+    case splashModeRGB8:
+    case splashModeBGR8:
+        src_bytes_per_comp = 3;
+        break;
+    case splashModeXBGR8:
+    case splashModeCMYK8:
+        src_bytes_per_comp = 4;
+        break;
+    case splashModeDeviceN8:
+        src_bytes_per_comp = SPOT_NCOMPS + 4;
+        break;
+    default:
+        break;
+    }
+
+    switch(bitmap->mode) {
+    case splashModeMono8:
+        bytes_per_comp = 1;
+        break;
+    case splashModeRGB8:
+    case splashModeBGR8:
+        bytes_per_comp = 3;
+        break;
+    case splashModeXBGR8:
+    case splashModeCMYK8:
+        bytes_per_comp = 4;
+        break;
+    case splashModeDeviceN8:
+        bytes_per_comp = SPOT_NCOMPS + 4;
+        break;
+    default:
+        break;
+    }
+
+#ifdef USE_CMS
+    if (src->mode != bitmap->mode) {
+        if (src->mode == splashModeDeviceN8) {
+            tmp_buf1 = new unsigned char[4 * src->width];
+        }
+    }
+
+    if (colortransform) {
+        tmp_buf2 = new unsigned char[bytes_per_comp * w];
+    }
+#endif
 
     if (src->getSeparationList()->size() > bitmap->getSeparationList()->size()) {
         for (x = bitmap->getSeparationList()->size(); x < (int)src->getSeparationList()->size(); x++)
@@ -5004,8 +5073,36 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, 
             for (y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
                 ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+
+                auto linebuf = tmp_buf2;
+#ifdef USE_CMS
+                if (colortransform) {
+                    auto srcdata = tmp_buf1;
+                    if (srcdata) {
+                        src->getCMYKLine(ySrc + y,srcdata);
+                        srcdata += 4 * xSrc;
+                    } else {
+                        srcdata = &src->data[(ySrc + y) * src->rowSize + xSrc * src_bytes_per_comp];
+                    }
+
+                    if (bitmap->mode == splashModeDeviceN8 && src->mode == splashModeDeviceN8) {
+                        // need to do this since cmsDoTransform does not copy over the spot colors
+                        memcpy(tmp_buf2, srcdata, w * bytes_per_comp);
+                    }
+
+                    cmsDoTransform(colortransform, srcdata, tmp_buf2, w);
+                } else {
+#endif
+                    linebuf = &src->data[(ySrc + y) * src->rowSize + xSrc * src_bytes_per_comp];
+#ifdef USE_CMS
+                }
+#endif
+
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    for (unsigned int cp = 0; cp < bytes_per_comp; ++cp) {
+                        pixel[cp] = linebuf[bytes_per_comp*x + cp];
+                    }
+
                     alpha = *ap++;
                     // this uses shape instead of alpha, which isn't technically
                     // correct, but works out the same
@@ -5017,8 +5114,36 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, 
             for (y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
                 ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+
+                auto linebuf = tmp_buf2;
+#ifdef USE_CMS
+                if (colortransform) {
+                    auto srcdata = tmp_buf1;
+                    if (srcdata) {
+                        src->getCMYKLine(ySrc + y,srcdata);
+                        srcdata += 4 * xSrc;
+                    } else {
+                        srcdata = &src->data[(ySrc + y) * src->rowSize + xSrc * src_bytes_per_comp];
+                    }
+
+                    if (bitmap->mode == splashModeDeviceN8 && src->mode == splashModeDeviceN8) {
+                        // need to do this since cmsDoTransform does not copy over the spot colors
+                        memcpy(tmp_buf2, srcdata, w * bytes_per_comp);
+                    }
+
+                    cmsDoTransform(colortransform, srcdata, tmp_buf2, w);
+                } else {
+#endif
+                    linebuf = &src->data[(ySrc + y) * src->rowSize + xSrc * src_bytes_per_comp];
+#ifdef USE_CMS
+                }
+#endif
+
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    for (unsigned int cp = 0; cp < bytes_per_comp; ++cp) {
+                        pixel[cp] = linebuf[bytes_per_comp*x + cp];
+                    }
+
                     alpha = *ap++;
                     if (state->clip->test(xDest + x, yDest + y)) {
                         // this uses shape instead of alpha, which isn't technically
@@ -5036,16 +5161,72 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, 
         if (noClip) {
             for (y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
+
+                auto linebuf = tmp_buf2;
+#ifdef USE_CMS
+                if (colortransform) {
+                    auto srcdata = tmp_buf1;
+                    if (srcdata) {
+                        src->getCMYKLine(ySrc + y,srcdata);
+                        srcdata += 4 * xSrc;
+                    } else {
+                        srcdata = &src->data[(ySrc + y) * src->rowSize + xSrc * src_bytes_per_comp];
+                    }
+
+                    if (bitmap->mode == splashModeDeviceN8 && src->mode == splashModeDeviceN8) {
+                        // need to do this since cmsDoTransform does not copy over the spot colors
+                        memcpy(tmp_buf2, srcdata, w * bytes_per_comp);
+                    }
+
+                    cmsDoTransform(colortransform, srcdata, tmp_buf2, w);
+                } else {
+#endif
+                    linebuf = &src->data[(ySrc + y) * src->rowSize + xSrc * src_bytes_per_comp];
+#ifdef USE_CMS
+                }
+#endif
+
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    for (unsigned int cp = 0; cp < bytes_per_comp; ++cp) {
+                        pixel[cp] = linebuf[bytes_per_comp*x + cp];
+                    }
+
                     (this->*pipe.run)(&pipe);
                 }
             }
         } else {
             for (y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
+
+                auto linebuf = tmp_buf2;
+#ifdef USE_CMS
+                if (colortransform) {
+                    auto srcdata = tmp_buf1;
+                    if (srcdata) {
+                        src->getCMYKLine(ySrc + y,srcdata);
+                        srcdata += 4 * xSrc;
+                    } else {
+                        srcdata = &src->data[(ySrc + y) * src->rowSize + xSrc * src_bytes_per_comp];
+                    }
+
+                    if (bitmap->mode == splashModeDeviceN8 && src->mode == splashModeDeviceN8) {
+                        // need to do this since cmsDoTransform does not copy over the spot colors
+                        memcpy(tmp_buf2, srcdata, w * bytes_per_comp);
+                    }
+
+                    cmsDoTransform(colortransform, srcdata, tmp_buf2, w);
+                } else {
+#endif
+                    linebuf = &src->data[(ySrc + y) * src->rowSize + xSrc * src_bytes_per_comp];
+#ifdef USE_CMS
+                }
+#endif
+
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    for (unsigned int cp = 0; cp < bytes_per_comp; ++cp) {
+                        pixel[cp] = linebuf[bytes_per_comp*x + cp];
+                    }
+
                     if (state->clip->test(xDest + x, yDest + y)) {
                         (this->*pipe.run)(&pipe);
                     } else {
@@ -5055,6 +5236,12 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, 
             }
         }
     }
+
+    if (tmp_buf1)
+        delete [] tmp_buf1;
+
+    if (tmp_buf2)
+        delete [] tmp_buf2;
 
     return splashOk;
 }

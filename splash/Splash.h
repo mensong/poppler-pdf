@@ -206,7 +206,7 @@ public:
 
     // Composite a rectangular region from <src> onto this Splash
     // object.
-    SplashError composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, int yDest, int w, int h, bool noClip, bool nonIsolated, bool knockout = false, SplashCoord knockoutOpacity = 1.0);
+    SplashError composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, int yDest, int w, int h, bool noClip, bool nonIsolated, bool knockout = false, SplashCoord knockoutOpacity = 1.0, void* colortransform = nullptr);
 
     // Composite this Splash object onto a background color.  The
     // background alpha is assumed to be 1.
