@@ -80,6 +80,10 @@
 #include "SplashOutputDev.h"
 #include <algorithm>
 
+#ifdef USE_CMS
+#include <lcms2.h>
+#endif
+
 static const double s_minLineWidth = 0.0;
 
 static inline void convertGfxColor(SplashColorPtr dest, const SplashColorMode colorMode, const GfxColorSpace *colorSpace, const GfxColor *src)
@@ -1206,6 +1210,12 @@ struct SplashTransparencyGroup
     //----- saved state
     SplashBitmap *origBitmap;
     Splash *origSplash;
+
+    //----- CMS specific
+#ifdef USE_CMS
+    GfxLCMSProfilePtr origDisplayProfile;
+    GfxLCMSProfilePtr newDisplayProfile;
+#endif
 
     SplashTransparencyGroup *next;
 };
@@ -3912,21 +3922,62 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const double *bbox
     // save state
     transpGroup->origBitmap = bitmap;
     transpGroup->origSplash = splash;
+#ifdef USE_CMS
+    transpGroup->origDisplayProfile = state->getDisplayProfile();
+    transpGroup->newDisplayProfile = state->getDisplayProfile();
+#endif
     transpGroup->fontAA = fontEngine->getAA();
 
-    //~ this handles the blendingColorSpace arg for soft masks, but
-    //~   not yet for transparency groups
-
     // switch to the blending color space
-    if (forSoftMask && isolated && blendingColorSpace) {
-        if (blendingColorSpace->getMode() == csDeviceGray || blendingColorSpace->getMode() == csCalGray || (blendingColorSpace->getMode() == csICCBased && blendingColorSpace->getNComps() == 1)) {
-            colorMode = splashModeMono8;
-        } else if (blendingColorSpace->getMode() == csDeviceRGB || blendingColorSpace->getMode() == csCalRGB || (blendingColorSpace->getMode() == csICCBased && blendingColorSpace->getNComps() == 3)) {
-            //~ does this need to use BGR8?
-            colorMode = splashModeRGB8;
-        } else if (blendingColorSpace->getMode() == csDeviceCMYK || (blendingColorSpace->getMode() == csICCBased && blendingColorSpace->getNComps() == 4)) {
-            colorMode = splashModeCMYK8;
+    if (isolated && blendingColorSpace && (forSoftMask || blendingColorSpace->getMode() == csICCBased)) {
+        bool changeColorMode = forSoftMask;
+#ifdef USE_CMS
+        // according to the pdf spec, only for isolated transparency groups we need to do color conversion between different spaces
+        // TODO: shall we provide a fallback for missing origDisplayProfile?
+        if (!forSoftMask && blendingColorSpace->getMode() == csICCBased && transpGroup->origDisplayProfile) {
+            auto bcs = static_cast<GfxICCBasedColorSpace *>(blendingColorSpace);
+            auto dp = bcs->getProfile();
+            auto lcms_color_space = cmsGetColorSpace(dp.get());
+
+            // check for:
+            // - proofing support, otherwise skip the color conversion
+            // - and supported color spaces
+            if (cmsIsIntentSupported(dp.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_PROOF) || cmsIsIntentSupported(dp.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_PROOF)
+                || cmsIsIntentSupported(dp.get(), INTENT_SATURATION, LCMS_USED_AS_PROOF) || cmsIsIntentSupported(dp.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_PROOF)) {
+                if (lcms_color_space == cmsSigRgbData || lcms_color_space == cmsSigGrayData || lcms_color_space == cmsSigCmykData) {
+                    state->setDisplayProfile(dp);
+                    transpGroup->newDisplayProfile = dp;
+                    changeColorMode = true;
+                } else {
+                    error(errSyntaxWarning, -1, "transparency group: unsupported ICC profile type");
+                }
+            } else {
+                error(errSyntaxWarning, -1, "cannot create proofing transform from the transparency group's ICC-based blending color space");
+            }
         }
+#endif
+
+        if (changeColorMode) {
+            // TODO: handle CalGray and CalRGB as possible blending color spaces in the color conversion case
+            if (blendingColorSpace->getMode() == csDeviceGray || blendingColorSpace->getMode() == csCalGray || (blendingColorSpace->getMode() == csICCBased && blendingColorSpace->getNComps() == 1)) {
+                colorMode = splashModeMono8;
+            } else if (blendingColorSpace->getMode() == csDeviceRGB || blendingColorSpace->getMode() == csCalRGB || (blendingColorSpace->getMode() == csICCBased && blendingColorSpace->getNComps() == 3)) {
+                //~ does this need to use BGR8?
+                colorMode = splashModeRGB8;
+            } else if (blendingColorSpace->getMode() == csDeviceCMYK || (blendingColorSpace->getMode() == csICCBased && blendingColorSpace->getNComps() == 4)) {
+                if (forSoftMask) {
+                    colorMode = splashModeCMYK8;
+                } else {
+                    // Since we do not know whether there will be any spot colors in the transparency group, we have to play safe and assume so
+
+                    // TODO: currently this leads to the spot colororants to bubble up through all the transparency stack until a non-CMYK bitmap
+                    // becomes the output. Until then spot colorrants do not experience any color conversion.
+                    // Shouldn't there be situtations in which exactly this, a "condensing" to just CMYK, should happen?
+                    colorMode = splashModeDeviceN8;
+                }
+            }
+        }
+
     }
 
     // create the temporary bitmap
@@ -3972,6 +4023,9 @@ void SplashOutputDev::endTransparencyGroup(GfxState *state)
     bitmap = transpGroupStack->origBitmap;
     colorMode = bitmap->getMode();
     splash = transpGroupStack->origSplash;
+#ifdef USE_CMS
+    state->setDisplayProfile(transpGroupStack->origDisplayProfile);
+#endif
     state->shiftCTMAndClip(transpGroupStack->tx, transpGroupStack->ty);
     updateCTM(state, 0, 0, 0, 0, 0, 0);
 }
@@ -3982,6 +4036,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, const double *bbox
     SplashTransparencyGroup *transpGroup;
     bool isolated;
     int tx, ty;
+    void* colortransform = nullptr;
 
     tx = transpGroupStack->tx;
     ty = transpGroupStack->ty;
@@ -3991,14 +4046,43 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, const double *bbox
     // paint the transparency group onto the parent bitmap
     // - the clip path was set in the parent's state)
     if (tx < bitmap->getWidth() && ty < bitmap->getHeight()) {
+#ifdef USE_CMS
+        if (transpGroupStack->origDisplayProfile && transpGroupStack->newDisplayProfile && transpGroupStack->origDisplayProfile != transpGroupStack->newDisplayProfile) {
+            unsigned int sNChannels = cmsChannelsOf(cmsGetColorSpace(transpGroupStack->newDisplayProfile.get()));
+            unsigned int scst = _cmsLCMScolorSpace(cmsGetColorSpace(transpGroupStack->newDisplayProfile.get()));
+            unsigned int sextrabytes = 0;
+            unsigned int dNChannels = cmsChannelsOf(cmsGetColorSpace(transpGroupStack->origDisplayProfile.get()));
+            unsigned int dcst = _cmsLCMScolorSpace(cmsGetColorSpace(transpGroupStack->origDisplayProfile.get()));
+            unsigned int dextrabytes = 0;
+
+            // TODO: refactor this code. Here one needs to know the inner workings of Splash::composite
+            if (bitmap->getMode() == splashModeDeviceN8 && tBitmap->getMode() == splashModeDeviceN8) {
+                sextrabytes = SPOT_NCOMPS;
+                dextrabytes = SPOT_NCOMPS;
+            }
+
+            colortransform = cmsCreateTransform(transpGroupStack->newDisplayProfile.get(), COLORSPACE_SH(scst) | CHANNELS_SH(sNChannels) | BYTES_SH(1) | EXTRA_SH(sextrabytes), transpGroupStack->origDisplayProfile.get(), COLORSPACE_SH(dcst) | CHANNELS_SH(dNChannels) | BYTES_SH(1) | EXTRA_SH(dextrabytes), state->getCmsRenderingIntent(), cmsFLAGS_BLACKPOINTCOMPENSATION);
+            if (!colortransform) {
+                error(errSyntaxWarning, -1, "Can't create ICC transform for transparency group");
+            }
+        }
+#endif
+
+
         SplashCoord knockoutOpacity = (transpGroupStack->next != nullptr) ? transpGroupStack->next->knockoutOpacity : transpGroupStack->knockoutOpacity;
         splash->setOverprintMask(0xffffffff, false);
-        splash->composite(tBitmap, 0, 0, tx, ty, tBitmap->getWidth(), tBitmap->getHeight(), false, !isolated, transpGroupStack->next != nullptr && transpGroupStack->next->knockout, knockoutOpacity);
+        splash->composite(tBitmap, 0, 0, tx, ty, tBitmap->getWidth(), tBitmap->getHeight(), false, !isolated, transpGroupStack->next != nullptr && transpGroupStack->next->knockout, knockoutOpacity, colortransform);
         fontEngine->setAA(transpGroupStack->fontAA);
         if (transpGroupStack->next != nullptr && transpGroupStack->next->shape != nullptr) {
             transpGroupStack->next->knockout = true;
         }
     }
+
+#ifdef USE_CMS
+    if (colortransform) {
+        cmsDeleteTransform(colortransform);
+    }
+#endif
 
     // pop the stack
     transpGroup = transpGroupStack;
