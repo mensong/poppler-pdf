@@ -3616,7 +3616,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     delete splashOut;
 
     // finish the PS page
-    endPage();
+    endPage(nullptr);
 
     return false;
 
@@ -3880,7 +3880,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     writePS("%%EndPageSetup\n");
 }
 
-void PSOutputDev::endPage()
+void PSOutputDev::endPage(GfxState *state)
 {
     if (overlayCbk) {
         restoreState(nullptr);

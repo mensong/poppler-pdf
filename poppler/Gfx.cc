@@ -603,7 +603,7 @@ Gfx::~Gfx()
         popStateGuard();
     }
     if (!subPage) {
-        out->endPage();
+        out->endPage(state);
     }
     // There shouldn't be more saves, but pop them if there were any
     while (state->hasSaves()) {

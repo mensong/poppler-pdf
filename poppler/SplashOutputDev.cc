@@ -1409,7 +1409,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     splash->clear(paperColor, 0);
 }
 
-void SplashOutputDev::endPage()
+void SplashOutputDev::endPage(GfxState *state)
 {
     if (colorMode != splashModeMono1 && !keepAlphaChannel) {
         splash->compositeBackground(paperColor);

@@ -181,7 +181,7 @@ void QPainterOutputDev::startDoc(PDFDoc *doc)
 
 void QPainterOutputDev::startPage(int pageNum, GfxState *state, XRef *) { }
 
-void QPainterOutputDev::endPage() { }
+void QPainterOutputDev::endPage(GfxState *state) { }
 
 void QPainterOutputDev::saveState(GfxState *state)
 {

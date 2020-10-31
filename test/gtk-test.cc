@@ -47,7 +47,7 @@ public:
     //----- initialization and control
 
     // End a page.
-    void endPage() override;
+    void endPage(GfxState *state) override;
 
     // Dump page contents to display.
     void dump() override;
@@ -103,9 +103,9 @@ void GDKSplashOutputDev::clear()
     startPage(0, nullptr, nullptr);
 }
 
-void GDKSplashOutputDev::endPage()
+void GDKSplashOutputDev::endPage(GfxState *state)
 {
-    SplashOutputDev::endPage();
+    SplashOutputDev::endPage(state);
     if (!incrementalUpdate) {
         (*redrawCbk)(redrawCbkData);
     }

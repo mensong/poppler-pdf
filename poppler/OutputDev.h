@@ -130,7 +130,7 @@ public:
     virtual void startPage(int pageNum, GfxState *state, XRef *xref) { }
 
     // End a page.
-    virtual void endPage() { }
+    virtual void endPage(GfxState *state) { }
 
     // Dump page contents to display.
     virtual void dump() { }

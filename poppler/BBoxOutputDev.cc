@@ -53,7 +53,7 @@ double BBoxOutputDev::getHasGraphics() const
     return hasGraphics;
 }
 
-void BBoxOutputDev::endPage() { }
+void BBoxOutputDev::endPage(GfxState *state) { }
 
 void BBoxOutputDev::stroke(GfxState *state)
 {
