@@ -348,6 +348,16 @@ public:
     void setFreeTypeHinting(bool enable, bool enableSlightHinting);
     void setEnableFreeType(bool enable) { enableFreeType = enable; }
 
+#ifdef USE_CMS
+    bool addProofingProfile(const GfxLCMSProfilePtr& proofingProfile) {
+        // TODO: add more checks
+        if (proofingProfile) {
+            proofingProfiles.push_back(proofingProfile);
+        }
+        return true;
+    }
+#endif
+
 protected:
     void doUpdateFont(GfxState *state);
 
@@ -409,6 +419,10 @@ private:
 
     SplashTransparencyGroup * // transparency group stack
             transpGroupStack;
+
+#ifdef USE_CMS
+    std::vector<GfxLCMSProfilePtr> proofingProfiles;
+#endif
 };
 
 #endif

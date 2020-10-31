@@ -1407,10 +1407,88 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     // apparently hardwires it to true
     splash->setStrokeAdjust(true);
     splash->clear(paperColor, 0);
+
+#ifdef USE_CMS
+    // TODO: add support for monochrome 1-bit colors. is this really a usecase?
+    if (!proofingProfiles.empty() && colorMode != splashModeMono1) {
+        if (state->getDisplayProfile()) {
+            proofingProfiles.push_back(state->getDisplayProfile());
+        }
+
+        if (proofingProfiles.size() > 1) {
+            // TODO:
+            // implement this functionality without relying on transparency groups, since:
+            // - we unneccessarily use alpha blending when compositing the bitmaps
+            // - the beginTransparencyGroup API needs the bbox arguments, which lead to unneccessary conversions
+            //   of integers to doubles and back, thus potentially leading to round-off errors
+            // - we are currently limited to the first and last profile in the proofing profile stack, ignoring all other profiles
+            // - transparency groups only allow for certain ICC profiles. But in some applications a named-color profile
+            //   or a device link profile might be useful
+            double bbox[4];
+            bbox[0] = state->getX1();
+            bbox[1] = state->getY1();
+            bbox[2] = state->getX2();
+            bbox[3] = state->getY2();
+
+            auto invalidref = Ref::INVALID();
+            void* cmsprofile = proofingProfiles.front().get();
+            auto nComps = cmsChannelsOf(cmsGetColorSpace(cmsprofile));
+
+            GfxColorSpace* alt = nullptr;
+            if (nComps == 1) {
+                alt = new GfxDeviceGrayColorSpace();
+            } else if (nComps >= 4) {
+                alt = new GfxDeviceCMYKColorSpace();
+                nComps = 4;
+            } else {
+                alt = new GfxDeviceRGBColorSpace();
+            }
+            auto cs = new GfxICCBasedColorSpace(nComps, alt, &invalidref);
+
+            cs->setProfile(proofingProfiles.front());
+            // This call is not necessary, since we just need GfxICCBasedColorSpace as a shallow wrapper around our ICC profile
+            //cs->buildTransforms(state);
+
+            // TODO: these three update calls are probably a bit overcautious
+            if (state->getBlendMode() != gfxBlendNormal) {
+                state->setBlendMode(gfxBlendNormal);
+                updateBlendMode(state);
+            }
+            if (state->getFillOpacity() != 1) {
+                state->setFillOpacity(1);
+                updateFillOpacity(state);
+            }
+            if (state->getStrokeOpacity() != 1) {
+                state->setStrokeOpacity(1);
+                updateStrokeOpacity(state);
+            }
+
+            beginTransparencyGroup(state, bbox, cs, /*isolated=*/ true, /*knockout=*/ false, /*forSoftMask=*/ false);
+        }
+    }
+#endif
+
 }
 
 void SplashOutputDev::endPage(GfxState *state)
 {
+#ifdef USE_CMS
+    if (proofingProfiles.size() > 1) {
+        double bbox[4] = { 0.0, 0.0, 1.0, 1.0 }; // not used
+        char oldintent[31];
+        strcpy(oldintent, state->getRenderingIntent());
+        // TODO:
+        // - add options to set rendering intents
+        // - port away from abusing the transparency groups for softproofing, since
+        //   for absolute colorimetric rendering intent we should not use SplashBitmap
+        //   with alpha channel
+        state->setRenderingIntent("RelativeColorimetric");
+        endTransparencyGroup(state);
+        paintTransparencyGroup(state, bbox);
+        state->setRenderingIntent(oldintent);
+    }
+#endif
+
     if (colorMode != splashModeMono1 && !keepAlphaChannel) {
         splash->compositeBackground(paperColor);
     }
