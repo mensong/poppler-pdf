@@ -367,7 +367,7 @@ static void processPageJobs()
         pthread_mutex_unlock(&pageJobMutex);
 
         // process the job
-        SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
+        SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : jpegcmyk ? splashModeDeviceN8 : splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
         splashOut->setFontAntialias(fontAntialias);
         splashOut->setVectorAntialias(vectorAntialias);
         splashOut->setEnableFreeType(enableFreeType);
@@ -535,6 +535,9 @@ int main(int argc, char *argv[])
     // write PPM files
     if (jpegcmyk || overprint) {
         globalParams->setOverprintPreview(true);
+    }
+
+    if (jpegcmyk) {
         splashClearColor(paperColor);
     } else {
         paperColor[0] = 255;
@@ -558,7 +561,7 @@ int main(int argc, char *argv[])
         // Note: In contrast to pdftops we do not fail if a non-matching ICC profile is supplied.
         //       Doing so would be pretentious, since SplashOutputDev by default assumes sRGB, even for
         //       the CMYK and Mono cases.
-        if (jpegcmyk || overprint) {
+        if (jpegcmyk) {
             if (profilecolorspace != cmsSigCmykData) {
                 fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a CMYK profile.\n", displayprofilename.c_str());
             }
@@ -594,7 +597,7 @@ int main(int argc, char *argv[])
 
 #ifndef UTILS_USE_PTHREADS
 
-    splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, paperColor, true, thinLineMode);
+    splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : jpegcmyk ? splashModeDeviceN8 : splashModeRGB8, 4, false, paperColor, true, thinLineMode);
 
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
