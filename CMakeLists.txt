@@ -570,10 +570,8 @@ ADD_GPERF_FILE(ZapfDingbatsWidths)
 
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-add_library(poppler STATIC ${poppler_SRCS})
-else()
-add_library(poppler ${poppler_SRCS})
 endif()
+add_library(poppler ${poppler_SRCS})
 set_target_properties(poppler PROPERTIES VERSION 105.0.0 SOVERSION 105)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
@@ -583,10 +581,15 @@ target_link_libraries(poppler LINK_PRIVATE ${poppler_LIBS})
 if(CMAKE_USE_PTHREADS_INIT)
    target_link_libraries(poppler LINK_PRIVATE Threads::Threads)
 endif()
+
+include(GenerateExportHeader)
+generate_export_header(poppler)
+
 install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(ENABLE_UNSTABLE_API_ABI_HEADERS)
   install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/poppler_export.h
     poppler/Annot.h
     poppler/Array.h
     poppler/CachedFile.h
