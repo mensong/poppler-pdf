@@ -23,8 +23,8 @@ if (GTK_FOUND)
   )
 
   include_directories(
-    ${CMAKE_SOURCE_DIR}/glib
-    ${CMAKE_BINARY_DIR}/glib
+    ${PROJECT_SOURCE_DIR}/glib
+    ${PROJECT_BINARY_DIR}/glib
   )
 
   set (gtk_splash_test_SRCS
@@ -37,9 +37,9 @@ if (GTK_FOUND)
 
     set (pdf_inspector_SRCS
       pdf-inspector.cc
-      ${CMAKE_SOURCE_DIR}/poppler/CairoFontEngine.cc
-      ${CMAKE_SOURCE_DIR}/poppler/CairoOutputDev.cc
-      ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
+      ${PROJECT_SOURCE_DIR}/poppler/CairoFontEngine.cc
+      ${PROJECT_SOURCE_DIR}/poppler/CairoOutputDev.cc
+      ${PROJECT_SOURCE_DIR}/poppler/CairoRescaleBox.cc
     )
     poppler_add_test(pdf-inspector BUILD_GTK_TESTS ${pdf_inspector_SRCS})
     target_link_libraries(pdf-inspector ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES} ${common_libs} ${GTK3_LIBRARIES} poppler)

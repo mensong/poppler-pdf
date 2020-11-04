@@ -26,9 +26,9 @@ if (HAVE_CAIRO)
   set(pdftocairo_SOURCES ${common_srcs}
     pdftocairo.cc
     pdftocairo-win32.cc
-    ${CMAKE_SOURCE_DIR}/poppler/CairoFontEngine.cc
-    ${CMAKE_SOURCE_DIR}/poppler/CairoOutputDev.cc
-    ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
+    ${PROJECT_SOURCE_DIR}/poppler/CairoFontEngine.cc
+    ${PROJECT_SOURCE_DIR}/poppler/CairoOutputDev.cc
+    ${PROJECT_SOURCE_DIR}/poppler/CairoRescaleBox.cc
   )
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}

@@ -2,7 +2,7 @@ project(poppler)
 
 cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 include(PopplerDefaults)
 include(PopplerMacros)
@@ -77,7 +77,7 @@ option(EXTRA_WARN "Enable extra compile warnings" OFF)
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-set(TESTDATADIR "${CMAKE_SOURCE_DIR}/../test" CACHE STRING "Specify test data dir.")
+set(TESTDATADIR "${PROJECT_SOURCE_DIR}/../test" CACHE STRING "Specify test data dir.")
 if(NOT (EXISTS ${TESTDATADIR} AND EXISTS ${TESTDATADIR}/test-poppler.c))
   message(WARNING "
  No test data found in $testdatadir.
@@ -836,9 +836,9 @@ endif()
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${POPPLER_VERSION})
 add_custom_target(dist
     COMMAND
-        COMMAND git log --stat | fmt --split-only > ${CMAKE_BINARY_DIR}/ChangeLog
-        COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar
-        COMMAND tar -C ${CMAKE_BINARY_DIR} -rf ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar ChangeLog --transform='s,,${ARCHIVE_NAME}/,' --owner root:0 --group root:0
-        COMMAND tar -C ${CMAKE_BINARY_DIR} -rf ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar glib/reference/html --transform='s,,${ARCHIVE_NAME}/,' --owner root:0 --group root:0
-        COMMAND xz -9 ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+        COMMAND git log --stat | fmt --split-only > ${PROJECT_BINARY_DIR}/ChangeLog
+        COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD > ${PROJECT_BINARY_DIR}/${ARCHIVE_NAME}.tar
+        COMMAND tar -C ${PROJECT_BINARY_DIR} -rf ${PROJECT_BINARY_DIR}/${ARCHIVE_NAME}.tar ChangeLog --transform='s,,${ARCHIVE_NAME}/,' --owner root:0 --group root:0
+        COMMAND tar -C ${PROJECT_BINARY_DIR} -rf ${PROJECT_BINARY_DIR}/${ARCHIVE_NAME}.tar glib/reference/html --transform='s,,${ARCHIVE_NAME}/,' --owner root:0 --group root:0
+        COMMAND xz -9 ${PROJECT_BINARY_DIR}/${ARCHIVE_NAME}.tar
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

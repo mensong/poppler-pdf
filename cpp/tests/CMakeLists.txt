@@ -2,7 +2,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/..
   ${CMAKE_CURRENT_BINARY_DIR}/..
-  ${CMAKE_SOURCE_DIR}/utils
+  ${PROJECT_SOURCE_DIR}/utils
 )
 
 macro(CPP_ADD_SIMPLETEST exe)
@@ -17,8 +17,8 @@ macro(CPP_ADD_SIMPLETEST exe)
   endif()
 endmacro(CPP_ADD_SIMPLETEST)
 
-cpp_add_simpletest(poppler-dump poppler-dump.cpp ${CMAKE_SOURCE_DIR}/utils/parseargs.cc)
-cpp_add_simpletest(poppler-render poppler-render.cpp ${CMAKE_SOURCE_DIR}/utils/parseargs.cc)
+cpp_add_simpletest(poppler-dump poppler-dump.cpp ${PROJECT_SOURCE_DIR}/utils/parseargs.cc)
+cpp_add_simpletest(poppler-render poppler-render.cpp ${PROJECT_SOURCE_DIR}/utils/parseargs.cc)
 
 if(ENABLE_FUZZER)
   cpp_add_simpletest(doc_fuzzer ./fuzzing/doc_fuzzer.cc)

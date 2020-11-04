@@ -82,9 +82,9 @@ set(poppler_glib_SRCS
 )
 set(poppler_glib_generated_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c
-  ${CMAKE_SOURCE_DIR}/poppler/CairoFontEngine.cc
-  ${CMAKE_SOURCE_DIR}/poppler/CairoOutputDev.cc
-  ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
+  ${PROJECT_SOURCE_DIR}/poppler/CairoFontEngine.cc
+  ${PROJECT_SOURCE_DIR}/poppler/CairoOutputDev.cc
+  ${PROJECT_SOURCE_DIR}/poppler/CairoRescaleBox.cc
 )
 add_library(poppler-glib ${poppler_glib_SRCS} ${poppler_glib_generated_SRCS})
 set_target_properties(poppler-glib PROPERTIES VERSION 8.19.0 SOVERSION 8)
@@ -135,7 +135,7 @@ if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
   get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
   _gir_list_prefix(_includes _tmp_includes "-I")
   # And set flags for gir compiler and scanner
-  set(Poppler_0_18_gir_CFLAGS ${_includes} -L${CMAKE_BINARY_DIR} -L${CMAKE_CURRENT_BINARY_DIR})
+  set(Poppler_0_18_gir_CFLAGS ${_includes} -L${PROJECT_BINARY_DIR} -L${CMAKE_CURRENT_BINARY_DIR})
   set(Poppler_0_18_gir_SCANNERFLAGS "--c-include=poppler.h")
 
   # Load temporary source-file lists, including a few generated at build

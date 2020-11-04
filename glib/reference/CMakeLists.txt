@@ -1,7 +1,7 @@
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/glib-docs-build.stamp
   DEPENDS poppler-glib
-  COMMAND ${CMAKE_SOURCE_DIR}/make-glib-api-docs --src-dir=${CMAKE_SOURCE_DIR} --build-dir=${CMAKE_BINARY_DIR}
+  COMMAND ${PROJECT_SOURCE_DIR}/make-glib-api-docs --src-dir=${PROJECT_SOURCE_DIR} --build-dir=${PROJECT_BINARY_DIR}
   COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/glib-docs-build.stamp
 )
 
