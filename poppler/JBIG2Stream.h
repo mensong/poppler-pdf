@@ -29,6 +29,7 @@
 #ifndef JBIG2STREAM_H
 #define JBIG2STREAM_H
 
+#include "poppler_export.h"
 #include "Object.h"
 #include "Stream.h"
 
@@ -42,7 +43,7 @@ class JBIG2MMRDecoder;
 
 //------------------------------------------------------------------------
 
-class JBIG2Stream : public FilterStream
+class POPPLER_EXPORT JBIG2Stream : public FilterStream
 {
 public:
     JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA);

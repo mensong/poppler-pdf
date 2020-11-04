@@ -15,6 +15,7 @@
 #ifndef CACHEDFILE_H
 #define CACHEDFILE_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 
 #include "Object.h"
@@ -38,7 +39,7 @@ class CachedFileLoader;
 // needs from the CachedFileLoader.
 //------------------------------------------------------------------------
 
-class CachedFile
+class POPPLER_EXPORT CachedFile
 {
 
     friend class CachedFileWriter;
@@ -96,7 +97,7 @@ private:
 // should be written.
 //------------------------------------------------------------------------
 
-class CachedFileWriter
+class POPPLER_EXPORT CachedFileWriter
 {
 
 public:
@@ -123,7 +124,7 @@ private:
 // loadng data from an URI into a CachedFile.
 //------------------------------------------------------------------------
 
-class CachedFileLoader
+class POPPLER_EXPORT CachedFileLoader
 {
 
 public:

@@ -21,6 +21,8 @@
 #ifndef Sound_H
 #define Sound_H
 
+#include "poppler_export.h"
+
 #include <memory>
 
 class Object;
@@ -42,7 +44,7 @@ enum SoundEncoding
     soundALaw // A-law-encoded samples
 };
 
-class Sound
+class POPPLER_EXPORT Sound
 {
 public:
     // Try to parse the Object obj

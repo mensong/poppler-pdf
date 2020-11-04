@@ -10,11 +10,13 @@
 #ifndef PROFILE_DATA_H
 #define PROFILE_DATA_H
 
+#include "poppler_export.h"
+
 //------------------------------------------------------------------------
 // ProfileData
 //------------------------------------------------------------------------
 
-class ProfileData
+class POPPLER_EXPORT ProfileData
 {
 public:
     void addElement(double elapsed);

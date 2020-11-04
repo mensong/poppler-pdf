@@ -22,6 +22,7 @@
 #ifndef SPLASHPATTERN_H
 #define SPLASHPATTERN_H
 
+#include "poppler_export.h"
 #include "SplashTypes.h"
 
 class SplashScreen;
@@ -30,7 +31,7 @@ class SplashScreen;
 // SplashPattern
 //------------------------------------------------------------------------
 
-class SplashPattern
+class POPPLER_EXPORT SplashPattern
 {
 public:
     SplashPattern();
@@ -62,7 +63,7 @@ private:
 // SplashSolidColor
 //------------------------------------------------------------------------
 
-class SplashSolidColor : public SplashPattern
+class POPPLER_EXPORT SplashSolidColor : public SplashPattern
 {
 public:
     SplashSolidColor(SplashColorPtr colorA);
@@ -87,7 +88,7 @@ private:
 // SplashGouraudColor (needed for gouraudTriangleShadedFill)
 //------------------------------------------------------------------------
 
-class SplashGouraudColor : public SplashPattern
+class POPPLER_EXPORT SplashGouraudColor : public SplashPattern
 {
 public:
     ~SplashGouraudColor() override;

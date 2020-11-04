@@ -23,6 +23,8 @@
 #ifndef FOFIIDENTIFIER_H
 #define FOFIIDENTIFIER_H
 
+#include "poppler_export.h"
+
 //------------------------------------------------------------------------
 // FoFiIdentifier
 //------------------------------------------------------------------------
@@ -41,7 +43,7 @@ enum FoFiIdentifierType
     fofiIdError // error in reading the file
 };
 
-class FoFiIdentifier
+class POPPLER_EXPORT FoFiIdentifier
 {
 public:
     static FoFiIdentifierType identifyMem(const char *file, int len);

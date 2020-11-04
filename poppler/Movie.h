@@ -25,9 +25,10 @@
 #ifndef _MOVIE_H_
 #define _MOVIE_H_
 
+#include "poppler_export.h"
 #include "Object.h"
 
-struct MovieActivationParameters
+struct POPPLER_EXPORT MovieActivationParameters
 {
 
     MovieActivationParameters();
@@ -71,7 +72,7 @@ struct MovieActivationParameters
     int zdenum; // 1
 };
 
-class Movie
+class POPPLER_EXPORT Movie
 {
 public:
     Movie(const Object *movieDict, const Object *aDict);

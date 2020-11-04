@@ -50,6 +50,7 @@
 #include <vector>
 
 #include "Object.h"
+#include "poppler_export.h"
 
 class XRef;
 class Gfx;
@@ -94,7 +95,7 @@ enum AnnotExternalDataType
 // AnnotCoord
 //------------------------------------------------------------------------
 
-class AnnotCoord
+class POPPLER_EXPORT AnnotCoord
 {
 public:
     AnnotCoord() : x(0), y(0) { }
@@ -111,7 +112,7 @@ protected:
 // AnnotPath
 //------------------------------------------------------------------------
 
-class AnnotPath
+class POPPLER_EXPORT AnnotPath
 {
 public:
     AnnotPath();
@@ -137,7 +138,7 @@ protected:
 // AnnotCalloutLine
 //------------------------------------------------------------------------
 
-class AnnotCalloutLine
+class POPPLER_EXPORT AnnotCalloutLine
 {
 public:
     AnnotCalloutLine(double x1, double y1, double x2, double y2);
@@ -159,7 +160,7 @@ protected:
 // AnnotCalloutMultiLine
 //------------------------------------------------------------------------
 
-class AnnotCalloutMultiLine : public AnnotCalloutLine
+class POPPLER_EXPORT AnnotCalloutMultiLine : public AnnotCalloutLine
 {
 public:
     AnnotCalloutMultiLine(double x1, double y1, double x2, double y2, double x3, double y3);
@@ -176,7 +177,7 @@ protected:
 // AnnotBorderEffect
 //------------------------------------------------------------------------
 
-class AnnotBorderEffect
+class POPPLER_EXPORT AnnotBorderEffect
 {
 public:
     enum AnnotBorderEffectType
@@ -199,10 +200,10 @@ private:
 // AnnotQuadrilateral
 //------------------------------------------------------------------------
 
-class AnnotQuadrilaterals
+class POPPLER_EXPORT AnnotQuadrilaterals
 {
 public:
-    class AnnotQuadrilateral
+    class POPPLER_EXPORT AnnotQuadrilateral
     {
     public:
         AnnotQuadrilateral();
@@ -237,7 +238,7 @@ protected:
 // AnnotBorder
 //------------------------------------------------------------------------
 
-class AnnotBorder
+class POPPLER_EXPORT AnnotBorder
 {
 public:
     enum AnnotBorderType
@@ -287,7 +288,7 @@ protected:
 // AnnotBorderArray
 //------------------------------------------------------------------------
 
-class AnnotBorderArray : public AnnotBorder
+class POPPLER_EXPORT AnnotBorderArray : public AnnotBorder
 {
 public:
     AnnotBorderArray();
@@ -312,7 +313,7 @@ private:
 // AnnotBorderBS
 //------------------------------------------------------------------------
 
-class AnnotBorderBS : public AnnotBorder
+class POPPLER_EXPORT AnnotBorderBS : public AnnotBorder
 {
 public:
     AnnotBorderBS();
@@ -333,7 +334,7 @@ private:
 // AnnotColor
 //------------------------------------------------------------------------
 
-class AnnotColor
+class POPPLER_EXPORT AnnotColor
 {
 public:
     enum AnnotColorSpace
@@ -366,7 +367,7 @@ private:
 // DefaultAppearance
 //------------------------------------------------------------------------
 
-class DefaultAppearance
+class POPPLER_EXPORT DefaultAppearance
 {
 public:
     DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> fontColorA);
@@ -392,7 +393,7 @@ private:
 // AnnotIconFit
 //------------------------------------------------------------------------
 
-class AnnotIconFit
+class POPPLER_EXPORT AnnotIconFit
 {
 public:
     enum AnnotIconFitScaleWhen
@@ -429,7 +430,7 @@ protected:
 // AnnotAppearance
 //------------------------------------------------------------------------
 
-class AnnotAppearance
+class POPPLER_EXPORT AnnotAppearance
 {
 public:
     enum AnnotAppearanceType
@@ -470,7 +471,7 @@ protected:
 // AnnotAppearanceCharacs
 //------------------------------------------------------------------------
 
-class AnnotAppearanceCharacs
+class POPPLER_EXPORT AnnotAppearanceCharacs
 {
 public:
     enum AnnotAppearanceCharacsTextPos
@@ -517,7 +518,7 @@ protected:
 // AnnotAppearanceBBox
 //------------------------------------------------------------------------
 
-class AnnotAppearanceBBox
+class POPPLER_EXPORT AnnotAppearanceBBox
 {
 public:
     AnnotAppearanceBBox(PDFRectangle *rect);
@@ -543,7 +544,7 @@ private:
 // AnnotAppearanceBuilder
 //------------------------------------------------------------------------
 class Matrix;
-class AnnotAppearanceBuilder
+class POPPLER_EXPORT AnnotAppearanceBuilder
 {
 public:
     AnnotAppearanceBuilder();
@@ -595,7 +596,7 @@ private:
 // Annot
 //------------------------------------------------------------------------
 
-class Annot
+class POPPLER_EXPORT Annot
 {
     friend class Annots;
     friend class Page;
@@ -791,7 +792,7 @@ protected:
 // AnnotPopup
 //------------------------------------------------------------------------
 
-class AnnotPopup : public Annot
+class POPPLER_EXPORT AnnotPopup : public Annot
 {
 public:
     AnnotPopup(PDFDoc *docA, PDFRectangle *rect);
@@ -814,7 +815,7 @@ protected:
 // AnnotMarkup
 //------------------------------------------------------------------------
 
-class AnnotMarkup : public Annot
+class POPPLER_EXPORT AnnotMarkup : public Annot
 {
 public:
     enum AnnotMarkupReplyType
@@ -869,7 +870,7 @@ private:
 // AnnotText
 //------------------------------------------------------------------------
 
-class AnnotText : public AnnotMarkup
+class POPPLER_EXPORT AnnotText : public AnnotMarkup
 {
 public:
     enum AnnotTextState
@@ -914,7 +915,7 @@ private:
 // AnnotMovie
 //------------------------------------------------------------------------
 
-class AnnotMovie : public Annot
+class POPPLER_EXPORT AnnotMovie : public Annot
 {
 public:
     AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA);
@@ -937,7 +938,7 @@ private:
 // AnnotScreen
 //------------------------------------------------------------------------
 
-class AnnotScreen : public Annot
+class POPPLER_EXPORT AnnotScreen : public Annot
 {
 public:
     AnnotScreen(PDFDoc *docA, PDFRectangle *rect);
@@ -965,7 +966,7 @@ private:
 // AnnotLink
 //------------------------------------------------------------------------
 
-class AnnotLink : public Annot
+class POPPLER_EXPORT AnnotLink : public Annot
 {
 public:
     enum AnnotLinkEffect
@@ -1001,7 +1002,7 @@ protected:
 // AnnotFreeText
 //------------------------------------------------------------------------
 
-class AnnotFreeText : public AnnotMarkup
+class POPPLER_EXPORT AnnotFreeText : public AnnotMarkup
 {
 public:
     enum AnnotFreeTextQuadding
@@ -1069,7 +1070,7 @@ protected:
 // AnnotLine
 //------------------------------------------------------------------------
 
-class AnnotLine : public AnnotMarkup
+class POPPLER_EXPORT AnnotLine : public AnnotMarkup
 {
 public:
     enum AnnotLineIntent
@@ -1147,7 +1148,7 @@ protected:
 // AnnotTextMarkup
 //------------------------------------------------------------------------
 
-class AnnotTextMarkup : public AnnotMarkup
+class POPPLER_EXPORT AnnotTextMarkup : public AnnotMarkup
 {
 public:
     AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
@@ -1176,7 +1177,7 @@ private:
 // AnnotStamp
 //------------------------------------------------------------------------
 
-class AnnotStamp : public AnnotMarkup
+class POPPLER_EXPORT AnnotStamp : public AnnotMarkup
 {
 public:
     AnnotStamp(PDFDoc *docA, PDFRectangle *rect);
@@ -1198,7 +1199,7 @@ private:
 // AnnotGeometry
 //------------------------------------------------------------------------
 
-class AnnotGeometry : public AnnotMarkup
+class POPPLER_EXPORT AnnotGeometry : public AnnotMarkup
 {
 public:
     AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
@@ -1227,7 +1228,7 @@ private:
 // AnnotPolygon
 //------------------------------------------------------------------------
 
-class AnnotPolygon : public AnnotMarkup
+class POPPLER_EXPORT AnnotPolygon : public AnnotMarkup
 {
 public:
     enum AnnotPolygonIntent
@@ -1278,7 +1279,7 @@ private:
 // AnnotCaret
 //------------------------------------------------------------------------
 
-class AnnotCaret : public AnnotMarkup
+class POPPLER_EXPORT AnnotCaret : public AnnotMarkup
 {
 public:
     enum AnnotCaretSymbol
@@ -1308,7 +1309,7 @@ private:
 // AnnotInk
 //------------------------------------------------------------------------
 
-class AnnotInk : public AnnotMarkup
+class POPPLER_EXPORT AnnotInk : public AnnotMarkup
 {
 public:
     AnnotInk(PDFDoc *docA, PDFRectangle *rect);
@@ -1342,7 +1343,7 @@ private:
 // AnnotFileAttachment
 //------------------------------------------------------------------------
 
-class AnnotFileAttachment : public AnnotMarkup
+class POPPLER_EXPORT AnnotFileAttachment : public AnnotMarkup
 {
 public:
     AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooString *filename);
@@ -1369,7 +1370,7 @@ private:
 // AnnotSound
 //------------------------------------------------------------------------
 
-class AnnotSound : public AnnotMarkup
+class POPPLER_EXPORT AnnotSound : public AnnotMarkup
 {
 public:
     AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA);
@@ -1396,7 +1397,7 @@ private:
 // AnnotWidget
 //------------------------------------------------------------------------
 
-class AnnotWidget : public Annot
+class POPPLER_EXPORT AnnotWidget : public Annot
 {
 public:
     enum AnnotWidgetHighlightMode
@@ -1447,7 +1448,7 @@ private:
 // Annot3D
 //------------------------------------------------------------------------
 
-class Annot3D : public Annot
+class POPPLER_EXPORT Annot3D : public Annot
 {
     class Activation
     {
@@ -1511,10 +1512,10 @@ private:
 // AnnotRichMedia
 //------------------------------------------------------------------------
 
-class AnnotRichMedia : public Annot
+class POPPLER_EXPORT AnnotRichMedia : public Annot
 {
 public:
-    class Params
+    class POPPLER_EXPORT Params
     {
     public:
         Params(Dict *dict);
@@ -1530,7 +1531,7 @@ public:
         std::unique_ptr<GooString> flashVars; // FlashVars
     };
 
-    class Instance
+    class POPPLER_EXPORT Instance
     {
     public:
         enum Type
@@ -1556,7 +1557,7 @@ public:
         std::unique_ptr<Params> params; // Params
     };
 
-    class Configuration
+    class POPPLER_EXPORT Configuration
     {
     public:
         enum Type
@@ -1588,7 +1589,7 @@ public:
 
     class Content;
 
-    class Asset
+    class POPPLER_EXPORT Asset
     {
     public:
         Asset();
@@ -1607,7 +1608,7 @@ public:
         Object fileSpec;
     };
 
-    class Content
+    class POPPLER_EXPORT Content
     {
     public:
         Content(Dict *dict);
@@ -1631,7 +1632,7 @@ public:
         int nAssets;
     };
 
-    class Activation
+    class POPPLER_EXPORT Activation
     {
     public:
         enum Condition
@@ -1650,7 +1651,7 @@ public:
         Condition condition;
     };
 
-    class Deactivation
+    class POPPLER_EXPORT Deactivation
     {
     public:
         enum Condition
@@ -1669,7 +1670,7 @@ public:
         Condition condition;
     };
 
-    class Settings
+    class POPPLER_EXPORT Settings
     {
     public:
         Settings(Dict *dict);
@@ -1709,7 +1710,7 @@ private:
 // Annots
 //------------------------------------------------------------------------
 
-class Annots
+class POPPLER_EXPORT Annots
 {
 public:
     // Build a list of Annot objects and call setPage on them

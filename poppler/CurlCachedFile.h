@@ -12,6 +12,7 @@
 #ifndef CURLCACHELOADER_H
 #define CURLCACHELOADER_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include "CachedFile.h"
 
@@ -19,7 +20,7 @@
 
 //------------------------------------------------------------------------
 
-class CurlCachedFileLoader : public CachedFileLoader
+class POPPLER_EXPORT CurlCachedFileLoader : public CachedFileLoader
 {
 
 public:

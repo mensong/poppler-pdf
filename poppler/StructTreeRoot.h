@@ -14,6 +14,7 @@
 #ifndef STRUCTTREEROOT_H
 #define STRUCTTREEROOT_H
 
+#include "poppler_export.h"
 #include "Object.h"
 #include "StructElement.h"
 #include <map>
@@ -22,7 +23,7 @@
 class Dict;
 class PDFDoc;
 
-class StructTreeRoot
+class POPPLER_EXPORT StructTreeRoot
 {
 public:
     StructTreeRoot(PDFDoc *docA, Dict *rootDict);

@@ -26,6 +26,8 @@
 #ifndef SPLASHFTFONTENGINE_H
 #define SPLASHFTFONTENGINE_H
 
+#include "poppler_export.h"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -37,7 +39,7 @@ class SplashFontSrc;
 // SplashFTFontEngine
 //------------------------------------------------------------------------
 
-class SplashFTFontEngine
+class POPPLER_EXPORT SplashFTFontEngine
 {
 public:
     static SplashFTFontEngine *init(bool aaA, bool enableFreeTypeHintingA, bool enableSlightHinting);

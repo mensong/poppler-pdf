@@ -37,12 +37,13 @@
 #ifndef GLOBALPARAMS_H
 #define GLOBALPARAMS_H
 
-#include <cassert>
+#include "poppler_export.h"
 #include "poppler-config.h"
-#include <cstdio>
 #include "CharTypes.h"
 #include "UnicodeMap.h"
 #include "Error.h"
+#include <cassert>
+#include <cstdio>
 #include <unordered_map>
 #include <string>
 #include <memory>
@@ -64,7 +65,7 @@ class SysFontList;
 //------------------------------------------------------------------------
 
 // The global parameters object.
-extern std::unique_ptr<GlobalParams> globalParams;
+POPPLER_EXPORT extern std::unique_ptr<GlobalParams> globalParams;
 
 //------------------------------------------------------------------------
 
@@ -78,7 +79,7 @@ enum SysFontType
 
 //------------------------------------------------------------------------
 
-class GlobalParams
+class POPPLER_EXPORT GlobalParams
 {
 public:
     // Initialize the global parameters
@@ -201,7 +202,7 @@ private:
     const char *popplerDataDir;
 };
 
-class GlobalParamsIniter
+class POPPLER_EXPORT GlobalParamsIniter
 {
 public:
     GlobalParamsIniter(ErrorCallback errorCallback);

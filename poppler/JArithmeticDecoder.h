@@ -27,13 +27,15 @@
 #ifndef JARITHMETICDECODER_H
 #define JARITHMETICDECODER_H
 
+#include "poppler_export.h"
+
 class Stream;
 
 //------------------------------------------------------------------------
 // JArithmeticDecoderStats
 //------------------------------------------------------------------------
 
-class JArithmeticDecoderStats
+class POPPLER_EXPORT JArithmeticDecoderStats
 {
 public:
     JArithmeticDecoderStats(int contextSizeA);
@@ -58,7 +60,7 @@ private:
 // JArithmeticDecoder
 //------------------------------------------------------------------------
 
-class JArithmeticDecoder
+class POPPLER_EXPORT JArithmeticDecoder
 {
 public:
     JArithmeticDecoder();

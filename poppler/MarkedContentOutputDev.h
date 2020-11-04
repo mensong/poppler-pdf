@@ -12,6 +12,7 @@
 #ifndef MARKEDCONTENTOUTPUTDEV_H
 #define MARKEDCONTENTOUTPUTDEV_H
 
+#include "poppler_export.h"
 #include "goo/gmem.h"
 #include "OutputDev.h"
 #include "GfxState.h"
@@ -21,7 +22,7 @@
 class Dict;
 class UnicodeMap;
 
-class TextSpan
+class POPPLER_EXPORT TextSpan
 {
 public:
     TextSpan(const TextSpan &other) : data(other.data) { data->refcount++; }
@@ -84,7 +85,7 @@ private:
 
 typedef std::vector<TextSpan> TextSpanArray;
 
-class MarkedContentOutputDev : public OutputDev
+class POPPLER_EXPORT MarkedContentOutputDev : public OutputDev
 {
 public:
     MarkedContentOutputDev(int mcidA);

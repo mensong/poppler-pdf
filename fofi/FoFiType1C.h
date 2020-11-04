@@ -25,6 +25,7 @@
 #ifndef FOFITYPE1C_H
 #define FOFITYPE1C_H
 
+#include "poppler_export.h"
 #include "FoFiBase.h"
 
 class GooString;
@@ -146,7 +147,7 @@ struct Type1CEexecBuf
 // FoFiType1C
 //------------------------------------------------------------------------
 
-class FoFiType1C : public FoFiBase
+class POPPLER_EXPORT FoFiType1C : public FoFiBase
 {
 public:
     // Create a FoFiType1C object from a memory buffer.

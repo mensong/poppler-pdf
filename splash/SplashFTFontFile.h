@@ -24,6 +24,7 @@
 #ifndef SPLASHFTFONTFILE_H
 #define SPLASHFTFONTFILE_H
 
+#include "poppler_export.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "SplashFontFile.h"
@@ -35,7 +36,7 @@ class SplashFTFontEngine;
 // SplashFTFontFile
 //------------------------------------------------------------------------
 
-class SplashFTFontFile : public SplashFontFile
+class POPPLER_EXPORT SplashFTFontFile : public SplashFontFile
 {
 public:
     static SplashFontFile *loadType1Font(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, const char **encA);

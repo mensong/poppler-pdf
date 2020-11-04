@@ -23,13 +23,14 @@
 #ifndef FOFITYPE1_H
 #define FOFITYPE1_H
 
+#include "poppler_export.h"
 #include "FoFiBase.h"
 
 //------------------------------------------------------------------------
 // FoFiType1
 //------------------------------------------------------------------------
 
-class FoFiType1 : public FoFiBase
+class POPPLER_EXPORT FoFiType1 : public FoFiBase
 {
 public:
     // Create a FoFiType1 object from a memory buffer.

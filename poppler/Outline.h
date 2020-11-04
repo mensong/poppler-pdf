@@ -25,9 +25,10 @@
 #ifndef OUTLINE_H
 #define OUTLINE_H
 
-#include <memory>
+#include "poppler_export.h"
 #include "Object.h"
 #include "CharTypes.h"
+#include <memory>
 
 class GooString;
 class XRef;
@@ -36,7 +37,7 @@ class OutlineItem;
 
 //------------------------------------------------------------------------
 
-class Outline
+class POPPLER_EXPORT Outline
 {
 public:
     Outline(const Object *outlineObj, XRef *xref);
@@ -53,7 +54,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class OutlineItem
+class POPPLER_EXPORT OutlineItem
 {
 public:
     OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA);

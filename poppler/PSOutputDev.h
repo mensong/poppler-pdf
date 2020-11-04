@@ -37,6 +37,7 @@
 #ifndef PSOUTPUTDEV_H
 #define PSOUTPUTDEV_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include <cstddef>
 #include "Object.h"
@@ -115,7 +116,7 @@ typedef void (*PSOutputFunc)(void *stream, const char *data, int len);
 
 typedef GooString *(*PSOutCustomCodeCbk)(PSOutputDev *psOut, PSOutCustomCodeLocation loc, int n, void *data);
 
-class PSOutputDev : public OutputDev
+class POPPLER_EXPORT PSOutputDev : public OutputDev
 {
 public:
     // Open a PostScript output file, and write the prolog.

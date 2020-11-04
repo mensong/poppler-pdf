@@ -9,12 +9,14 @@
 #ifndef FONTENCODINGTABLES_H
 #define FONTENCODINGTABLES_H
 
-extern const char *macRomanEncoding[];
-extern const char *macExpertEncoding[];
-extern const char *winAnsiEncoding[];
-extern const char *standardEncoding[];
-extern const char *expertEncoding[];
-extern const char *symbolEncoding[];
-extern const char *zapfDingbatsEncoding[];
+#include "poppler_export.h"
+
+POPPLER_EXPORT extern const char *macRomanEncoding[];
+POPPLER_EXPORT extern const char *macExpertEncoding[];
+POPPLER_EXPORT extern const char *winAnsiEncoding[];
+POPPLER_EXPORT extern const char *standardEncoding[];
+POPPLER_EXPORT extern const char *expertEncoding[];
+POPPLER_EXPORT extern const char *symbolEncoding[];
+POPPLER_EXPORT extern const char *zapfDingbatsEncoding[];
 
 #endif

@@ -35,6 +35,7 @@
 #ifndef GFX_H
 #define GFX_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include "GfxState.h"
 #include "Object.h"
@@ -107,7 +108,7 @@ struct Operator
 
 //------------------------------------------------------------------------
 
-class GfxResources
+class POPPLER_EXPORT GfxResources
 {
 public:
     GfxResources(XRef *xref, Dict *resDict, GfxResources *nextA);
@@ -148,7 +149,7 @@ private:
 // Gfx
 //------------------------------------------------------------------------
 
-class Gfx
+class POPPLER_EXPORT Gfx
 {
 public:
     // Constructor for regular output.

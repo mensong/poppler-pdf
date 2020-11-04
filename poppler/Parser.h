@@ -27,13 +27,14 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "poppler_export.h"
 #include "Lexer.h"
 
 //------------------------------------------------------------------------
 // Parser
 //------------------------------------------------------------------------
 
-class Parser
+class POPPLER_EXPORT Parser
 {
 public:
     // Constructor.

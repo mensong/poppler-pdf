@@ -23,9 +23,11 @@
 #ifndef PSTOKENIZER_H
 #define PSTOKENIZER_H
 
+#include "poppler_export.h"
+
 //------------------------------------------------------------------------
 
-class PSTokenizer
+class POPPLER_EXPORT PSTokenizer
 {
 public:
     PSTokenizer(int (*getCharFuncA)(void *), void *dataA);

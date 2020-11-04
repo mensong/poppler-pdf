@@ -12,6 +12,7 @@
 #ifndef LINEARIZATION_H
 #define LINEARIZATION_H
 
+#include "poppler_export.h"
 #include "Object.h"
 class BaseStream;
 
@@ -19,7 +20,7 @@ class BaseStream;
 // Linearization
 //------------------------------------------------------------------------
 
-class Linearization
+class POPPLER_EXPORT Linearization
 {
 public:
     Linearization(BaseStream *str);

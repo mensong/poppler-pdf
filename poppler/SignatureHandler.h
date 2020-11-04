@@ -16,6 +16,7 @@
 #ifndef SIGNATURE_HANDLER_H
 #define SIGNATURE_HANDLER_H
 
+#include "poppler_export.h"
 #include "goo/GooString.h"
 #include "SignatureInfo.h"
 #include "CertificateInfo.h"
@@ -33,7 +34,7 @@
 #include <secmodt.h>
 #include <sechash.h>
 
-class SignatureHandler
+class POPPLER_EXPORT SignatureHandler
 {
 public:
     SignatureHandler(unsigned char *p7, int p7_length);

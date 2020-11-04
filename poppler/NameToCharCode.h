@@ -23,13 +23,14 @@
 #ifndef NAMETOCHARCODE_H
 #define NAMETOCHARCODE_H
 
+#include "poppler_export.h"
 #include "CharTypes.h"
 
 struct NameToCharCodeEntry;
 
 //------------------------------------------------------------------------
 
-class NameToCharCode
+class POPPLER_EXPORT NameToCharCode
 {
 public:
     NameToCharCode();

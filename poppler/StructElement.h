@@ -14,6 +14,7 @@
 #ifndef STRUCTELEMENT_H
 #define STRUCTELEMENT_H
 
+#include "poppler_export.h"
 #include "goo/GooString.h"
 #include "MarkedContentOutputDev.h"
 #include "Object.h"
@@ -25,7 +26,7 @@ class Dict;
 class StructElement;
 class StructTreeRoot;
 
-class Attribute
+class POPPLER_EXPORT Attribute
 {
 public:
     enum Type
@@ -160,7 +161,7 @@ private:
     friend class StructElement;
 };
 
-class StructElement
+class POPPLER_EXPORT StructElement
 {
 public:
     enum Type

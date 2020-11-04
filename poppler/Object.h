@@ -33,15 +33,17 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "poppler_export.h"
+#include "poppler-config.h"
+#include "goo/gmem.h"
+#include "goo/GooString.h"
+#include "goo/GooLikely.h"
+#include "Error.h"
 #include <cassert>
 #include <set>
 #include <cstdio>
 #include <cstring>
 #include <climits>
-#include "goo/gmem.h"
-#include "goo/GooString.h"
-#include "goo/GooLikely.h"
-#include "Error.h"
 
 #define OBJECT_TYPE_CHECK(wanted_type)                                                                                                                                                                                                         \
     if (unlikely(type != wanted_type)) {                                                                                                                                                                                                       \
@@ -160,7 +162,7 @@ constexpr int numObjTypes = 16; // total number of object types
 // Object
 //------------------------------------------------------------------------
 
-class Object
+class POPPLER_EXPORT Object
 {
 public:
     Object() : type(objNone) { }

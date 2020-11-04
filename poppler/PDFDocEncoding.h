@@ -25,14 +25,15 @@
 #ifndef PDFDOCENCODING_H
 #define PDFDOCENCODING_H
 
-#include <string>
-
+#include "poppler_export.h"
 #include "CharTypes.h"
+
+#include <string>
 
 class GooString;
 
-extern const Unicode pdfDocEncoding[256];
+POPPLER_EXPORT extern const Unicode pdfDocEncoding[256];
 
-char *pdfDocEncodingToUTF16(const std::string &orig, int *length);
+POPPLER_EXPORT char *pdfDocEncodingToUTF16(const std::string &orig, int *length);
 
 #endif

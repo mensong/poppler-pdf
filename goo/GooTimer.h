@@ -17,6 +17,7 @@
 #ifndef GOOTIMER_H
 #define GOOTIMER_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #ifdef HAVE_GETTIMEOFDAY
 #    include <sys/time.h>
@@ -33,7 +34,7 @@
 // GooTimer
 //------------------------------------------------------------------------
 
-class GooTimer
+class POPPLER_EXPORT GooTimer
 {
 public:
     // Create a new timer.

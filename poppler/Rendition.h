@@ -25,9 +25,10 @@
 #ifndef _RENDITION_H_
 #define _RENDITION_H_
 
+#include "poppler_export.h"
 #include "Object.h"
 
-struct MediaWindowParameters
+struct POPPLER_EXPORT MediaWindowParameters
 {
 
     MediaWindowParameters();
@@ -68,7 +69,7 @@ struct MediaWindowParameters
     bool isResizeable; // true
 };
 
-struct MediaParameters
+struct POPPLER_EXPORT MediaParameters
 {
 
     MediaParameters();
@@ -118,7 +119,7 @@ struct MediaParameters
     MediaWindowParameters windowParams;
 };
 
-class MediaRendition
+class POPPLER_EXPORT MediaRendition
 {
 public:
     MediaRendition(Object *obj);

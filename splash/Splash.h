@@ -27,10 +27,12 @@
 #ifndef SPLASH_H
 #define SPLASH_H
 
-#include <cstddef>
+#include "poppler_export.h"
 #include "SplashTypes.h"
 #include "SplashClip.h"
 #include "SplashPattern.h"
+
+#include <cstddef>
 
 class SplashBitmap;
 struct SplashGlyphBitmap;
@@ -78,7 +80,7 @@ enum SplashPipeResultColorCtrl
 // Splash
 //------------------------------------------------------------------------
 
-class Splash
+class POPPLER_EXPORT Splash
 {
 public:
     // Create a new rasterizer object.

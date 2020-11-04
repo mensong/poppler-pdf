@@ -23,6 +23,7 @@
 #ifndef SPLASHXPATHSCANNER_H
 #define SPLASHXPATHSCANNER_H
 
+#include "poppler_export.h"
 #include "SplashTypes.h"
 
 #include <poppler-config.h>
@@ -47,7 +48,7 @@ struct SplashIntersect
 // SplashXPathScanner
 //------------------------------------------------------------------------
 
-class SplashXPathScanner
+class POPPLER_EXPORT SplashXPathScanner
 {
 public:
     // Create a new SplashXPathScanner object.  <xPathA> must be sorted.
@@ -112,7 +113,7 @@ private:
     friend class SplashXPathScanIterator;
 };
 
-class SplashXPathScanIterator
+class POPPLER_EXPORT SplashXPathScanIterator
 {
 public:
     SplashXPathScanIterator(const SplashXPathScanner &scanner, int y);

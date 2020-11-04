@@ -12,6 +12,7 @@
 #ifndef CURLPDFDOCBUILDER_H
 #define CURLPDFDOCBUILDER_H
 
+#include "poppler_export.h"
 #include "PDFDocBuilder.h"
 
 //------------------------------------------------------------------------
@@ -20,7 +21,7 @@
 // The CurlPDFDocBuilder implements a PDFDocBuilder for 'http(s)://'.
 //------------------------------------------------------------------------
 
-class CurlPDFDocBuilder : public PDFDocBuilder
+class POPPLER_EXPORT CurlPDFDocBuilder : public PDFDocBuilder
 {
 
 public:

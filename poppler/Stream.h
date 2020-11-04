@@ -39,11 +39,12 @@
 #ifndef STREAM_H
 #define STREAM_H
 
-#include <atomic>
-#include <cstdio>
-
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include "Object.h"
+
+#include <atomic>
+#include <cstdio>
 
 class GooFile;
 class BaseStream;
@@ -103,7 +104,7 @@ typedef struct _ByteRange
 // Stream (base class)
 //------------------------------------------------------------------------
 
-class Stream
+class POPPLER_EXPORT Stream
 {
 public:
     // Constructor.
@@ -261,7 +262,7 @@ private:
 //
 // This is the base class for all streams that output to a file
 //------------------------------------------------------------------------
-class OutStream
+class POPPLER_EXPORT OutStream
 {
 public:
     // Constructor.
@@ -288,7 +289,7 @@ public:
 //------------------------------------------------------------------------
 // FileOutStream
 //------------------------------------------------------------------------
-class FileOutStream : public OutStream
+class POPPLER_EXPORT FileOutStream : public OutStream
 {
 public:
     FileOutStream(FILE *fa, Goffset startA);
@@ -314,7 +315,7 @@ private:
 // This is the base class for all streams that read directly from a file.
 //------------------------------------------------------------------------
 
-class BaseStream : public Stream
+class POPPLER_EXPORT BaseStream : public Stream
 {
 public:
     // TODO Mirar si puedo hacer que dictA sea un puntero
@@ -344,7 +345,7 @@ protected:
 // BaseInputStream
 //------------------------------------------------------------------------
 
-class BaseSeekInputStream : public BaseStream
+class POPPLER_EXPORT BaseSeekInputStream : public BaseStream
 {
 public:
     // This enum is used to tell the seek() method how it must reposition
@@ -400,7 +401,7 @@ private:
 // This is the base class for all streams that filter another stream.
 //------------------------------------------------------------------------
 
-class FilterStream : public Stream
+class POPPLER_EXPORT FilterStream : public Stream
 {
 public:
     FilterStream(Stream *strA);
@@ -425,7 +426,7 @@ protected:
 // ImageStream
 //------------------------------------------------------------------------
 
-class ImageStream
+class POPPLER_EXPORT ImageStream
 {
 public:
     // Create an image stream object for an image with the specified
@@ -471,7 +472,7 @@ private:
 // StreamPredictor
 //------------------------------------------------------------------------
 
-class StreamPredictor
+class POPPLER_EXPORT StreamPredictor
 {
 public:
     // Create a predictor object.  Note that the parameters are for the
@@ -511,7 +512,7 @@ private:
 
 #define fileStreamBufSize 256
 
-class FileStream : public BaseStream
+class POPPLER_EXPORT FileStream : public BaseStream
 {
 public:
     FileStream(GooFile *fileA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
@@ -581,7 +582,7 @@ private:
 
 #define cachedStreamBufSize 1024
 
-class CachedFileStream : public BaseStream
+class POPPLER_EXPORT CachedFileStream : public BaseStream
 {
 public:
     CachedFileStream(CachedFile *ccA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
@@ -719,14 +720,14 @@ private:
     T *bufPtr;
 };
 
-class MemStream : public BaseMemStream<const char>
+class POPPLER_EXPORT MemStream : public BaseMemStream<const char>
 {
 public:
     MemStream(const char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseMemStream(bufA, startA, lengthA, std::move(dictA)) { }
     ~MemStream() override;
 };
 
-class AutoFreeMemStream : public BaseMemStream<char>
+class POPPLER_EXPORT AutoFreeMemStream : public BaseMemStream<char>
 {
 public:
     AutoFreeMemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseMemStream(bufA, startA, lengthA, std::move(dictA)) { }
@@ -743,7 +744,7 @@ public:
 // that creating a new FileStream (using makeSubStream).
 //------------------------------------------------------------------------
 
-class EmbedStream : public BaseStream
+class POPPLER_EXPORT EmbedStream : public BaseStream
 {
 public:
     EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA = false);
@@ -785,7 +786,7 @@ private:
 // ASCIIHexStream
 //------------------------------------------------------------------------
 
-class ASCIIHexStream : public FilterStream
+class POPPLER_EXPORT ASCIIHexStream : public FilterStream
 {
 public:
     ASCIIHexStream(Stream *strA);
@@ -811,7 +812,7 @@ private:
 // ASCII85Stream
 //------------------------------------------------------------------------
 
-class ASCII85Stream : public FilterStream
+class POPPLER_EXPORT ASCII85Stream : public FilterStream
 {
 public:
     ASCII85Stream(Stream *strA);
@@ -839,7 +840,7 @@ private:
 // LZWStream
 //------------------------------------------------------------------------
 
-class LZWStream : public FilterStream
+class POPPLER_EXPORT LZWStream : public FilterStream
 {
 public:
     LZWStream(Stream *strA, int predictor, int columns, int colors, int bits, int earlyA);
@@ -899,7 +900,7 @@ private:
 // RunLengthStream
 //------------------------------------------------------------------------
 
-class RunLengthStream : public FilterStream
+class POPPLER_EXPORT RunLengthStream : public FilterStream
 {
 public:
     RunLengthStream(Stream *strA);
@@ -929,7 +930,7 @@ private:
 
 struct CCITTCodeTable;
 
-class CCITTFaxStream : public FilterStream
+class POPPLER_EXPORT CCITTFaxStream : public FilterStream
 {
 public:
     CCITTFaxStream(Stream *strA, int encodingA, bool endOfLineA, bool byteAlignA, int columnsA, int rowsA, bool endOfBlockA, bool blackA, int damagedRowsBeforeErrorA);
@@ -1025,7 +1026,7 @@ struct DCTHuffTable
     unsigned char sym[256]; // symbols
 };
 
-class DCTStream : public FilterStream
+class POPPLER_EXPORT DCTStream : public FilterStream
 {
 public:
     DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
@@ -1129,7 +1130,7 @@ struct FlateDecode
     int first; // first length/distance
 };
 
-class FlateStream : public FilterStream
+class POPPLER_EXPORT FlateStream : public FilterStream
 {
 public:
     FlateStream(Stream *strA, int predictor, int columns, int colors, int bits);
@@ -1204,7 +1205,7 @@ private:
 // EOFStream
 //------------------------------------------------------------------------
 
-class EOFStream : public FilterStream
+class POPPLER_EXPORT EOFStream : public FilterStream
 {
 public:
     EOFStream(Stream *strA);
@@ -1244,7 +1245,7 @@ private:
 // FixedLengthEncoder
 //------------------------------------------------------------------------
 
-class FixedLengthEncoder : public FilterStream
+class POPPLER_EXPORT FixedLengthEncoder : public FilterStream
 {
 public:
     FixedLengthEncoder(Stream *strA, int lengthA);
@@ -1266,7 +1267,7 @@ private:
 // ASCIIHexEncoder
 //------------------------------------------------------------------------
 
-class ASCIIHexEncoder : public FilterStream
+class POPPLER_EXPORT ASCIIHexEncoder : public FilterStream
 {
 public:
     ASCIIHexEncoder(Stream *strA);
@@ -1293,7 +1294,7 @@ private:
 // ASCII85Encoder
 //------------------------------------------------------------------------
 
-class ASCII85Encoder : public FilterStream
+class POPPLER_EXPORT ASCII85Encoder : public FilterStream
 {
 public:
     ASCII85Encoder(Stream *strA);
@@ -1354,7 +1355,7 @@ struct LZWEncoderNode
     LZWEncoderNode *children; // first child
 };
 
-class LZWEncoder : public FilterStream
+class POPPLER_EXPORT LZWEncoder : public FilterStream
 {
 public:
     LZWEncoder(Stream *strA);
@@ -1384,7 +1385,7 @@ private:
 // CMYKGrayEncoder
 //------------------------------------------------------------------------
 
-class CMYKGrayEncoder : public FilterStream
+class POPPLER_EXPORT CMYKGrayEncoder : public FilterStream
 {
 public:
     CMYKGrayEncoder(Stream *strA);
@@ -1410,7 +1411,7 @@ private:
 // RGBGrayEncoder
 //------------------------------------------------------------------------
 
-class RGBGrayEncoder : public FilterStream
+class POPPLER_EXPORT RGBGrayEncoder : public FilterStream
 {
 public:
     RGBGrayEncoder(Stream *strA);
@@ -1440,7 +1441,7 @@ private:
 //------------------------------------------------------------------------
 
 #ifdef HAVE_SPLASH
-class SplashBitmapCMYKEncoder : public Stream
+class POPPLER_EXPORT SplashBitmapCMYKEncoder : public Stream
 {
 public:
     SplashBitmapCMYKEncoder(SplashBitmap *bitmapA);

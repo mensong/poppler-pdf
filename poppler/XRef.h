@@ -34,6 +34,7 @@
 #ifndef XREF_H
 #define XREF_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include "Object.h"
 #include "Stream.h"
@@ -92,7 +93,7 @@ struct XRefEntry
     }
 };
 
-class XRef
+class POPPLER_EXPORT XRef
 {
 public:
     // Constructor, create an empty XRef, used for PDF writing

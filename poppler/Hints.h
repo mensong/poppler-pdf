@@ -13,9 +13,10 @@
 #ifndef HINTS_H
 #define HINTS_H
 
+#include "poppler_export.h"
+#include "PDFDoc.h"
 #include <cstring>
 #include <vector>
-#include "PDFDoc.h"
 
 class Stream;
 class BaseStream;
@@ -26,7 +27,7 @@ class XRef;
 // Hints
 //------------------------------------------------------------------------
 
-class Hints
+class POPPLER_EXPORT Hints
 {
 public:
     Hints(BaseStream *str, Linearization *linearization, XRef *xref, SecurityHandler *secHdlr);

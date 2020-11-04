@@ -12,6 +12,7 @@
 #ifndef PDFDOCBUILDER_H
 #define PDFDOCBUILDER_H
 
+#include "poppler_export.h"
 #include "PDFDoc.h"
 class GooString;
 
@@ -22,7 +23,7 @@ class GooString;
 // constructing PDFDocs.
 //------------------------------------------------------------------------
 
-class PDFDocBuilder
+class POPPLER_EXPORT PDFDocBuilder
 {
 
 public:

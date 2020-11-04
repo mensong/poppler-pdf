@@ -38,6 +38,7 @@
 #ifndef CATALOG_H
 #define CATALOG_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include "Object.h"
 #include "Link.h"
@@ -62,7 +63,7 @@ class StructTreeRoot;
 // NameTree
 //------------------------------------------------------------------------
 
-class NameTree
+class POPPLER_EXPORT NameTree
 {
 public:
     NameTree();
@@ -103,7 +104,7 @@ private:
 // Catalog
 //------------------------------------------------------------------------
 
-class Catalog
+class POPPLER_EXPORT Catalog
 {
 public:
     // Constructor.

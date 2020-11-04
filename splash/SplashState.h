@@ -23,6 +23,7 @@
 #ifndef SPLASHSTATE_H
 #define SPLASHSTATE_H
 
+#include "poppler_export.h"
 #include "SplashTypes.h"
 
 class SplashPattern;
@@ -50,7 +51,7 @@ class SplashBitmap;
 // SplashState
 //------------------------------------------------------------------------
 
-class SplashState
+class POPPLER_EXPORT SplashState
 {
 public:
     // Create a new state object, initialized with default settings.

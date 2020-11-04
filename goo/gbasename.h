@@ -16,8 +16,10 @@
 #ifndef GBASENAME_H
 #define GBASENAME_H
 
+#include "poppler_export.h"
+
 #include <string>
 
-std::string gbasename(const char *filename);
+POPPLER_EXPORT std::string gbasename(const char *filename);
 
 #endif // ndef GBASENAME_H

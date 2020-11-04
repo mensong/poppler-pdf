@@ -23,6 +23,7 @@
 #ifndef JPXSTREAM_H
 #define JPXSTREAM_H
 
+#include "poppler_export.h"
 #include "Object.h"
 #include "Stream.h"
 
@@ -281,7 +282,7 @@ struct JPXImage
 
 //------------------------------------------------------------------------
 
-class JPXStream : public FilterStream
+class POPPLER_EXPORT JPXStream : public FilterStream
 {
 public:
     JPXStream(Stream *strA);

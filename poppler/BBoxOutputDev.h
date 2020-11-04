@@ -8,11 +8,12 @@
 //
 //========================================================================
 
+#include "poppler_export.h"
 #include <PDFDoc.h>
 #include <GfxState.h>
 #include <OutputDev.h>
 
-class BBoxOutputDev : public OutputDev
+class POPPLER_EXPORT BBoxOutputDev : public OutputDev
 {
 public:
     bool upsideDown() override { return false; }

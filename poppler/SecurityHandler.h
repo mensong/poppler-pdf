@@ -23,6 +23,7 @@
 #ifndef SECURITYHANDLER_H
 #define SECURITYHANDLER_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 
 #include "Object.h"
@@ -34,7 +35,7 @@ class PDFDoc;
 // SecurityHandler
 //------------------------------------------------------------------------
 
-class SecurityHandler
+class POPPLER_EXPORT SecurityHandler
 {
 public:
     static SecurityHandler *make(PDFDoc *docA, Object *encryptDictA);
@@ -92,7 +93,7 @@ protected:
 // StandardSecurityHandler
 //------------------------------------------------------------------------
 
-class StandardSecurityHandler : public SecurityHandler
+class POPPLER_EXPORT StandardSecurityHandler : public SecurityHandler
 {
 public:
     StandardSecurityHandler(PDFDoc *docA, Object *encryptDictA);

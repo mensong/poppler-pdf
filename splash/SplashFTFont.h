@@ -25,6 +25,7 @@
 #ifndef SPLASHFTFONT_H
 #define SPLASHFTFONT_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 
 #include <ft2build.h>
@@ -37,7 +38,7 @@ class SplashFTFontFile;
 // SplashFTFont
 //------------------------------------------------------------------------
 
-class SplashFTFont : public SplashFont
+class POPPLER_EXPORT SplashFTFont : public SplashFont
 {
 public:
     SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA, const SplashCoord *textMatA);

@@ -12,6 +12,7 @@
 #ifndef FLATESTREAM_H
 #define FLATESTREAM_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include <cstdio>
 #include <cstdlib>
@@ -32,7 +33,7 @@ extern "C" {
 #include <zlib.h>
 }
 
-class FlateStream : public FilterStream
+class POPPLER_EXPORT FlateStream : public FilterStream
 {
 public:
     FlateStream(Stream *strA, int predictor, int columns, int colors, int bits);

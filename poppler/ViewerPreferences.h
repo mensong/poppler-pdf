@@ -12,6 +12,8 @@
 #ifndef VIEWERPREFERENCES_H
 #define VIEWERPREFERENCES_H
 
+#include "poppler_export.h"
+
 #include <vector>
 
 class Dict;
@@ -20,7 +22,7 @@ class Dict;
 // ViewerPreferences
 //------------------------------------------------------------------------
 
-class ViewerPreferences
+class POPPLER_EXPORT ViewerPreferences
 {
 public:
     enum NonFullScreenPageMode

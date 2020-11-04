@@ -35,6 +35,7 @@
 #ifndef GFXSTATE_H
 #define GFXSTATE_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 
 #include "Object.h"
@@ -54,7 +55,7 @@ class GfxState;
 class GfxResources;
 class GfxSeparationColorSpace;
 
-class Matrix
+class POPPLER_EXPORT Matrix
 {
 public:
     double m[6];
@@ -216,11 +217,11 @@ enum GfxColorSpaceMode
 typedef std::shared_ptr<void> GfxLCMSProfilePtr;
 
 #ifdef USE_CMS
-GfxLCMSProfilePtr make_GfxLCMSProfilePtr(void *profile);
+POPPLER_EXPORT GfxLCMSProfilePtr make_GfxLCMSProfilePtr(void *profile);
 #endif
 
 // wrapper of cmsHTRANSFORM to copy
-class GfxColorTransform
+class POPPLER_EXPORT GfxColorTransform
 {
 public:
     void doTransform(void *in, void *out, unsigned int size);
@@ -241,7 +242,7 @@ private:
     unsigned int transformPixelType;
 };
 
-class GfxColorSpace
+class POPPLER_EXPORT GfxColorSpace
 {
 public:
     GfxColorSpace();
@@ -312,7 +313,7 @@ protected:
 // GfxDeviceGrayColorSpace
 //------------------------------------------------------------------------
 
-class GfxDeviceGrayColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxDeviceGrayColorSpace : public GfxColorSpace
 {
 public:
     GfxDeviceGrayColorSpace();
@@ -346,7 +347,7 @@ private:
 // GfxCalGrayColorSpace
 //------------------------------------------------------------------------
 
-class GfxCalGrayColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxCalGrayColorSpace : public GfxColorSpace
 {
 public:
     GfxCalGrayColorSpace();
@@ -389,7 +390,7 @@ private:
 // GfxDeviceRGBColorSpace
 //------------------------------------------------------------------------
 
-class GfxDeviceRGBColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxDeviceRGBColorSpace : public GfxColorSpace
 {
 public:
     GfxDeviceRGBColorSpace();
@@ -423,7 +424,7 @@ private:
 // GfxCalRGBColorSpace
 //------------------------------------------------------------------------
 
-class GfxCalRGBColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxCalRGBColorSpace : public GfxColorSpace
 {
 public:
     GfxCalRGBColorSpace();
@@ -470,7 +471,7 @@ private:
 // GfxDeviceCMYKColorSpace
 //------------------------------------------------------------------------
 
-class GfxDeviceCMYKColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxDeviceCMYKColorSpace : public GfxColorSpace
 {
 public:
     GfxDeviceCMYKColorSpace();
@@ -501,7 +502,7 @@ private:
 // GfxLabColorSpace
 //------------------------------------------------------------------------
 
-class GfxLabColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxLabColorSpace : public GfxColorSpace
 {
 public:
     GfxLabColorSpace();
@@ -549,7 +550,7 @@ private:
 // GfxICCBasedColorSpace
 //------------------------------------------------------------------------
 
-class GfxICCBasedColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxICCBasedColorSpace : public GfxColorSpace
 {
 public:
     GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA, const Ref *iccProfileStreamA);
@@ -606,7 +607,7 @@ private:
 // GfxIndexedColorSpace
 //------------------------------------------------------------------------
 
-class GfxIndexedColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxIndexedColorSpace : public GfxColorSpace
 {
 public:
     GfxIndexedColorSpace(GfxColorSpace *baseA, int indexHighA);
@@ -654,7 +655,7 @@ private:
 // GfxSeparationColorSpace
 //------------------------------------------------------------------------
 
-class GfxSeparationColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxSeparationColorSpace : public GfxColorSpace
 {
 public:
     GfxSeparationColorSpace(GooString *nameA, GfxColorSpace *altA, Function *funcA);
@@ -695,7 +696,7 @@ private:
 // GfxDeviceNColorSpace
 //------------------------------------------------------------------------
 
-class GfxDeviceNColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxDeviceNColorSpace : public GfxColorSpace
 {
 public:
     GfxDeviceNColorSpace(int nCompsA, std::vector<std::string> &&namesA, GfxColorSpace *alt, Function *func, std::vector<GfxSeparationColorSpace *> *sepsCS);
@@ -738,7 +739,7 @@ private:
 // GfxPatternColorSpace
 //------------------------------------------------------------------------
 
-class GfxPatternColorSpace : public GfxColorSpace
+class POPPLER_EXPORT GfxPatternColorSpace : public GfxColorSpace
 {
 public:
     GfxPatternColorSpace(GfxColorSpace *underA);
@@ -769,7 +770,7 @@ private:
 // GfxPattern
 //------------------------------------------------------------------------
 
-class GfxPattern
+class POPPLER_EXPORT GfxPattern
 {
 public:
     GfxPattern(int typeA, int patternRefNumA);
@@ -795,7 +796,7 @@ private:
 // GfxTilingPattern
 //------------------------------------------------------------------------
 
-class GfxTilingPattern : public GfxPattern
+class POPPLER_EXPORT GfxTilingPattern : public GfxPattern
 {
 public:
     static GfxTilingPattern *parse(Object *patObj, int patternRefNum);
@@ -828,7 +829,7 @@ private:
 // GfxShadingPattern
 //------------------------------------------------------------------------
 
-class GfxShadingPattern : public GfxPattern
+class POPPLER_EXPORT GfxShadingPattern : public GfxPattern
 {
 public:
     static GfxShadingPattern *parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum);
@@ -850,7 +851,7 @@ private:
 // GfxShading
 //------------------------------------------------------------------------
 
-class GfxShading
+class POPPLER_EXPORT GfxShading
 {
 public:
     GfxShading(int typeA);
@@ -899,7 +900,7 @@ protected:
 // GfxUnivariateShading
 //------------------------------------------------------------------------
 
-class GfxUnivariateShading : public GfxShading
+class POPPLER_EXPORT GfxUnivariateShading : public GfxShading
 {
 public:
     GfxUnivariateShading(int typeA, double t0A, double t1A, std::vector<std::unique_ptr<Function>> &&funcsA, bool extend0A, bool extend1A);
@@ -937,7 +938,7 @@ private:
 // GfxFunctionShading
 //------------------------------------------------------------------------
 
-class GfxFunctionShading : public GfxShading
+class POPPLER_EXPORT GfxFunctionShading : public GfxShading
 {
 public:
     GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const double *matrixA, std::vector<std::unique_ptr<Function>> &&funcsA);
@@ -970,7 +971,7 @@ private:
 // GfxAxialShading
 //------------------------------------------------------------------------
 
-class GfxAxialShading : public GfxUnivariateShading
+class POPPLER_EXPORT GfxAxialShading : public GfxUnivariateShading
 {
 public:
     GfxAxialShading(double x0A, double y0A, double x1A, double y1A, double t0A, double t1A, std::vector<std::unique_ptr<Function>> &&funcsA, bool extend0A, bool extend1A);
@@ -1001,7 +1002,7 @@ private:
 // GfxRadialShading
 //------------------------------------------------------------------------
 
-class GfxRadialShading : public GfxUnivariateShading
+class POPPLER_EXPORT GfxRadialShading : public GfxUnivariateShading
 {
 public:
     GfxRadialShading(double x0A, double y0A, double r0A, double x1A, double y1A, double r1A, double t0A, double t1A, std::vector<std::unique_ptr<Function>> &&funcsA, bool extend0A, bool extend1A);
@@ -1040,7 +1041,7 @@ struct GfxGouraudVertex
     GfxColor color;
 };
 
-class GfxGouraudTriangleShading : public GfxShading
+class POPPLER_EXPORT GfxGouraudTriangleShading : public GfxShading
 {
 public:
     GfxGouraudTriangleShading(int typeA, GfxGouraudVertex *verticesA, int nVerticesA, int (*trianglesA)[3], int nTrianglesA, std::vector<std::unique_ptr<Function>> &&funcsA);
@@ -1129,7 +1130,7 @@ struct GfxPatch
     ColorValue color[2][2];
 };
 
-class GfxPatchMeshShading : public GfxShading
+class POPPLER_EXPORT GfxPatchMeshShading : public GfxShading
 {
 public:
     GfxPatchMeshShading(int typeA, GfxPatch *patchesA, int nPatchesA, std::vector<std::unique_ptr<Function>> &&funcsA);
@@ -1175,7 +1176,7 @@ private:
 // GfxImageColorMap
 //------------------------------------------------------------------------
 
-class GfxImageColorMap
+class POPPLER_EXPORT GfxImageColorMap
 {
 public:
     // Constructor.
@@ -1255,7 +1256,7 @@ private:
 // GfxSubpath and GfxPath
 //------------------------------------------------------------------------
 
-class GfxSubpath
+class POPPLER_EXPORT GfxSubpath
 {
 public:
     // Constructor.
@@ -1307,7 +1308,7 @@ private:
     GfxSubpath(const GfxSubpath *subpath);
 };
 
-class GfxPath
+class POPPLER_EXPORT GfxPath
 {
 public:
     // Constructor.
@@ -1369,7 +1370,7 @@ private:
 // GfxState
 //------------------------------------------------------------------------
 
-class GfxState
+class POPPLER_EXPORT GfxState
 {
 public:
     /**

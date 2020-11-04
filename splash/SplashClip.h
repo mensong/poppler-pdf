@@ -23,6 +23,7 @@
 #ifndef SPLASHCLIP_H
 #define SPLASHCLIP_H
 
+#include "poppler_export.h"
 #include "SplashTypes.h"
 
 class SplashPath;
@@ -43,7 +44,7 @@ enum SplashClipResult
 // SplashClip
 //------------------------------------------------------------------------
 
-class SplashClip
+class POPPLER_EXPORT SplashClip
 {
 public:
     // Create a clip, for the given rectangle.

@@ -27,9 +27,10 @@
 #ifndef SPLASHFONTENGINE_H
 #define SPLASHFONTENGINE_H
 
-#include <array>
-
+#include "poppler_export.h"
 #include "SplashTypes.h"
+
+#include <array>
 
 class SplashT1FontEngine;
 class SplashFTFontEngine;
@@ -44,7 +45,7 @@ class SplashFontSrc;
 // SplashFontEngine
 //------------------------------------------------------------------------
 
-class SplashFontEngine
+class POPPLER_EXPORT SplashFontEngine
 {
 public:
     // Create a font engine.

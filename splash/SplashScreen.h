@@ -21,6 +21,7 @@
 #ifndef SPLASHSCREEN_H
 #define SPLASHSCREEN_H
 
+#include "poppler_export.h"
 #include "SplashTypes.h"
 
 #include <cstdlib>
@@ -29,7 +30,7 @@
 // SplashScreen
 //------------------------------------------------------------------------
 
-class SplashScreen
+class POPPLER_EXPORT SplashScreen
 {
 public:
     SplashScreen(const SplashScreenParams *params);

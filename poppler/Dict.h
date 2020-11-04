@@ -30,20 +30,21 @@
 #ifndef DICT_H
 #define DICT_H
 
+#include "poppler_export.h"
+#include "poppler-config.h"
+#include "Object.h"
+
 #include <atomic>
 #include <mutex>
 #include <string>
 #include <vector>
 #include <utility>
 
-#include "poppler-config.h"
-#include "Object.h"
-
 //------------------------------------------------------------------------
 // Dict
 //------------------------------------------------------------------------
 
-class Dict
+class POPPLER_EXPORT Dict
 {
 public:
     // Constructor.

@@ -28,6 +28,7 @@
 
 #include <atomic>
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include "CharTypes.h"
 
@@ -39,7 +40,7 @@ class Stream;
 
 //------------------------------------------------------------------------
 
-class CMap
+class POPPLER_EXPORT CMap
 {
 public:
     // Parse a CMap from <obj>, which can be a name or a stream.  Sets
@@ -113,7 +114,7 @@ private:
 
 #define cMapCacheSize 4
 
-class CMapCache
+class POPPLER_EXPORT CMapCache
 {
 public:
     CMapCache();

@@ -15,6 +15,7 @@
 #ifndef NETPBMWRITER_H
 #define NETPBMWRITER_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 
 #include "ImgWriter.h"
@@ -24,7 +25,7 @@
 //   http://netpbm.sourceforge.net/doc/pbm.html
 //   http://netpbm.sourceforge.net/doc/ppm.html
 
-class NetPBMWriter : public ImgWriter
+class POPPLER_EXPORT NetPBMWriter : public ImgWriter
 {
 public:
     /* RGB        - 3 bytes/pixel

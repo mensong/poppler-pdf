@@ -27,6 +27,7 @@
 #ifndef PRESCANOUTPUTDEV_H
 #define PRESCANOUTPUTDEV_H
 
+#include "poppler_export.h"
 #include "Object.h"
 #include "GfxState.h"
 #include "OutputDev.h"
@@ -36,7 +37,7 @@
 // PreScanOutputDev
 //------------------------------------------------------------------------
 
-class PreScanOutputDev : public OutputDev
+class POPPLER_EXPORT PreScanOutputDev : public OutputDev
 {
 public:
     // Constructor.

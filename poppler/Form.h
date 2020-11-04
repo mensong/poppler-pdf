@@ -28,6 +28,7 @@
 #ifndef FORM_H
 #define FORM_H
 
+#include "poppler_export.h"
 #include "Object.h"
 #include "Annot.h"
 
@@ -98,7 +99,7 @@ class FormFieldChoice;
 // to a page.
 //------------------------------------------------------------------------
 
-class FormWidget
+class POPPLER_EXPORT FormWidget
 {
 public:
     virtual ~FormWidget();
@@ -177,7 +178,7 @@ protected:
 // FormWidgetButton
 //------------------------------------------------------------------------
 
-class FormWidgetButton : public FormWidget
+class POPPLER_EXPORT FormWidgetButton : public FormWidget
 {
 public:
     FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
@@ -201,7 +202,7 @@ protected:
 // FormWidgetText
 //------------------------------------------------------------------------
 
-class FormWidgetText : public FormWidget
+class POPPLER_EXPORT FormWidgetText : public FormWidget
 {
 public:
     FormWidgetText(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
@@ -236,7 +237,7 @@ protected:
 // FormWidgetChoice
 //------------------------------------------------------------------------
 
-class FormWidgetChoice : public FormWidget
+class POPPLER_EXPORT FormWidgetChoice : public FormWidget
 {
 public:
     FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
@@ -280,7 +281,7 @@ protected:
 // FormWidgetSignature
 //------------------------------------------------------------------------
 
-class FormWidgetSignature : public FormWidget
+class POPPLER_EXPORT FormWidgetSignature : public FormWidget
 {
 public:
     FormWidgetSignature(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
@@ -309,7 +310,7 @@ public:
 // only interact with FormWidgets.
 //------------------------------------------------------------------------
 
-class FormField
+class POPPLER_EXPORT FormField
 {
 public:
     FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *parent, std::set<int> *usedParents, FormFieldType t = formUndef);
@@ -393,7 +394,7 @@ private:
 // FormFieldButton
 //------------------------------------------------------------------------
 
-class FormFieldButton : public FormField
+class POPPLER_EXPORT FormFieldButton : public FormField
 {
 public:
     FormFieldButton(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
@@ -442,7 +443,7 @@ protected:
 // FormFieldText
 //------------------------------------------------------------------------
 
-class FormFieldText : public FormField
+class POPPLER_EXPORT FormFieldText : public FormField
 {
 public:
     FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref ref, FormField *parent, std::set<int> *usedParents);
@@ -494,7 +495,7 @@ protected:
 // FormFieldChoice
 //------------------------------------------------------------------------
 
-class FormFieldChoice : public FormField
+class POPPLER_EXPORT FormFieldChoice : public FormField
 {
 public:
     FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents);
@@ -566,7 +567,7 @@ protected:
 // FormFieldSignature
 //------------------------------------------------------------------------
 
-class FormFieldSignature : public FormField
+class POPPLER_EXPORT FormFieldSignature : public FormField
 {
 public:
     FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
@@ -606,7 +607,7 @@ private:
 // Catalog entry).
 //------------------------------------------------------------------------
 
-class Form
+class POPPLER_EXPORT Form
 {
 public:
     Form(PDFDoc *docA, Object *acroForm);
@@ -664,7 +665,7 @@ private:
 // FormPageWidgets
 //------------------------------------------------------------------------
 
-class FormPageWidgets
+class POPPLER_EXPORT FormPageWidgets
 {
 public:
     FormPageWidgets(Annots *annots, unsigned int page, Form *form);

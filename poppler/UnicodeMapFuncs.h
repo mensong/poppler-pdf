@@ -26,10 +26,11 @@
 #ifndef UNICODEMAPFUNCS_H
 #define UNICODEMAPFUNCS_H
 
+#include "poppler_export.h"
 #include "UTF.h"
 
-int mapUTF8(Unicode u, char *buf, int bufSize);
+POPPLER_EXPORT int mapUTF8(Unicode u, char *buf, int bufSize);
 
-int mapUTF16(Unicode u, char *buf, int bufSize);
+POPPLER_EXPORT int mapUTF16(Unicode u, char *buf, int bufSize);
 
 #endif

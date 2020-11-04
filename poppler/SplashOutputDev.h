@@ -32,6 +32,7 @@
 #ifndef SPLASHOUTPUTDEV_H
 #define SPLASHOUTPUTDEV_H
 
+#include "poppler_export.h"
 #include "splash/SplashTypes.h"
 #include "splash/SplashPattern.h"
 #include "poppler-config.h"
@@ -55,7 +56,7 @@ struct SplashTransparencyGroup;
 // Splash dynamic pattern
 //------------------------------------------------------------------------
 
-class SplashFunctionPattern : public SplashPattern
+class POPPLER_EXPORT SplashFunctionPattern : public SplashPattern
 {
 public:
     SplashFunctionPattern(SplashColorMode colorMode, GfxState *state, GfxFunctionShading *shading);
@@ -83,7 +84,7 @@ protected:
     GfxColorSpaceMode gfxMode;
 };
 
-class SplashUnivariatePattern : public SplashPattern
+class POPPLER_EXPORT SplashUnivariatePattern : public SplashPattern
 {
 public:
     SplashUnivariatePattern(SplashColorMode colorMode, GfxState *state, GfxUnivariateShading *shading);
@@ -111,7 +112,7 @@ protected:
     GfxColorSpaceMode gfxMode;
 };
 
-class SplashAxialPattern : public SplashUnivariatePattern
+class POPPLER_EXPORT SplashAxialPattern : public SplashUnivariatePattern
 {
 public:
     SplashAxialPattern(SplashColorMode colorMode, GfxState *state, GfxAxialShading *shading);
@@ -128,7 +129,7 @@ private:
 };
 
 // see GfxState.h, GfxGouraudTriangleShading
-class SplashGouraudPattern : public SplashGouraudColor
+class POPPLER_EXPORT SplashGouraudPattern : public SplashGouraudColor
 {
 public:
     SplashGouraudPattern(bool bDirectColorTranslation, GfxState *state, GfxGouraudTriangleShading *shading);
@@ -164,7 +165,7 @@ private:
 };
 
 // see GfxState.h, GfxRadialShading
-class SplashRadialPattern : public SplashUnivariatePattern
+class POPPLER_EXPORT SplashRadialPattern : public SplashUnivariatePattern
 {
 public:
     SplashRadialPattern(SplashColorMode colorMode, GfxState *state, GfxRadialShading *shading);
@@ -189,7 +190,7 @@ private:
 // SplashOutputDev
 //------------------------------------------------------------------------
 
-class SplashOutputDev : public OutputDev
+class POPPLER_EXPORT SplashOutputDev : public OutputDev
 {
 public:
     // Constructor.

@@ -35,6 +35,7 @@
 #ifndef GFILE_H
 #define GFILE_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include <cstdio>
 #include <cstdlib>
@@ -82,36 +83,36 @@ typedef long long Goffset;
 
 // Append a file name to a path string.  <path> may be an empty
 // string, denoting the current directory).  Returns <path>.
-extern GooString *appendToPath(GooString *path, const char *fileName);
+POPPLER_EXPORT extern GooString *appendToPath(GooString *path, const char *fileName);
 
 #ifndef _WIN32
 // Open a file descriptor
 // Could be implemented on WIN32 too, but the only external caller of
 // this function is not used on WIN32
-extern int openFileDescriptor(const char *path, int flags);
+POPPLER_EXPORT extern int openFileDescriptor(const char *path, int flags);
 #endif
 
 // Open a file.  On Windows, this converts the path from UTF-8 to
 // UCS-2 and calls _wfopen (if available).  On other OSes, this simply
 // calls fopen.
-extern FILE *openFile(const char *path, const char *mode);
+POPPLER_EXPORT extern FILE *openFile(const char *path, const char *mode);
 
 // Just like fgets, but handles Unix, Mac, and/or DOS end-of-line
 // conventions.
-extern char *getLine(char *buf, int size, FILE *f);
+POPPLER_EXPORT extern char *getLine(char *buf, int size, FILE *f);
 
 // Like fseek/ftell but uses platform specific variants that support large files
-extern int Gfseek(FILE *f, Goffset offset, int whence);
-extern Goffset Gftell(FILE *f);
+POPPLER_EXPORT extern int Gfseek(FILE *f, Goffset offset, int whence);
+POPPLER_EXPORT extern Goffset Gftell(FILE *f);
 
 // Largest offset supported by Gfseek/Gftell
-extern Goffset GoffsetMax();
+POPPLER_EXPORT extern Goffset GoffsetMax();
 
 //------------------------------------------------------------------------
 // GooFile
 //------------------------------------------------------------------------
 
-class GooFile
+class POPPLER_EXPORT GooFile
 {
 public:
     GooFile(const GooFile &) = delete;

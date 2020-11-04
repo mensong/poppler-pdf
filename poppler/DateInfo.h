@@ -24,20 +24,21 @@
 #ifndef DATE_INFO_H
 #define DATE_INFO_H
 
+#include "poppler_export.h"
 #include "goo/GooString.h"
 #include <ctime>
 
-bool parseDateString(const char *string, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
+POPPLER_EXPORT bool parseDateString(const char *string, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
 
 /* Converts the time_t into a PDF Date format string.
  * If timeA is NULL, current time is used.
  * Returns new GooString. Free with delete.
  */
-GooString *timeToDateString(const time_t *timeA);
+POPPLER_EXPORT GooString *timeToDateString(const time_t *timeA);
 
 /* Convert PDF date string to time.
  * Returns -1 if conversion fails.
  */
-time_t dateStringToTime(const GooString *dateString);
+POPPLER_EXPORT time_t dateStringToTime(const GooString *dateString);
 
 #endif

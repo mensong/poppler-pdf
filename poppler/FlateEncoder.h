@@ -12,6 +12,7 @@
 #ifndef FLATEENCODE_H
 #define FLATEENCODE_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include <cstdio>
 #include <cstdlib>
@@ -37,7 +38,7 @@ extern "C" {
 // FlateEncoder
 //------------------------------------------------------------------------
 
-class FlateEncoder : public FilterStream
+class POPPLER_EXPORT FlateEncoder : public FilterStream
 {
 public:
     FlateEncoder(Stream *strA);

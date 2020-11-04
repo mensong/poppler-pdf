@@ -15,10 +15,12 @@
 #ifndef GOO_GBASE64_H
 #define GOO_GBASE64_H
 
+#include "poppler_export.h"
+
 #include <string>
 #include <vector>
 
-std::string gbase64Encode(const void *input, size_t len);
+POPPLER_EXPORT std::string gbase64Encode(const void *input, size_t len);
 
 inline std::string gbase64Encode(const std::vector<char> &input)
 {

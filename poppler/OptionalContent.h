@@ -15,6 +15,7 @@
 #ifndef OPTIONALCONTENT_H
 #define OPTIONALCONTENT_H
 
+#include "poppler_export.h"
 #include "Object.h"
 #include "CharTypes.h"
 #include <unordered_map>
@@ -27,7 +28,7 @@ class OptionalContentGroup;
 
 //------------------------------------------------------------------------
 
-class OCGs
+class POPPLER_EXPORT OCGs
 {
 public:
     OCGs(Object *ocgObject, XRef *xref);
@@ -66,7 +67,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class OptionalContentGroup
+class POPPLER_EXPORT OptionalContentGroup
 {
 public:
     enum State

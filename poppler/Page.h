@@ -38,6 +38,7 @@
 #include <memory>
 #include <mutex>
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include "Object.h"
 
@@ -56,7 +57,7 @@ class FormField;
 
 //------------------------------------------------------------------------
 
-class PDFRectangle
+class POPPLER_EXPORT PDFRectangle
 {
 public:
     double x1, y1, x2, y2;
@@ -80,7 +81,7 @@ public:
 // PageAttrs
 //------------------------------------------------------------------------
 
-class PageAttrs
+class POPPLER_EXPORT PageAttrs
 {
 public:
     // Construct a new PageAttrs object by merging a dictionary
@@ -135,7 +136,7 @@ private:
 // Page
 //------------------------------------------------------------------------
 
-class Page
+class POPPLER_EXPORT Page
 {
 public:
     // Constructor.

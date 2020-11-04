@@ -16,13 +16,14 @@
 #ifndef JPEG2000STREAM_H
 #define JPEG2000STREAM_H
 
+#include "poppler_export.h"
 #include "config.h"
 #include "Object.h"
 #include "Stream.h"
 
 struct JPXStreamPrivate;
 
-class JPXStream : public FilterStream
+class POPPLER_EXPORT JPXStream : public FilterStream
 {
 public:
     JPXStream(Stream *strA);

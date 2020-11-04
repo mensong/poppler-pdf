@@ -16,6 +16,7 @@
 #ifndef DCTSTREAM_H
 #define DCTSTREAM_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include <cstdio>
 #include <cstdlib>
@@ -54,7 +55,7 @@ struct str_error_mgr
     int height;
 };
 
-class DCTStream : public FilterStream
+class POPPLER_EXPORT DCTStream : public FilterStream
 {
 public:
     DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);

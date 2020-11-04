@@ -27,22 +27,23 @@
 #ifndef UNICODETYPETABLE_H
 #define UNICODETYPETABLE_H
 
+#include "poppler_export.h"
 #include "CharTypes.h"
 
-extern bool unicodeTypeL(Unicode c);
+POPPLER_EXPORT extern bool unicodeTypeL(Unicode c);
 
-extern bool unicodeTypeR(Unicode c);
+POPPLER_EXPORT extern bool unicodeTypeR(Unicode c);
 
-extern bool unicodeTypeNum(Unicode c);
+POPPLER_EXPORT extern bool unicodeTypeNum(Unicode c);
 
-extern bool unicodeTypeAlphaNum(Unicode c);
+POPPLER_EXPORT extern bool unicodeTypeAlphaNum(Unicode c);
 
-extern bool unicodeIsAlphabeticPresentationForm(Unicode c);
+POPPLER_EXPORT extern bool unicodeIsAlphabeticPresentationForm(Unicode c);
 
-extern Unicode unicodeToUpper(Unicode c);
+POPPLER_EXPORT extern Unicode unicodeToUpper(Unicode c);
 
-extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len, int *out_len, int **indices);
+POPPLER_EXPORT extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len, int *out_len, int **indices);
 
-extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len, int *out_len, int **indices, bool reverseRTL);
+POPPLER_EXPORT extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len, int *out_len, int **indices, bool reverseRTL);
 
 #endif

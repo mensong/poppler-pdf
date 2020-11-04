@@ -15,6 +15,7 @@
 
 #include <memory>
 #include <ctime>
+#include "poppler_export.h"
 #include "goo/GooString.h"
 
 enum CertificateKeyUsageExtension
@@ -38,7 +39,7 @@ enum PublicKeyType
     OTHERKEY
 };
 
-class X509CertificateInfo
+class POPPLER_EXPORT X509CertificateInfo
 {
 public:
     X509CertificateInfo();

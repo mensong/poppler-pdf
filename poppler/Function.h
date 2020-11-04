@@ -27,6 +27,7 @@
 #ifndef FUNCTION_H
 #define FUNCTION_H
 
+#include "poppler_export.h"
 #include "Object.h"
 #include <set>
 
@@ -43,7 +44,7 @@ class PSStack;
 #define funcMaxOutputs 32
 #define sampledFuncMaxInputs 16
 
-class Function
+class POPPLER_EXPORT Function
 {
 public:
     Function();
@@ -102,7 +103,7 @@ protected:
 // IdentityFunction
 //------------------------------------------------------------------------
 
-class IdentityFunction : public Function
+class POPPLER_EXPORT IdentityFunction : public Function
 {
 public:
     IdentityFunction();
@@ -119,7 +120,7 @@ private:
 // SampledFunction
 //------------------------------------------------------------------------
 
-class SampledFunction : public Function
+class POPPLER_EXPORT SampledFunction : public Function
 {
 public:
     SampledFunction(Object *funcObj, Dict *dict);
@@ -162,7 +163,7 @@ private:
 // ExponentialFunction
 //------------------------------------------------------------------------
 
-class ExponentialFunction : public Function
+class POPPLER_EXPORT ExponentialFunction : public Function
 {
 public:
     ExponentialFunction(Object *funcObj, Dict *dict);
@@ -190,7 +191,7 @@ private:
 // StitchingFunction
 //------------------------------------------------------------------------
 
-class StitchingFunction : public Function
+class POPPLER_EXPORT StitchingFunction : public Function
 {
 public:
     StitchingFunction(Object *funcObj, Dict *dict, std::set<int> *usedParents);
@@ -221,7 +222,7 @@ private:
 // PostScriptFunction
 //------------------------------------------------------------------------
 
-class PostScriptFunction : public Function
+class POPPLER_EXPORT PostScriptFunction : public Function
 {
 public:
     PostScriptFunction(Object *funcObj, Dict *dict);

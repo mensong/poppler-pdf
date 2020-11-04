@@ -23,6 +23,8 @@
 #ifndef FOFIBASE_H
 #define FOFIBASE_H
 
+#include "poppler_export.h"
+
 //------------------------------------------------------------------------
 
 typedef void (*FoFiOutputFunc)(void *stream, const char *data, int len);
@@ -31,7 +33,7 @@ typedef void (*FoFiOutputFunc)(void *stream, const char *data, int len);
 // FoFiBase
 //------------------------------------------------------------------------
 
-class FoFiBase
+class POPPLER_EXPORT FoFiBase
 {
 public:
     FoFiBase(const FoFiBase &) = delete;

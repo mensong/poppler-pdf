@@ -18,16 +18,18 @@
 #ifndef JS_INFO_H
 #define JS_INFO_H
 
-#include <cstdio>
+#include "poppler_export.h"
 #include "Object.h"
 #include "PDFDoc.h"
 
 #include "Link.h"
 #include "UnicodeMap.h"
 
+#include <cstdio>
+
 class PDFDoc;
 
-class JSInfo
+class POPPLER_EXPORT JSInfo
 {
 public:
     // Constructor.

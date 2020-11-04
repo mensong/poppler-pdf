@@ -24,20 +24,22 @@
 #ifndef FOFIENCODINGS_H
 #define FOFIENCODINGS_H
 
+#include "poppler_export.h"
+
 //------------------------------------------------------------------------
 // Type 1 and 1C font data
 //------------------------------------------------------------------------
 
-extern const char *const fofiType1StandardEncoding[256];
-extern const char *const fofiType1ExpertEncoding[256];
+POPPLER_EXPORT extern const char *const fofiType1StandardEncoding[256];
+POPPLER_EXPORT extern const char *const fofiType1ExpertEncoding[256];
 
 //------------------------------------------------------------------------
 // Type 1C font data
 //------------------------------------------------------------------------
 
-extern const char *fofiType1CStdStrings[391];
-extern const unsigned short fofiType1CISOAdobeCharset[229];
-extern const unsigned short fofiType1CExpertCharset[166];
-extern const unsigned short fofiType1CExpertSubsetCharset[87];
+POPPLER_EXPORT extern const char *fofiType1CStdStrings[391];
+POPPLER_EXPORT extern const unsigned short fofiType1CISOAdobeCharset[229];
+POPPLER_EXPORT extern const unsigned short fofiType1CExpertCharset[166];
+POPPLER_EXPORT extern const unsigned short fofiType1CExpertSubsetCharset[87];
 
 #endif

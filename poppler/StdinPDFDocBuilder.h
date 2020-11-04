@@ -12,6 +12,7 @@
 #ifndef STDINPDFDOCBUILDER_H
 #define STDINPDFDOCBUILDER_H
 
+#include "poppler_export.h"
 #include "PDFDocBuilder.h"
 
 //------------------------------------------------------------------------
@@ -20,7 +21,7 @@
 // The StdinPDFDocBuilder implements a PDFDocBuilder that read from stdin.
 //------------------------------------------------------------------------
 
-class StdinPDFDocBuilder : public PDFDocBuilder
+class POPPLER_EXPORT StdinPDFDocBuilder : public PDFDocBuilder
 {
 
 public:

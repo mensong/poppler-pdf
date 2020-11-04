@@ -36,6 +36,7 @@
 #ifndef TEXTOUTPUTDEV_H
 #define TEXTOUTPUTDEV_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include <cstdio>
 #include "GfxFont.h"
@@ -83,7 +84,7 @@ enum EndOfLineKind
 // TextFontInfo
 //------------------------------------------------------------------------
 
-class TextFontInfo
+class POPPLER_EXPORT TextFontInfo
 {
 public:
     TextFontInfo(const GfxState *state);
@@ -133,7 +134,7 @@ private:
 // TextWord
 //------------------------------------------------------------------------
 
-class TextWord
+class POPPLER_EXPORT TextWord
 {
 public:
     // Constructor.
@@ -257,7 +258,7 @@ private:
 // TextPool
 //------------------------------------------------------------------------
 
-class TextPool
+class POPPLER_EXPORT TextPool
 {
 public:
     TextPool();
@@ -291,7 +292,7 @@ struct TextFlowData;
 // TextLine
 //------------------------------------------------------------------------
 
-class TextLine
+class POPPLER_EXPORT TextLine
 {
 public:
     TextLine(TextBlock *blkA, int rotA, double baseA);
@@ -371,7 +372,7 @@ private:
 // TextBlock
 //------------------------------------------------------------------------
 
-class TextBlock
+class POPPLER_EXPORT TextBlock
 {
 public:
     TextBlock(TextPage *pageA, int rotA);
@@ -460,7 +461,7 @@ private:
 // TextFlow
 //------------------------------------------------------------------------
 
-class TextFlow
+class POPPLER_EXPORT TextFlow
 {
 public:
     TextFlow(TextPage *pageA, TextBlock *blk);
@@ -503,7 +504,7 @@ private:
 // TextWordList
 //------------------------------------------------------------------------
 
-class TextWordList
+class POPPLER_EXPORT TextWordList
 {
 public:
     // Build a flat word list, in content stream order (if
@@ -529,7 +530,7 @@ private:
 
 #endif // TEXTOUT_WORD_LIST
 
-class TextWordSelection
+class POPPLER_EXPORT TextWordSelection
 {
 public:
     TextWordSelection(const TextWord *wordA, int beginA, int endA) : word(wordA), begin(beginA), end(endA) { }
@@ -551,7 +552,7 @@ private:
 // TextPage
 //------------------------------------------------------------------------
 
-class TextPage
+class POPPLER_EXPORT TextPage
 {
 public:
     // Constructor.
@@ -708,7 +709,7 @@ private:
 // ActualText
 //------------------------------------------------------------------------
 
-class ActualText
+class POPPLER_EXPORT ActualText
 {
 public:
     // Create an ActualText
@@ -737,7 +738,7 @@ private:
 // TextOutputDev
 //------------------------------------------------------------------------
 
-class TextOutputDev : public OutputDev
+class POPPLER_EXPORT TextOutputDev : public OutputDev
 {
 public:
     // Open a text output file.  If <fileName> is NULL, no file is

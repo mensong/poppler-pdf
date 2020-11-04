@@ -12,9 +12,10 @@
 #ifndef STDINCACHELOADER_H
 #define STDINCACHELOADER_H
 
+#include "poppler_export.h"
 #include "CachedFile.h"
 
-class StdinCacheLoader : public CachedFileLoader
+class POPPLER_EXPORT StdinCacheLoader : public CachedFileLoader
 {
 
 public:

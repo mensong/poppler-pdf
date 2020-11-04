@@ -43,10 +43,8 @@
 #ifndef PDFDOC_H
 #define PDFDOC_H
 
-#include <mutex>
-
+#include "poppler_export.h"
 #include "poppler-config.h"
-#include <cstdio>
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
@@ -54,6 +52,9 @@
 #include "Form.h"
 #include "OptionalContent.h"
 #include "Stream.h"
+
+#include <cstdio>
+#include <mutex>
 
 class GooString;
 class GooFile;
@@ -117,7 +118,7 @@ enum PDFSubtypeConformance
 // PDFDoc
 //------------------------------------------------------------------------
 
-class PDFDoc
+class POPPLER_EXPORT PDFDoc
 {
 public:
     PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr);

@@ -28,6 +28,7 @@
 #ifndef DECRYPT_H
 #define DECRYPT_H
 
+#include "poppler_export.h"
 #include "goo/GooString.h"
 #include "Object.h"
 #include "Stream.h"
@@ -36,7 +37,7 @@
 // Decrypt
 //------------------------------------------------------------------------
 
-class Decrypt
+class POPPLER_EXPORT Decrypt
 {
 public:
     // Generate a file key.  The <fileKey> buffer must have space for at
@@ -89,7 +90,7 @@ struct DecryptAES256State
     int bufIdx;
 };
 
-class BaseCryptStream : public FilterStream
+class POPPLER_EXPORT BaseCryptStream : public FilterStream
 {
 public:
     BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
@@ -122,7 +123,7 @@ protected:
 // EncryptStream / DecryptStream
 //------------------------------------------------------------------------
 
-class EncryptStream : public BaseCryptStream
+class POPPLER_EXPORT EncryptStream : public BaseCryptStream
 {
 public:
     EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
@@ -131,7 +132,7 @@ public:
     int lookChar() override;
 };
 
-class DecryptStream : public BaseCryptStream
+class POPPLER_EXPORT DecryptStream : public BaseCryptStream
 {
 public:
     DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);

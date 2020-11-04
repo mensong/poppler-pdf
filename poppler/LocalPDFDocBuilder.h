@@ -12,6 +12,7 @@
 #ifndef LOCALPDFDOCBUILDER_H
 #define LOCALPDFDOCBUILDER_H
 
+#include "poppler_export.h"
 #include "PDFDocBuilder.h"
 
 //------------------------------------------------------------------------
@@ -20,7 +21,7 @@
 // The LocalPDFDocBuilder implements a PDFDocBuilder for local files.
 //------------------------------------------------------------------------
 
-class LocalPDFDocBuilder : public PDFDocBuilder
+class POPPLER_EXPORT LocalPDFDocBuilder : public PDFDocBuilder
 {
 
 public:

@@ -15,6 +15,9 @@
 #ifndef PAGELABELINFO_H
 #define PAGELABELINFO_H
 
+#include "poppler_export.h"
+#include "Object.h"
+
 #include <climits>
 #include <cstdlib>
 #include <cstdio>
@@ -23,9 +26,7 @@
 #include <string>
 #include <vector>
 
-#include "Object.h"
-
-class PageLabelInfo
+class POPPLER_EXPORT PageLabelInfo
 {
 public:
     PageLabelInfo(Object *tree, int numPages);

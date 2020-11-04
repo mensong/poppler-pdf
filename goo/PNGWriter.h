@@ -16,6 +16,7 @@
 #ifndef PNGWRITER_H
 #define PNGWRITER_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 
 #ifdef ENABLE_LIBPNG
@@ -24,7 +25,7 @@
 
 struct PNGWriterPrivate;
 
-class PNGWriter : public ImgWriter
+class POPPLER_EXPORT PNGWriter : public ImgWriter
 {
 public:
     /* RGB        - 3 bytes/pixel

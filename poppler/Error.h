@@ -28,10 +28,12 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include <cstdarg>
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include "goo/gfile.h"
 #include "goo/GooString.h"
+
+#include <cstdarg>
 
 enum ErrorCategory
 {
@@ -51,8 +53,8 @@ enum ErrorCategory
 
 using ErrorCallback = void (*)(ErrorCategory category, Goffset pos, const char *msg);
 
-extern void setErrorCallback(ErrorCallback cbk);
+POPPLER_EXPORT extern void setErrorCallback(ErrorCallback cbk);
 
-extern void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) GOOSTRING_FORMAT;
+POPPLER_EXPORT extern void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) GOOSTRING_FORMAT;
 
 #endif

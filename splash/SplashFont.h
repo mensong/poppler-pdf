@@ -22,6 +22,7 @@
 #ifndef SPLASHFONT_H
 #define SPLASHFONT_H
 
+#include "poppler_export.h"
 #include "SplashTypes.h"
 #include "SplashClip.h"
 
@@ -42,7 +43,7 @@ class SplashPath;
 // SplashFont
 //------------------------------------------------------------------------
 
-class SplashFont
+class POPPLER_EXPORT SplashFont
 {
 public:
     SplashFont(SplashFontFile *fontFileA, const SplashCoord *matA, const SplashCoord *textMatA, bool aaA);

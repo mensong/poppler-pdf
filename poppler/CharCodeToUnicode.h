@@ -33,6 +33,7 @@
 
 #include <atomic>
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 #include "CharTypes.h"
 
@@ -41,7 +42,7 @@ class GooString;
 
 //------------------------------------------------------------------------
 
-class CharCodeToUnicode
+class POPPLER_EXPORT CharCodeToUnicode
 {
     friend class UnicodeToCharCode;
 
@@ -116,7 +117,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class CharCodeToUnicodeCache
+class POPPLER_EXPORT CharCodeToUnicodeCache
 {
 public:
     CharCodeToUnicodeCache(int sizeA);

@@ -32,6 +32,7 @@
 #ifndef LINK_H
 #define LINK_H
 
+#include "poppler_export.h"
 #include "Object.h"
 #include <memory>
 #include <set>
@@ -65,7 +66,7 @@ enum LinkActionKind
     actionUnknown // anything else
 };
 
-class LinkAction
+class POPPLER_EXPORT LinkAction
 {
 public:
     LinkAction();
@@ -112,7 +113,7 @@ enum LinkDestKind
     destFitBV
 };
 
-class LinkDest
+class POPPLER_EXPORT LinkDest
 {
 public:
     // Build a LinkDest from the array.
@@ -161,7 +162,7 @@ private:
 // LinkGoTo
 //------------------------------------------------------------------------
 
-class LinkGoTo : public LinkAction
+class POPPLER_EXPORT LinkGoTo : public LinkAction
 {
 public:
     // Build a LinkGoTo from a destination (dictionary, name, or string).
@@ -188,7 +189,7 @@ private:
 // LinkGoToR
 //------------------------------------------------------------------------
 
-class LinkGoToR : public LinkAction
+class POPPLER_EXPORT LinkGoToR : public LinkAction
 {
 public:
     // Build a LinkGoToR from a file spec (dictionary) and destination
@@ -218,7 +219,7 @@ private:
 // LinkLaunch
 //------------------------------------------------------------------------
 
-class LinkLaunch : public LinkAction
+class POPPLER_EXPORT LinkLaunch : public LinkAction
 {
 public:
     // Build a LinkLaunch from an action dictionary.
@@ -242,7 +243,7 @@ private:
 // LinkURI
 //------------------------------------------------------------------------
 
-class LinkURI : public LinkAction
+class POPPLER_EXPORT LinkURI : public LinkAction
 {
 public:
     // Build a LinkURI given the URI (string) and base URI.
@@ -266,7 +267,7 @@ private:
 // LinkNamed
 //------------------------------------------------------------------------
 
-class LinkNamed : public LinkAction
+class POPPLER_EXPORT LinkNamed : public LinkAction
 {
 public:
     // Build a LinkNamed given the action name.
@@ -288,7 +289,7 @@ private:
 // LinkMovie
 //------------------------------------------------------------------------
 
-class LinkMovie : public LinkAction
+class POPPLER_EXPORT LinkMovie : public LinkAction
 {
 public:
     enum OperationType
@@ -328,7 +329,7 @@ private:
 // LinkRendition
 //------------------------------------------------------------------------
 
-class LinkRendition : public LinkAction
+class POPPLER_EXPORT LinkRendition : public LinkAction
 {
 public:
     /**
@@ -373,7 +374,7 @@ private:
 // LinkSound
 //------------------------------------------------------------------------
 
-class LinkSound : public LinkAction
+class POPPLER_EXPORT LinkSound : public LinkAction
 {
 public:
     LinkSound(const Object *soundObj);
@@ -402,7 +403,7 @@ private:
 // LinkJavaScript
 //------------------------------------------------------------------------
 
-class LinkJavaScript : public LinkAction
+class POPPLER_EXPORT LinkJavaScript : public LinkAction
 {
 public:
     // Build a LinkJavaScript given the action name.
@@ -425,7 +426,7 @@ private:
 //------------------------------------------------------------------------
 // LinkOCGState
 //------------------------------------------------------------------------
-class LinkOCGState : public LinkAction
+class POPPLER_EXPORT LinkOCGState : public LinkAction
 {
 public:
     LinkOCGState(const Object *obj);
@@ -463,7 +464,7 @@ private:
 // LinkHide
 //------------------------------------------------------------------------
 
-class LinkHide : public LinkAction
+class POPPLER_EXPORT LinkHide : public LinkAction
 {
 public:
     LinkHide(const Object *hideObj);
@@ -498,7 +499,7 @@ private:
 // LinkResetForm
 //------------------------------------------------------------------------
 
-class LinkResetForm : public LinkAction
+class POPPLER_EXPORT LinkResetForm : public LinkAction
 {
 public:
     // Build a LinkResetForm.
@@ -522,7 +523,7 @@ private:
 // LinkUnknown
 //------------------------------------------------------------------------
 
-class LinkUnknown : public LinkAction
+class POPPLER_EXPORT LinkUnknown : public LinkAction
 {
 public:
     // Build a LinkUnknown with the specified action type.
@@ -546,7 +547,7 @@ private:
 // Links
 //------------------------------------------------------------------------
 
-class Links
+class POPPLER_EXPORT Links
 {
 public:
     // Extract links from array of annotations.

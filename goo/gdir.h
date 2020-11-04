@@ -35,6 +35,7 @@
 #ifndef GDIR_H
 #define GDIR_H
 
+#include "poppler_export.h"
 #include "poppler-config.h"
 
 class GooString;
@@ -43,7 +44,7 @@ class GooString;
 // GDir and GDirEntry
 //------------------------------------------------------------------------
 
-class GDirEntry
+class POPPLER_EXPORT GDirEntry
 {
 public:
     GDirEntry(const char *dirPath, const char *nameA, bool doStat);
@@ -62,7 +63,7 @@ private:
     bool dir; // is it a directory?
 };
 
-class GDir
+class POPPLER_EXPORT GDir
 {
 public:
     GDir(const char *name, bool doStatA = true);
