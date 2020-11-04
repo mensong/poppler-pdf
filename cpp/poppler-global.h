@@ -22,7 +22,7 @@
 #ifndef POPPLER_GLOBAL_H
 #define POPPLER_GLOBAL_H
 
-#include "poppler_cpp_export.h"
+#include "poppler-export.h"
 
 #include <iosfwd>
 #include <string>
