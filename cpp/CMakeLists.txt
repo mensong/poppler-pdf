@@ -24,6 +24,13 @@ set(poppler_cpp_SRCS
   poppler-version.cpp
 )
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # Both poppler and poppler-cpp export a class extending std::string (GooString and poppler::ustring)
+    # Adding `/FORCE:MULTIPLE` avoids the following link error:
+    # `LNK2005 "public: class std::basic_string<char, ...>::assign(...)" already defined in poppler-image.obj`
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /FORCE:MULTIPLE")
+endif()
+
 add_library(poppler-cpp ${poppler_cpp_SRCS})
 set_target_properties(poppler-cpp PROPERTIES VERSION 0.9.0 SOVERSION 0)
 if(MINGW AND BUILD_SHARED_LIBS)
