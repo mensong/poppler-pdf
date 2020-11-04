@@ -33,7 +33,10 @@ endif()
 target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
 install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+generate_export_header(poppler-cpp EXPORT_FILE_NAME "poppler_cpp_export.h")
+
 install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/poppler_cpp_export.h
   poppler-destination.h
   poppler-document.h
   poppler-embedded-file.h
