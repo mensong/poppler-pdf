@@ -32,7 +32,7 @@ set(poppler_glib_public_headers
   poppler-form-field.h
   poppler-annot.h
   poppler-layer.h
-  poppler-macros.h
+  "${CMAKE_CURRENT_BINARY_DIR}/poppler-macros.h"
   poppler-movie.h
   poppler-media.h
   poppler.h
@@ -88,6 +88,8 @@ set(poppler_glib_generated_SRCS
 )
 add_library(poppler-glib ${poppler_glib_SRCS} ${poppler_glib_generated_SRCS})
 set_target_properties(poppler-glib PROPERTIES VERSION 8.19.0 SOVERSION 8)
+generate_export_header(poppler-glib EXPORT_FILE_NAME "poppler-macros.h" EXPORT_MACRO_NAME POPPLER_PUBLIC)
+target_include_directories(poppler-glib PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
 set_target_properties(poppler-glib PROPERTIES C_VISIBILITY_PRESET hidden)
 set_target_properties(poppler-glib PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(poppler-glib PROPERTIES VISIBILITY_INLINES_HIDDEN 1)
