@@ -1,0 +1,86 @@
+.TH pdftoplotter 1
+.SH NAME
+pdftoplotter \- Portable Document Format (PDF) to HPGL/SVG simple strokes
+.SH SYNOPSIS
+.B pdftoplotter
+[options]
+\-i
+.IR PDF-file
+\-o
+.IR output-file.[hpgl | svg]
+.SH DESCRIPTION
+.B pdftoplotter
+converts Portable Document Format (PDF) files into a series of pen strokes using any of the following output formats:
+.IP \(bu
+Hewlett-Packard Graphics Language (HPGL)
+.IP \(bu
+Scalable Vector Graphics (SVG)
+.PP
+.B pdftoplotter
+reads the PDF file,
+.IR PDF-file ,
+and writes to
+.IR output-file .
+The
+.IR -n
+flag specifies which page from the PDF to render to the output file (default = 1).
+
+.PP
+If Hershey fonts are installed in /usr/share/hershey-fonts/,
+.B pdftoplotter
+replaces outline font character fills in the PDF with stroked
+Hershey fonts.
+.PP
+.PP
+.SH OPTIONS
+.TP
+.BI \-i
+or
+.BI \-\-input
+Specifies the input filename. Required.
+.TP
+.BI \-o
+or
+.BI \-\-output
+Specifies the output filename. Required.
+.TP
+.BI \-\-format
+One of
+.IR
+hpgl
+or
+.IR
+svg
+. If not supplied, format taken from output file extension.
+.TP
+.BI \-\-verboseFonts
+Prints diagnostics explaining how Hershey fonts are selected to
+substitute for PDF document fonts. (Someday there will be a
+configuration file that allows a user-tuned replacement policy.)
+.SH ENVIRONMENT VARIABLES
+.TP
+.BI HERSHEY_FONT_PATH
+Path to the location of the installed Hershey .jhf files.
+.SH EXIT CODES
+The poppler tools use the following exit codes:
+.TP
+0
+No error.
+.TP
+255
+Error.
+.SH AUTHOR
+The pdftoplotter software and documentation are copyright 1996-2004 Glyph
+& Cog, LLC and copyright 2005-2020 The Poppler Developers.
+.SH "SEE ALSO"
+.BR pdfdetach (1),
+.BR pdffonts (1),
+.BR pdfimages (1),
+.BR pdfinfo (1),
+.BR pdftohtml (1),
+.BR pdftoppm (1),
+.BR pdftops (1),
+.BR pdftotext (1)
+.BR pdfseparate (1),
+.BR pdfsig (1),
+.BR pdfunite (1)
