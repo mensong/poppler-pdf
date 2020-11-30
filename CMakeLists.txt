@@ -589,7 +589,7 @@ install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INST
 
 if(ENABLE_UNSTABLE_API_ABI_HEADERS)
   install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/poppler_export.h
+    "${CMAKE_CURRENT_BINARY_DIR}/poppler_export.h"
     poppler/Annot.h
     poppler/Array.h
     poppler/CachedFile.h

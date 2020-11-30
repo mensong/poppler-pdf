@@ -32,7 +32,6 @@ set(poppler_glib_public_headers
   poppler-form-field.h
   poppler-annot.h
   poppler-layer.h
-  "${CMAKE_CURRENT_BINARY_DIR}/poppler-macros.h"
   poppler-movie.h
   poppler-media.h
   poppler.h
@@ -111,6 +110,7 @@ install(FILES
   ${poppler_glib_public_headers}
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-features.h
+  ${CMAKE_CURRENT_BINARY_DIR}/poppler-macros.h
   DESTINATION include/poppler/glib)
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
