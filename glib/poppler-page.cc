@@ -810,7 +810,8 @@ char *poppler_page_get_text_for_area(PopplerPage *page, PopplerRectangle *area)
  *
  * Since: ?
  **/
-char *poppler_page_get_text_for_annotation(PopplerPage *page, PopplerRectangle *area) {
+char *poppler_page_get_text_for_annotation(PopplerPage *page, PopplerRectangle *area)
+{
     g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
     g_return_val_if_fail(area != nullptr, NULL);
 
