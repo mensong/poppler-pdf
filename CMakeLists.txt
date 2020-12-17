@@ -440,7 +440,10 @@ set(poppler_SRCS
   poppler/Rendition.cc
   poppler/CertificateInfo.cc
   poppler/BBoxOutputDev.cc
+  poppler/SplashOutputBase.cc
   poppler/SplashOutputDev.cc
+  poppler/SplashDynamicPatterns.cc
+  poppler/SplashFonts.cc
   splash/Splash.cc
   splash/SplashBitmap.cc
   splash/SplashClip.cc
