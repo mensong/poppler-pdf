@@ -823,7 +823,7 @@ char *poppler_page_get_text_for_annotation(PopplerPage *page, PopplerRectangle *
     blArea.y1 = pageSize.y2 - area->y1;
     blArea.y2 = pageSize.y2 - area->y2;
 
-    if(blArea.y1 > blArea.y2){
+    if (blArea.y1 > blArea.y2) {
         std::swap(blArea.y1, blArea.y2);
     }
     return poppler_page_get_selected_text(page, POPPLER_SELECTION_GLYPH, &blArea);
