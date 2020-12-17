@@ -80,6 +80,10 @@ public:
     // Sort by upper coordinate (lower y), in y-major order.
     void sort();
 
+    // Access to resulting segments.
+    inline int getLength() { return length; }
+    SplashXPathSeg getSegment(int i);
+
 protected:
     SplashXPath(SplashXPath *xPath);
     void transform(SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);

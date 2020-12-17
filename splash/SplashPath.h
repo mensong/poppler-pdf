@@ -72,7 +72,7 @@ public:
     SplashPath();
 
     // Copy a path.
-    SplashPath *copy() { return new SplashPath(this); }
+    SplashPath *copy() const { return new SplashPath(this); }
 
     ~SplashPath();
 
@@ -121,8 +121,11 @@ public:
     // Reserve space for at least n points
     void reserve(int n);
 
+    // Create a new path transformed by matrix
+    SplashPath *transform(SplashCoord *matrix) const;
+
 protected:
-    SplashPath(SplashPath *path);
+    SplashPath(const SplashPath *path);
     void grow(int nPts);
     bool noCurrentPoint() { return curSubpath == length; }
     bool onePointSubpath() { return curSubpath == length - 1; }
