@@ -194,7 +194,7 @@ class SplashOutputDev : public OutputDev
 public:
     // Constructor.
     SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA = true, SplashThinLineMode thinLineMode = splashThinLineDefault,
-                    bool overprintPreviewA = globalParams->getOverprintPreview());
+                    bool overprintPreviewA = (globalParams->getOverprintPreview() == GlobalParams::OverprintAlways));
 
     // Destructor.
     ~SplashOutputDev() override;

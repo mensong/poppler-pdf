@@ -527,7 +527,7 @@ int main(int argc, char *argv[])
 
     // write PPM files
     if (jpegcmyk || overprint) {
-        globalParams->setOverprintPreview(true);
+        globalParams->setOverprintPreview(GlobalParams::OverprintAlways);
         splashClearColor(paperColor);
     } else {
         paperColor[0] = 255;

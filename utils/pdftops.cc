@@ -123,6 +123,7 @@ static bool quiet = false;
 static bool printVersion = false;
 static bool printHelp = false;
 static bool overprint = false;
+static bool noOverprint = false;
 #ifdef HAVE_SPLASH
 static GooString processcolorformatname;
 static SplashColorMode processcolorformat;
@@ -189,6 +190,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
                                    { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
                                    { "-overprint", argFlag, &overprint, 0, "enable overprint emulation during rasterization" },
+                                   { "-nooverprint", argFlag, &noOverprint, 0, "disable overprint emulation during rasterization" },
                                    { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
@@ -276,7 +278,9 @@ int main(int argc, char *argv[])
         }
     }
     if (overprint) {
-        globalParams->setOverprintPreview(true);
+        globalParams->setOverprintPreview(GlobalParams::OverprintAlways);
+    } else if (noOverprint) {
+        globalParams->setOverprintPreview(GlobalParams::NoOverprint);
     }
     if (expand) {
         globalParams->setPSExpandSmaller(true);
@@ -351,7 +355,7 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Error: Setting -level1 requires -processcolorformat MONO8");
             goto err05;
         } else if ((level1Sep || level2Sep || level3Sep || overprint) && processcolorformat != splashModeCMYK8) {
-            fprintf(stderr, "Error: Setting -level1sep/-level2sep/-level3sep/-overprint requires -processcolorformat CMYK8");
+            fprintf(stderr, "Error: Setting -level1sep/-level2sep/-level3sep/-overprint requires -processcolorformat CMYK8.\n");
             goto err05;
         }
     }
@@ -377,6 +381,11 @@ int main(int argc, char *argv[])
         }
     }
 #endif
+
+    if (overprint && noOverprint) {
+        fprintf(stderr, "Error: -overprint and -nooverprint can not both be set at once.\n");
+        goto err05;
+    }
 
     // open PDF file
     if (ownerPassword[0] != '\001') {

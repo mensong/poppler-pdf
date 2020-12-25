@@ -221,6 +221,10 @@ Enable overprint emulation during rasterization. For \-processcolorformat being 
 being higher than 2, this option is set to true by default. Note: This option requires \-processcolorformat to
 be CMYK8.
 .TP
+.B \-nooverprint
+Do not automatically enable overprint with -level#sep options.
+pdftops will run twice as fast but might produce inferior results on rasterized pages.
+.TP
 .B \-q
 Don't print any messages or errors.
 .TP

@@ -113,7 +113,8 @@ public:
     bool getPSExpandSmaller();
     bool getPSShrinkLarger();
     std::string getTextEncodingName() const;
-    bool getOverprintPreview() { return overprintPreview; }
+    enum OverprintType { NoOverprint, OverprintSeps, OverprintAlways };
+    OverprintType getOverprintPreview() { return overprintPreview; }
     bool getPrintCommands();
     bool getProfileCommands();
     bool getErrQuiet();
@@ -132,7 +133,7 @@ public:
     void setPSExpandSmaller(bool expand);
     void setPSShrinkLarger(bool shrink);
     void setTextEncoding(const char *encodingName);
-    void setOverprintPreview(bool overprintPreviewA);
+    void setOverprintPreview(OverprintType overprintPreviewA);
     void setPrintCommands(bool printCommandsA);
     void setProfileCommands(bool profileCommandsA);
     void setErrQuiet(bool errQuietA);
@@ -182,7 +183,7 @@ private:
     bool psShrinkLarger; // shrink larger pages to fit paper
     GooString *textEncoding; // encoding (unicodeMap) to use for text
                              //   output
-    bool overprintPreview; // enable overprint preview
+    OverprintType overprintPreview; // enable overprint preview
     bool printCommands; // print the drawing commands
     bool profileCommands; // profile the drawing commands
     bool errQuiet; // suppress error messages?
