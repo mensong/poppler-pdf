@@ -113,7 +113,12 @@ public:
     bool getPSExpandSmaller();
     bool getPSShrinkLarger();
     std::string getTextEncodingName() const;
-    enum OverprintType { NoOverprint, OverprintSeps, OverprintAlways };
+    enum OverprintType
+    {
+        NoOverprint,
+        OverprintSeps,
+        OverprintAlways
+    };
     OverprintType getOverprintPreview() { return overprintPreview; }
     bool getPrintCommands();
     bool getProfileCommands();
