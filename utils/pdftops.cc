@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
 
     if (processcolorformatspecified) {
         if (level1 && processcolorformat != splashModeMono8) {
-            fprintf(stderr, "Error: Setting -level1 requires -processcolorformat MONO8");
+            fprintf(stderr, "Error: Setting -level1 requires -processcolorformat MONO8.\n");
             goto err05;
         } else if ((level1Sep || level2Sep || level3Sep || overprint) && processcolorformat != splashModeCMYK8) {
             fprintf(stderr, "Error: Setting -level1sep/-level2sep/-level3sep/-overprint requires -processcolorformat CMYK8.\n");
