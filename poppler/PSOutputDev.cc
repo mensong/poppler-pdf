@@ -3179,7 +3179,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
 
     // If we would not rasterize this page, we would emit the overprint code anyway for language level 2 and upwards.
     // As such it is safe to assume for a CMYK printer that it would respect the overprint operands.
-    overprint = globalParams->getOverprintPreview() == GlobalParams::OverprintAlways || ((globalParams->getOverprintPreview() == GlobalParams::OverprintSeps && processColorFormat == splashModeCMYK8 && level >= psLevel2));
+    overprint = globalParams->getOverprintPreview() == GlobalParams::OverprintAlways || ((globalParams->getOverprintPreview() == GlobalParams::OverprintSeparations && processColorFormat == splashModeCMYK8 && level >= psLevel2));
 
     // set up the SplashOutputDev
     internalColorFormat = processColorFormat;

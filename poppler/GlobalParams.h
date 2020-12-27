@@ -116,7 +116,7 @@ public:
     enum OverprintType
     {
         NoOverprint,
-        OverprintSeps,
+        OverprintSeparations,
         OverprintAlways
     };
     OverprintType getOverprintPreview() { return overprintPreview; }

@@ -392,7 +392,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(cu
     psExpandSmaller = false;
     psShrinkLarger = true;
     textEncoding = new GooString("UTF-8");
-    overprintPreview = OverprintSeps;
+    overprintPreview = OverprintSeparations;
     printCommands = false;
     profileCommands = false;
     errQuiet = false;
