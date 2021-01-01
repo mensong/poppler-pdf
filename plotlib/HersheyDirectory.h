@@ -66,11 +66,13 @@ public:
     vector<string> enumerateHersheyFontNames();
 #endif // ENUMERATE
 
+    static constexpr const char *HERSHEY_FONT_PATH_ENV = "HERSHEY_FONT_PATH";
+    static string getHersheyFontPath();
+
 private:
     bool verboseFonts;
 
     HersheyFontRequest fontSelectionPolicy(const string &pdf_font_name);
-    static string getHersheyFontPath();
     static string pathForFontFilename(const string &hershey_font_name);
 
     unordered_map<string, HersheyFontRequest> pdf_name_to_hershey_req;

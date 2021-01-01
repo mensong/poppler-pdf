@@ -139,7 +139,7 @@ HersheyFontRequest HersheyDirectory::fontSelectionPolicy(const string &pdf_font_
 
 string HersheyDirectory::getHersheyFontPath()
 {
-    const char *path = getenv("HERSHEY_FONT_PATH");
+    const char *path = getenv(HERSHEY_FONT_PATH_ENV);
     if (path == nullptr) {
         path = "/usr/share/hershey-fonts/";
     }

@@ -160,12 +160,24 @@ UnicodeHersheyMapping HersheyUnicodeSubstitutions::mathlow_mapping[] = {
     { 0x0, 0x0 }, // terminator sentinel
 };
 
+void HersheyUnicodeSubstitutions::warnMissingFont(const string &fontName)
+{
+    cerr << "Can't load Hershey font " << fontName << endl;
+    if (!emittedMissingHersheyFontWarning) {
+        cerr << "  Falling back to stroking outline fonts." << endl;
+        cerr << "  Looking in " << hershey_directory->getHersheyFontPath() << endl;
+        cerr << "  On Ubuntu: apt install hershey-fonts-data" << endl;
+        cerr << "  Elsewhere: set environment variable " << HersheyDirectory::HERSHEY_FONT_PATH_ENV << endl;
+        emittedMissingHersheyFontWarning = true;
+    }
+}
+
 void HersheyUnicodeSubstitutions::LoadMapping(HersheyFontDescriptor *descriptor, const UnicodeHersheyMapping *mapping)
 {
     if (descriptor->loaded_font == nullptr) {
         HersheyFont *loaded_font = hershey_directory->openHersheyFont(descriptor->req);
         if (!loaded_font) {
-            cerr << "Can't load Hershey font " << descriptor->req.hershey_font_name << endl;
+            warnMissingFont(descriptor->req.hershey_font_name);
             delete loaded_font;
             return;
         }
@@ -177,7 +189,7 @@ void HersheyUnicodeSubstitutions::LoadMapping(HersheyFontDescriptor *descriptor,
     }
 }
 
-HersheyUnicodeSubstitutions::HersheyUnicodeSubstitutions(HersheyDirectory *_hershey_directory) : hershey_directory(_hershey_directory)
+HersheyUnicodeSubstitutions::HersheyUnicodeSubstitutions(HersheyDirectory *_hershey_directory) : hershey_directory(_hershey_directory), emittedMissingHersheyFontWarning(false)
 {
     LoadMapping(&greek_font, greek_mapping);
     LoadMapping(&futuram_font, futuram_mapping);

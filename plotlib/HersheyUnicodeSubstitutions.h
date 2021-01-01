@@ -137,6 +137,7 @@ public:
 private:
     std::unordered_map<Unicode, GlyphPtr> passthrough_table;
     HersheyDirectory *hershey_directory;
+    bool emittedMissingHersheyFontWarning;
 
     static HersheyFontDescriptor greek_font;
     static UnicodeHersheyMapping greek_mapping[];
@@ -146,6 +147,8 @@ private:
     static UnicodeHersheyMapping symbolic_mapping[];
     static HersheyFontDescriptor mathlow_font;
     static UnicodeHersheyMapping mathlow_mapping[];
+
+    void warnMissingFont(const string &fontName);
     void LoadMapping(HersheyFontDescriptor *descriptor, const UnicodeHersheyMapping *mapping);
 };
 
