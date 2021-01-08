@@ -65,6 +65,7 @@ public:
 struct PlotSeg
 {
     PlotPt a, b;
+    bool closeEnough(const PlotSeg& other) const;
 };
 std::ostream &operator<<(std::ostream &os, PlotSeg const &m);
 

@@ -102,6 +102,12 @@ void BBoxBuilder::add(PlotPt pt)
 // PlotSeg
 //----------------------------------------------------------------------
 
+bool PlotSeg::closeEnough(const PlotSeg& other) const
+{
+    return (a.closeEnough(other.a) && b.closeEnough(other.b))
+        || (b.closeEnough(other.a) && a.closeEnough(other.b));
+}
+
 std::ostream &operator<<(std::ostream &os, PlotSeg const &m)
 {
     return os << "[" << m.a << "--" << m.b << "]";
