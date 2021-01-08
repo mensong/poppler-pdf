@@ -81,8 +81,8 @@ public:
     void sort();
 
     // Access to resulting segments.
-    inline int getLength() { return length; }
-    SplashXPathSeg getSegment(int i);
+    inline int getLength() const { return length; }
+    const SplashXPathSeg &getSegment(int i) const;
 
 protected:
     SplashXPath(SplashXPath *xPath);

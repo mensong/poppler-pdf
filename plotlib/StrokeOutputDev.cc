@@ -17,7 +17,7 @@
 #include <string>
 #include <cassert>
 
-#include <StrokeOutputDev.h>
+#include "plotlib/StrokeOutputDev.h"
 #include "splash/SplashFont.h"
 #include "splash/SplashPath.h"
 #include "splash/SplashXPath.h"

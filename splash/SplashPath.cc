@@ -107,9 +107,6 @@ SplashPath *SplashPath::transform(SplashCoord *matrix) const
     for (int i = 0; i < newPath->getLength(); i++) {
         double ix = newPath->pts[i].x;
         double iy = newPath->pts[i].y;
-        // It's bizarre that Matrix isn't a first-class class with
-        // methods in Splash!
-        // mat.transform(ix, iy, &tx, &ty);
         newPath->pts[i].x = matrix[0] * ix + matrix[2] * iy + matrix[4];
         newPath->pts[i].y = matrix[1] * ix + matrix[3] * iy + matrix[5];
     }

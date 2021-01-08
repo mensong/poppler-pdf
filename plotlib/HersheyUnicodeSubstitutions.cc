@@ -166,8 +166,7 @@ void HersheyUnicodeSubstitutions::warnMissingFont(const string &fontName)
     if (!emittedMissingHersheyFontWarning) {
         cerr << "  Falling back to stroking outline fonts." << endl;
         cerr << "  Looking in " << hershey_directory->getHersheyFontPath() << endl;
-        cerr << "  On Ubuntu: apt install hershey-fonts-data" << endl;
-        cerr << "  Elsewhere: set environment variable " << HersheyDirectory::HERSHEY_FONT_PATH_ENV << endl;
+        cerr << "  Override default path with environment variable " << HersheyDirectory::HERSHEY_FONT_PATH_ENV << endl;
         emittedMissingHersheyFontWarning = true;
     }
 }

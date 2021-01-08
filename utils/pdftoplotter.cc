@@ -18,7 +18,7 @@
 #include "PDFDocFactory.h"
 #include "splash/SplashBitmap.h"
 
-#include "StrokeOutputDev.h"
+#include "plotlib/StrokeOutputDev.h"
 
 using namespace std;
 

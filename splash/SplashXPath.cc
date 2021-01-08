@@ -449,7 +449,7 @@ void SplashXPath::sort()
     std::sort(segs, segs + length, cmpXPathSegsFunctor());
 }
 
-SplashXPathSeg SplashXPath::getSegment(int i)
+const SplashXPathSeg &SplashXPath::getSegment(int i) const
 {
     return segs[i];
 }
