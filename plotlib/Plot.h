@@ -134,14 +134,13 @@ struct PageColor
     PageColor();
 };
 
-// Poppler has GfxState Matrix and SplashMatrix.
+// TODO(jonh.poppler@jonh.net): Poppler has GfxState Matrix and SplashMatrix.
 // GfxState Matrix is missing matrix multiplication.
 // SplashMatrix is missing almost everything (see in-line matrix multiply
 // in ::SplashFunctionPattern ctor).
 // So I added a *third* PlotMatrix (https://xkcd.com/927/) that has everything.
-// Code reviewer: another possibility is to beef up GfxMatrix, but to do that
-// right would suggest making it a real class, not just a double*. I'm open to
-// it, but it may be quite a bit more invasive to the rest of Poppler.
+// It might be nicer to beef up GfxMatrix with the suite of methods here.
+// Doing so would be more invasive to the rest of Poppler.
 class PlotMatrix
 {
 public:
