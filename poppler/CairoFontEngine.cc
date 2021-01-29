@@ -243,6 +243,8 @@ static void _ft_done_face(void *closure)
 {
     struct _ft_face_data *data = (struct _ft_face_data *)closure;
 
+    FT_Done_Face(data->face);
+
     if (data->fd != -1) {
 #    if defined(__SUNPRO_CC) && defined(__sun) && defined(__SVR4)
         munmap((char *)data->bytes, data->size);
@@ -254,7 +256,6 @@ static void _ft_done_face(void *closure)
         gfree(data->bytes);
     }
 
-    FT_Done_Face(data->face);
     gfree(data);
 }
 
