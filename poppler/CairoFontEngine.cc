@@ -148,10 +148,18 @@ double CairoFont::getSubstitutionCorrection(GfxFont *gfxFont)
 
 static cairo_user_data_key_t _ft_cairo_key;
 
+struct _ft_face_data_uncached
+{
+    FT_Face face;
+    char *font_data;
+};
+
 static void _ft_done_face_uncached(void *closure)
 {
-    FT_Face face = (FT_Face)closure;
-    FT_Done_Face(face);
+    _ft_face_data_uncached *data = static_cast<_ft_face_data_uncached *>(closure);
+    FT_Done_Face(data->face);
+    gfree(data->font_data);
+    delete data;
 }
 
 static bool _ft_new_face_uncached(FT_Library lib, const char *filename, char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
@@ -167,12 +175,15 @@ static bool _ft_new_face_uncached(FT_Library lib, const char *filename, char *fo
             return false;
     }
 
+    _ft_face_data_uncached *l = new _ft_face_data_uncached();
+    l->face = face;
     font_face = cairo_ft_font_face_create_for_ft_face(face, FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP);
-    if (cairo_font_face_set_user_data(font_face, &_ft_cairo_key, face, _ft_done_face_uncached)) {
-        _ft_done_face_uncached(face);
+    if (cairo_font_face_set_user_data(font_face, &_ft_cairo_key, l, _ft_done_face_uncached)) {
+        _ft_done_face_uncached(l);
         cairo_font_face_destroy(font_face);
         return false;
     }
+    l->font_data = font_data;
 
     *face_out = face;
     *font_face_out = font_face;
