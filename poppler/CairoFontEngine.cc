@@ -330,7 +330,8 @@ static bool _ft_new_face(FT_Library lib, const char *filename, char *font_data, 
     l->font_face = cairo_ft_font_face_create_for_ft_face(tmpl.face, FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP);
     if (cairo_font_face_set_user_data(l->font_face, &_ft_cairo_key, l, _ft_done_face)) {
         cairo_font_face_destroy(l->font_face);
-        l->bytes = nullptr;
+        if (l->fd == -1)
+            l->bytes = nullptr;
         _ft_done_face(l);
         return false;
     }
