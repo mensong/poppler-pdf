@@ -150,6 +150,7 @@ static cairo_user_data_key_t _ft_cairo_key;
 
 struct _ft_face_data_uncached
 {
+    CairoFtLibrary *lib;
     FT_Face face;
     char *font_data;
 };
@@ -157,25 +158,31 @@ struct _ft_face_data_uncached
 static void _ft_done_face_uncached(void *closure)
 {
     _ft_face_data_uncached *data = static_cast<_ft_face_data_uncached *>(closure);
-    FT_Done_Face(data->face);
+    {
+        std::lock_guard<std::mutex> locker(data->lib->mutex);
+        FT_Done_Face(data->face);
+    }
     gfree(data->font_data);
     delete data;
 }
 
-static bool _ft_new_face_uncached(FT_Library lib, const char *filename, char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
+static bool _ft_new_face_uncached(CairoFtLibrary *lib, const char *filename, char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
 {
     FT_Face face;
     cairo_font_face_t *font_face;
 
     if (font_data == nullptr) {
-        if (FT_New_Face(lib, filename, 0, &face))
+        std::lock_guard<std::mutex> locker(lib->mutex);
+        if (FT_New_Face(lib->ft_lib, filename, 0, &face))
             return false;
     } else {
-        if (FT_New_Memory_Face(lib, (unsigned char *)font_data, font_data_len, 0, &face))
+        std::lock_guard<std::mutex> locker(lib->mutex);
+        if (FT_New_Memory_Face(lib->ft_lib, (unsigned char *)font_data, font_data_len, 0, &face))
             return false;
     }
 
     _ft_face_data_uncached *l = new _ft_face_data_uncached();
+    l->lib = lib;
     l->face = face;
     font_face = cairo_ft_font_face_create_for_ft_face(face, FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP);
     if (cairo_font_face_set_user_data(font_face, &_ft_cairo_key, l, _ft_done_face_uncached)) {
@@ -198,7 +205,7 @@ struct _ft_face_data
     size_t size;
     unsigned char *bytes;
 
-    FT_Library lib;
+    CairoFtLibrary *lib;
     FT_Face face;
     cairo_font_face_t *font_face;
 };
@@ -229,7 +236,7 @@ static unsigned long _djb_hash(const unsigned char *bytes, size_t len)
 
 static bool _ft_face_data_equal(struct _ft_face_data *a, struct _ft_face_data *b)
 {
-    if (a->lib != b->lib)
+    if (a->lib->ft_lib != b->lib->ft_lib)
         return false;
     if (a->size != b->size)
         return false;
@@ -243,7 +250,10 @@ static void _ft_done_face(void *closure)
 {
     struct _ft_face_data *data = (struct _ft_face_data *)closure;
 
-    FT_Done_Face(data->face);
+    {
+        std::lock_guard<std::mutex> locker(data->lib->mutex);
+        FT_Done_Face(data->face);
+    }
 
     if (data->fd != -1) {
 #    if defined(__SUNPRO_CC) && defined(__sun) && defined(__SVR4)
@@ -259,7 +269,7 @@ static void _ft_done_face(void *closure)
     gfree(data);
 }
 
-static bool _ft_new_face(FT_Library lib, const char *filename, char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
+static bool _ft_new_face(CairoFtLibrary *lib, const char *filename, char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
 {
     struct stat st;
     struct _ft_face_data tmpl;
@@ -310,8 +320,14 @@ static bool _ft_new_face(FT_Library lib, const char *filename, char *font_data, 
         }
     }
 
+    FT_Error ft_err;
+    {
+        std::lock_guard<std::mutex> locker(lib->mutex);
+        ft_err = FT_New_Memory_Face(lib->ft_lib, (FT_Byte *)tmpl.bytes, tmpl.size, 0, &tmpl.face);
+    }
+
     /* not a dup, open and insert into list */
-    if (FT_New_Memory_Face(lib, (FT_Byte *)tmpl.bytes, tmpl.size, 0, &tmpl.face)) {
+    if (ft_err) {
         if (tmpl.fd != -1) {
 #    if defined(__SUNPRO_CC) && defined(__sun) && defined(__SVR4)
             munmap((char *)tmpl.bytes, tmpl.size);
@@ -351,7 +367,7 @@ CairoFreeTypeFont::CairoFreeTypeFont(Ref refA, cairo_font_face_t *cairo_font_fac
 
 CairoFreeTypeFont::~CairoFreeTypeFont() { }
 
-CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs)
+CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, CairoFtLibrary *lib, bool useCIDs)
 {
     GooString *fileName;
     const char *fileNameC;
@@ -729,7 +745,7 @@ bool CairoType3Font::matches(Ref &other, bool printingA)
 
 #define fontEngineLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
 
-CairoFontEngine::CairoFontEngine(FT_Library libA)
+CairoFontEngine::CairoFontEngine(CairoFtLibrary *libA)
 {
     int i;
 
@@ -740,7 +756,7 @@ CairoFontEngine::CairoFontEngine(FT_Library libA)
 
     FT_Int major, minor, patch;
     // as of FT 2.1.8, CID fonts are indexed by CID instead of GID
-    FT_Library_Version(lib, &major, &minor, &patch);
+    FT_Library_Version(lib->ft_lib, &major, &minor, &patch);
     useCIDs = major > 2 || (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
 }
 

@@ -62,7 +62,6 @@
 #include <fofi/FoFiTrueType.h>
 #include <splash/SplashBitmap.h>
 #include "CairoOutputDev.h"
-#include "CairoFontEngine.h"
 #include "CairoRescaleBox.h"
 #include "UnicodeMap.h"
 #include "JBIG2Stream.h"
@@ -120,14 +119,14 @@ void CairoImage::setImage(cairo_surface_t *i)
 // deleted.  The simplest way to avoid problems is to never tear down the
 // FT_Library instance; to avoid leaks, just use a single global instance
 // initialized the first time it is needed.
-FT_Library CairoOutputDev::ft_lib;
+CairoFtLibrary CairoOutputDev::ft_lib;
 std::once_flag CairoOutputDev::ft_lib_once_flag;
 
 CairoOutputDev::CairoOutputDev()
 {
     doc = nullptr;
 
-    std::call_once(ft_lib_once_flag, FT_Init_FreeType, &ft_lib);
+    std::call_once(ft_lib_once_flag, FT_Init_FreeType, &ft_lib.ft_lib);
 
     fontEngine = nullptr;
     fontEngine_owner = false;
@@ -263,7 +262,7 @@ void CairoOutputDev::startDoc(PDFDoc *docA, CairoFontEngine *parentFontEngine)
         if (fontEngine) {
             delete fontEngine;
         }
-        fontEngine = new CairoFontEngine(ft_lib);
+        fontEngine = new CairoFontEngine(&ft_lib);
         fontEngine_owner = true;
     }
     xref = doc->getXRef();
@@ -2530,7 +2529,7 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
    * so check its underlying color space as well */
   int is_identity_transform;
   is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB ||
-		  (colorMap->getColorSpace()->getMode() == csICCBased && 
+		  (colorMap->getColorSpace()->getMode() == csICCBased &&
 		   ((GfxICCBasedColorSpace*)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
 #endif
 
