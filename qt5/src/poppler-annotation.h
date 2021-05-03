@@ -1150,6 +1150,8 @@ public:
         QScopedPointer<Private> d;
     };
 
+    class Asset;
+
     /**
      * The instance object of a RichMediaAnnotation::Configuration object.
      *
@@ -1186,9 +1188,15 @@ public:
          */
         RichMediaAnnotation::Params *params() const;
 
+        /**
+         * Returns the asset object of the instance or @c 0 if it doesn't exist.
+         */
+        RichMediaAnnotation::Asset *asset() const;
+
     private:
         void setType(Type type);
         void setParams(RichMediaAnnotation::Params *params);
+        void setAsset(RichMediaAnnotation::Asset *asset);
 
         class Private;
         QScopedPointer<Private> d;

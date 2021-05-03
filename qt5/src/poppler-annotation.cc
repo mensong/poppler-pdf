@@ -678,6 +678,19 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
                                     instance->setParams(params);
                                 }
 
+                                const AnnotRichMedia::Asset *annotAsset = annotInstance->getAsset();
+                                if (annotAsset) {
+                                    RichMediaAnnotation::Asset *asset = new RichMediaAnnotation::Asset;
+
+                                    if (annotAsset->getName())
+                                        asset->setName(UnicodeParsedString(annotAsset->getName()));
+
+                                    FileSpec *fileSpec = new FileSpec(annotAsset->getFileSpec());
+                                    asset->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(fileSpec)));
+
+                                    instance->setAsset(asset);
+                                }
+
                                 instances.append(instance);
                             }
 
@@ -4278,6 +4291,7 @@ public:
 
     RichMediaAnnotation::Instance::Type type;
     RichMediaAnnotation::Params *params;
+    RichMediaAnnotation::Asset *asset;
 };
 
 RichMediaAnnotation::Instance::Instance() : d(new Private) { }
@@ -4303,6 +4317,17 @@ void RichMediaAnnotation::Instance::setParams(RichMediaAnnotation::Params *param
 RichMediaAnnotation::Params *RichMediaAnnotation::Instance::params() const
 {
     return d->params;
+}
+
+void RichMediaAnnotation::Instance::setAsset(RichMediaAnnotation::Asset *asset)
+{
+    delete d->asset;
+    d->asset = asset;
+}
+
+RichMediaAnnotation::Asset *RichMediaAnnotation::Instance::asset() const
+{
+    return d->asset;
 }
 
 class RichMediaAnnotation::Configuration::Private

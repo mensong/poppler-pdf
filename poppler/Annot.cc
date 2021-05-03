@@ -6840,6 +6840,13 @@ AnnotRichMedia::Instance::Instance(Dict *dict)
     if (obj1.isDict()) {
         params = std::make_unique<AnnotRichMedia::Params>(obj1.getDict());
     }
+
+    obj1 = dict->lookup("Asset");
+    if (obj1.isRef()) {
+        asset = std::make_unique<AnnotRichMedia::Asset>();
+        asset->name = std::make_unique<GooString>("");
+        asset->fileSpec = std::move(obj1);
+    }
 }
 
 AnnotRichMedia::Instance::~Instance() = default;
@@ -6852,6 +6859,11 @@ AnnotRichMedia::Instance::Type AnnotRichMedia::Instance::getType() const
 AnnotRichMedia::Params *AnnotRichMedia::Instance::getParams() const
 {
     return params.get();
+}
+
+AnnotRichMedia::Asset *AnnotRichMedia::Instance::getAsset() const
+{
+    return asset.get();
 }
 
 AnnotRichMedia::Params::Params(Dict *dict)

@@ -1541,6 +1541,8 @@ public:
         std::unique_ptr<GooString> flashVars; // FlashVars
     };
 
+    class Asset;
+
     class POPPLER_PRIVATE_EXPORT Instance
     {
     public:
@@ -1560,11 +1562,13 @@ public:
 
         Type getType() const;
         Params *getParams() const;
+        Asset *getAsset() const;
 
     private:
         // optional
         Type type; // Subtype
         std::unique_ptr<Params> params; // Params
+        std::unique_ptr<Asset> asset; // Asset
     };
 
     class POPPLER_PRIVATE_EXPORT Configuration
@@ -1613,6 +1617,7 @@ public:
 
     private:
         friend class AnnotRichMedia::Content;
+        friend class AnnotRichMedia::Instance;
 
         std::unique_ptr<GooString> name;
         Object fileSpec;
