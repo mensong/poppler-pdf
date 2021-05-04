@@ -1189,7 +1189,7 @@ public:
         RichMediaAnnotation::Params *params() const;
 
         /**
-         * Returns the asset object of the instance or @c 0 if it doesn't exist.
+         * Returns the asset object of the instance or @c nullptr if it doesn't exist.
          */
         RichMediaAnnotation::Asset *asset() const;
 
