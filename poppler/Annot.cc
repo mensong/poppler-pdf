@@ -6638,30 +6638,9 @@ AnnotRichMedia::Content::Content(Dict *dict)
         configurations = nullptr;
     }
 
-    nAssets = 0;
-    assets = nullptr;
     obj1 = dict->lookup("Assets");
     if (obj1.isDict()) {
-        Object obj2 = obj1.getDict()->lookup("Names");
-        if (obj2.isArray()) {
-            const int length = obj2.arrayGetLength() / 2;
-
-            assets = (Asset **)gmallocn(length, sizeof(Asset *));
-            for (int i = 0; i < length; ++i) {
-                Object objKey = obj2.arrayGet(2 * i);
-                Object objVal = obj2.arrayGet(2 * i + 1);
-
-                if (!objKey.isString() || objVal.isNull()) {
-                    error(errSyntaxError, -1, "Bad Annot Asset");
-                    continue;
-                }
-
-                assets[nAssets] = new AnnotRichMedia::Asset;
-                assets[nAssets]->name = std::make_unique<GooString>(objKey.getString());
-                assets[nAssets]->fileSpec = std::move(objVal);
-                ++nAssets;
-            }
-        }
+        assets.init(dict->getXRef(), &obj1);
     }
 }
 
@@ -6671,12 +6650,6 @@ AnnotRichMedia::Content::~Content()
         for (int i = 0; i < nConfigurations; ++i)
             delete configurations[i];
         gfree(configurations);
-    }
-
-    if (assets) {
-        for (int i = 0; i < nAssets; ++i)
-            delete assets[i];
-        gfree(assets);
     }
 }
 
@@ -6693,31 +6666,14 @@ AnnotRichMedia::Configuration *AnnotRichMedia::Content::getConfiguration(int ind
     return configurations[index];
 }
 
-int AnnotRichMedia::Content::getAssetsCount() const
+Object AnnotRichMedia::Content::getAsset(const GooString *name) const
 {
-    return nAssets;
+    return assets.lookup(name);
 }
 
-AnnotRichMedia::Asset *AnnotRichMedia::Content::getAsset(int index) const
+const NameTree *AnnotRichMedia::Content::getAssets() const
 {
-    if (index < 0 || index >= nAssets)
-        return nullptr;
-
-    return assets[index];
-}
-
-AnnotRichMedia::Asset::Asset() = default;
-
-AnnotRichMedia::Asset::~Asset() = default;
-
-const GooString *AnnotRichMedia::Asset::getName() const
-{
-    return name.get();
-}
-
-Object *AnnotRichMedia::Asset::getFileSpec() const
-{
-    return const_cast<Object *>(&fileSpec);
+    return &assets;
 }
 
 AnnotRichMedia::Configuration::Configuration(Dict *dict)
@@ -6841,11 +6797,9 @@ AnnotRichMedia::Instance::Instance(Dict *dict)
         params = std::make_unique<AnnotRichMedia::Params>(obj1.getDict());
     }
 
-    obj1 = dict->lookup("Asset");
-    if (obj1.isRef()) {
-        asset = std::make_unique<AnnotRichMedia::Asset>();
-        asset->name = std::make_unique<GooString>("");
-        asset->fileSpec = std::move(obj1);
+    const Object &assetDict = dict->lookupNF("Asset");
+    if (assetDict.isRef()) {
+        asset = assetDict.copy();
     }
 }
 
@@ -6861,9 +6815,9 @@ AnnotRichMedia::Params *AnnotRichMedia::Instance::getParams() const
     return params.get();
 }
 
-AnnotRichMedia::Asset *AnnotRichMedia::Instance::getAsset() const
+const Object &AnnotRichMedia::Instance::getAsset() const
 {
-    return asset.get();
+    return asset;
 }
 
 AnnotRichMedia::Params::Params(Dict *dict)

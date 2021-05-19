@@ -75,11 +75,11 @@ public:
     NameTree &operator=(const NameTree &) = delete;
 
     void init(XRef *xref, Object *tree);
-    Object lookup(const GooString *name);
-    int numEntries() { return length; };
+    Object lookup(const GooString *name) const;
+    int numEntries() const { return length; };
     // iterator accessor, note it returns a pointer to the internal object, do not free nor delete it
-    Object *getValue(int i);
-    GooString *getName(int i);
+    Object *getValue(int i) const;
+    GooString *getName(int i) const;
 
 private:
     struct Entry

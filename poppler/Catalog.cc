@@ -736,7 +736,7 @@ int NameTree::Entry::cmp(const void *voidKey, const void *voidEntry)
     return key->cmp(&entry->name);
 }
 
-Object NameTree::lookup(const GooString *name)
+Object NameTree::lookup(const GooString *name) const
 {
     Entry **entry;
 
@@ -749,7 +749,7 @@ Object NameTree::lookup(const GooString *name)
     }
 }
 
-Object *NameTree::getValue(int index)
+Object *NameTree::getValue(int index) const
 {
     if (index < length) {
         return &entries[index]->value;
@@ -758,7 +758,7 @@ Object *NameTree::getValue(int index)
     }
 }
 
-GooString *NameTree::getName(int index)
+GooString *NameTree::getName(int index) const
 {
     if (index < length) {
         return &entries[index]->name;

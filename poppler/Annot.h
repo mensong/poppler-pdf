@@ -53,6 +53,7 @@
 #include <vector>
 
 #include "Object.h"
+#include "Catalog.h"
 #include "poppler_private_export.h"
 
 class XRef;
@@ -1541,8 +1542,6 @@ public:
         std::unique_ptr<GooString> flashVars; // FlashVars
     };
 
-    class Asset;
-
     class POPPLER_PRIVATE_EXPORT Instance
     {
     public:
@@ -1562,13 +1561,13 @@ public:
 
         Type getType() const;
         Params *getParams() const;
-        Asset *getAsset() const;
+        const Object &getAsset() const;
 
     private:
         // optional
         Type type; // Subtype
         std::unique_ptr<Params> params; // Params
-        std::unique_ptr<Asset> asset; // Asset
+        Object asset; // Asset
     };
 
     class POPPLER_PRIVATE_EXPORT Configuration
@@ -1603,26 +1602,6 @@ public:
 
     class Content;
 
-    class POPPLER_PRIVATE_EXPORT Asset
-    {
-    public:
-        Asset();
-        ~Asset();
-
-        Asset(const Asset &) = delete;
-        Asset &operator=(const Asset &) = delete;
-
-        const GooString *getName() const;
-        Object *getFileSpec() const;
-
-    private:
-        friend class AnnotRichMedia::Content;
-        friend class AnnotRichMedia::Instance;
-
-        std::unique_ptr<GooString> name;
-        Object fileSpec;
-    };
-
     class POPPLER_PRIVATE_EXPORT Content
     {
     public:
@@ -1635,16 +1614,18 @@ public:
         int getConfigurationsCount() const;
         Configuration *getConfiguration(int index) const;
 
-        int getAssetsCount() const;
-        Asset *getAsset(int index) const;
+        // The intended interface: name -> asset
+        Object getAsset(const GooString *name) const;
+
+        // For iterating over assets. (qt copy)
+        const NameTree *getAssets() const;
 
     private:
         // optional
         Configuration **configurations; // Configurations
         int nConfigurations;
 
-        Asset **assets; // Assets
-        int nAssets;
+        NameTree assets;
     };
 
     class POPPLER_PRIVATE_EXPORT Activation

@@ -1150,8 +1150,6 @@ public:
         QScopedPointer<Private> d;
     };
 
-    class Asset;
-
     /**
      * The instance object of a RichMediaAnnotation::Configuration object.
      *
@@ -1189,14 +1187,14 @@ public:
         RichMediaAnnotation::Params *params() const;
 
         /**
-         * Returns the asset object of the instance or @c nullptr if it doesn't exist.
+         * Returns the asset object (embedded file) of the instance or @c nullptr if it doesn't exist.
          */
-        RichMediaAnnotation::Asset *asset() const;
+        EmbeddedFile *asset() const;
 
     private:
         void setType(Type type);
         void setParams(RichMediaAnnotation::Params *params);
-        void setAsset(RichMediaAnnotation::Asset *asset);
+        void setAsset(EmbeddedFile *asset);
 
         class Private;
         QScopedPointer<Private> d;
@@ -1252,39 +1250,6 @@ public:
     };
 
     /**
-     * The asset object of a RichMediaAnnotation::Content object.
-     *
-     * The asset object provides a mapping between identifier name, as
-     * used in the flash vars string of RichMediaAnnotation::Params,  and the
-     * associated file spec object.
-     */
-    class POPPLER_QT5_EXPORT Asset
-    {
-        friend class AnnotationPrivate;
-
-    public:
-        Asset();
-        ~Asset();
-
-        /**
-         * Returns the identifier name of the asset.
-         */
-        QString name() const;
-
-        /**
-         * Returns the embedded file the asset points to.
-         */
-        EmbeddedFile *embeddedFile() const;
-
-    private:
-        void setName(const QString &name);
-        void setEmbeddedFile(EmbeddedFile *embeddedFile);
-
-        class Private;
-        QScopedPointer<Private> d;
-    };
-
-    /**
      * The content object of a RichMediaAnnotation.
      *
      * The content object provides access to the list of configurations
@@ -1306,11 +1271,11 @@ public:
         /**
          * Returns the list of asset objects of the content object.
          */
-        QList<RichMediaAnnotation::Asset *> assets() const;
+        QHash<QString, EmbeddedFile *> assets() const;
 
     private:
         void setConfigurations(const QList<RichMediaAnnotation::Configuration *> &configurations);
-        void setAssets(const QList<RichMediaAnnotation::Asset *> &assets);
+        void setAssets(const QHash<QString, EmbeddedFile *> &assets);
 
         class Private;
         QScopedPointer<Private> d;
