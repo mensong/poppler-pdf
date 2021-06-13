@@ -4051,6 +4051,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const double *bbox
                 || cmsIsIntentSupported(dp.get(), INTENT_SATURATION, LCMS_USED_AS_PROOF) || cmsIsIntentSupported(dp.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_PROOF)) {
                 if (lcms_color_space == cmsSigRgbData || lcms_color_space == cmsSigGrayData || lcms_color_space == cmsSigCmykData) {
                     state->setDisplayProfile(dp);
+                    getIccColorSpaceCache()->invalidate();
                     transpGroup->newDisplayProfile = dp;
                     changeColorMode = true;
                 } else {
@@ -4130,6 +4131,7 @@ void SplashOutputDev::endTransparencyGroup(GfxState *state)
     splash = transpGroupStack->origSplash;
 #ifdef USE_CMS
     state->setDisplayProfile(transpGroupStack->origDisplayProfile);
+    getIccColorSpaceCache()->invalidate();
 #endif
     state->shiftCTMAndClip(transpGroupStack->tx, transpGroupStack->ty);
     updateCTM(state, 0, 0, 0, 0, 0, 0);

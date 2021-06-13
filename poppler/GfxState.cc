@@ -6702,6 +6702,21 @@ void GfxState::setDisplayProfile(const GfxLCMSProfilePtr &localDisplayProfileA)
         } else {
             XYZ2DisplayTransformPerc = std::make_shared<GfxColorTransform>(transform, INTENT_PERCEPTUAL, PT_XYZ, localDisplayPixelType);
         }
+
+        if (defaultRGBColorSpace && defaultRGBColorSpace->getMode() == csICCBased ) {
+            auto cs = static_cast<GfxICCBasedColorSpace*>(defaultRGBColorSpace);
+            cs->buildTransforms(this);
+        }
+
+        if (defaultCMYKColorSpace && defaultCMYKColorSpace->getMode() == csICCBased ) {
+            auto cs = static_cast<GfxICCBasedColorSpace*>(defaultCMYKColorSpace);
+            cs->buildTransforms(this);
+        }
+
+        if (defaultGrayColorSpace && defaultGrayColorSpace->getMode() == csICCBased ) {
+            auto cs = static_cast<GfxICCBasedColorSpace*>(defaultGrayColorSpace);
+            cs->buildTransforms(this);
+        }
     }
 }
 

@@ -138,14 +138,12 @@ public:
     virtual void initGfxState(GfxState *state)
     {
 #ifdef USE_CMS
-        state->setDisplayProfile(displayprofile);
-
         auto invalidref = Ref::INVALID();
         if (defaultGrayProfile) {
             auto cs = new GfxICCBasedColorSpace(1, new GfxDeviceGrayColorSpace(), &invalidref);
 
             cs->setProfile(defaultGrayProfile);
-            cs->buildTransforms(state); // needs to happen after state->setDisplayProfile has been called
+            //cs->buildTransforms(state); // superfluous since the following setDisplayProfile will call this anyway
             state->setDefaultGrayColorSpace(cs);
         }
 
@@ -153,7 +151,7 @@ public:
             auto cs = new GfxICCBasedColorSpace(3, new GfxDeviceRGBColorSpace(), &invalidref);
 
             cs->setProfile(defaultRGBProfile);
-            cs->buildTransforms(state); // needs to happen after state->setDisplayProfile has been called
+            //cs->buildTransforms(state); // superfluous since the following setDisplayProfile will call this anyway
             state->setDefaultRGBColorSpace(cs);
         }
 
@@ -161,9 +159,10 @@ public:
             auto cs = new GfxICCBasedColorSpace(4, new GfxDeviceCMYKColorSpace(), &invalidref);
 
             cs->setProfile(defaultCMYKProfile);
-            cs->buildTransforms(state); // needs to happen after state->setDisplayProfile has been called
+            //cs->buildTransforms(state); // superfluous since the following setDisplayProfile will call this anyway
             state->setDefaultCMYKColorSpace(cs);
         }
+        state->setDisplayProfile(displayprofile);
 #endif
     }
 
