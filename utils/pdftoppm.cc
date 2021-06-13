@@ -111,6 +111,8 @@ static GooString defaultrgbprofilename;
 static GfxLCMSProfilePtr defaultrgbprofile;
 static GooString defaultcmykprofilename;
 static GfxLCMSProfilePtr defaultcmykprofile;
+static GooString proofingprofilename;
+static GfxLCMSProfilePtr proofingprofile;
 #endif
 static char sep[2] = "-";
 static bool forceNum = false;
@@ -171,6 +173,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-defaultgrayprofile", argGooString, &defaultgrayprofilename, 0, "ICC color profile to use as the DefaultGray color space" },
                                    { "-defaultrgbprofile", argGooString, &defaultrgbprofilename, 0, "ICC color profile to use as the DefaultRGB color space" },
                                    { "-defaultcmykprofile", argGooString, &defaultcmykprofilename, 0, "ICC color profile to use as the DefaultCMYK color space" },
+                                   { "-proofingprofile", argGooString, &proofingprofilename, 0, "ICC color profile to use as the proofing profile" },
 #endif
                                    { "-sep", argString, sep, sizeof(sep), "single character separator between name and page number, default - " },
                                    { "-forcenum", argFlag, &forceNum, 0, "force page number even if there is only one page " },
@@ -593,6 +596,10 @@ int main(int argc, char *argv[])
             return kOtherError;
         }
     }
+    if (!proofingprofilename.toStr().empty()) {
+        // TODO: add checks
+        proofingprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(proofingprofilename.c_str(), "r"));
+    }
 #endif
 
 #ifndef UTILS_USE_PTHREADS
@@ -607,6 +614,7 @@ int main(int argc, char *argv[])
     splashOut->setDefaultGrayProfile(defaultgrayprofile);
     splashOut->setDefaultRGBProfile(defaultrgbprofile);
     splashOut->setDefaultCMYKProfile(defaultcmykprofile);
+    splashOut->addProofingProfile(proofingprofile);
 #    endif
     splashOut->startDoc(doc.get());
 
