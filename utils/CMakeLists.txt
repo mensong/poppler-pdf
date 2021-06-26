@@ -24,7 +24,7 @@ install(FILES pdftoppm.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 include_directories(
   ../plotlib
 )
-set(plotler_SOURCES ${common_srcs}
+set(pdftoplotter_SOURCES ${common_srcs}
   pdftoplotter.cc
   ../plotlib/StrokeOutputDev.cc
   ../plotlib/HersheyDirectory.cc
@@ -35,7 +35,7 @@ set(plotler_SOURCES ${common_srcs}
   ../plotlib/PlotEmitHpgl.cc
   ../plotlib/PlotEmitSvg.cc
 )
-add_executable(pdftoplotter ${plotler_SOURCES})
+add_executable(pdftoplotter ${pdftoplotter_SOURCES})
 target_link_libraries(pdftoplotter ${common_libs})
 if(LCMS2_FOUND)
   target_link_libraries(pdftoplotter ${LCMS2_LIBRARIES})

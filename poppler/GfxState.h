@@ -55,7 +55,7 @@ class GfxState;
 class GfxResources;
 class GfxSeparationColorSpace;
 
-class Matrix
+class POPPLER_PRIVATE_EXPORT Matrix
 {
 public:
     double m[6];

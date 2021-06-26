@@ -47,7 +47,7 @@ static const ArgDesc argDesc[] = { { "-h", argFlag, &args.help, 0, "Display this
 static int processPage()
 {
     GooString *fileName = new GooString(args.inputFilename);
-    PDFDoc *document = PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr);
+    unique_ptr<PDFDoc> document = PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr);
     if (document == nullptr || !document->isOk()) {
         return -1;
     }
@@ -58,7 +58,7 @@ static int processPage()
 
     StrokeOutputDev *strokeOut = new StrokeOutputDev(args.verboseFonts);
     strokeOut->setDebugAlarm(args.alarm);
-    strokeOut->startDoc(document);
+    strokeOut->startDoc(document.get());
 
     int x_resolution = 150;
     int y_resolution = 150;
@@ -82,7 +82,6 @@ static int processPage()
     }
 
     delete strokeOut;
-    delete document;
     delete fileName;
     return 0;
 }

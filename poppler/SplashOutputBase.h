@@ -90,7 +90,7 @@ struct SplashOutMaskedImageData
 //------------------------------------------------------------------------
 
 // Superclass shared by SplashOutputDev and StrokeOutputDev.
-class SplashOutputBase : public OutputDev
+class POPPLER_PRIVATE_EXPORT SplashOutputBase : public OutputDev
 {
 public:
     // Constructor.

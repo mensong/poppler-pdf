@@ -23,6 +23,7 @@
 #define SPLASHXPATH_H
 
 #include "SplashTypes.h"
+#include "poppler_private_export.h"
 
 class SplashPath;
 struct SplashXPathAdjust;
@@ -56,7 +57,7 @@ struct SplashXPathSeg
 // SplashXPath
 //------------------------------------------------------------------------
 
-class SplashXPath
+class POPPLER_PRIVATE_EXPORT SplashXPath
 {
 public:
     // Expands (converts to segments) and flattens (converts curves to
