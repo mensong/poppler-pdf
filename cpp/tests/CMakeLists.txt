@@ -19,6 +19,7 @@ endmacro(CPP_ADD_SIMPLETEST)
 
 cpp_add_simpletest(poppler-dump poppler-dump.cpp ${CMAKE_SOURCE_DIR}/utils/parseargs.cc)
 cpp_add_simpletest(poppler-render poppler-render.cpp ${CMAKE_SOURCE_DIR}/utils/parseargs.cc)
+cpp_add_simpletest(plotlib-clip plotlib-clip.cpp ${CMAKE_SOURCE_DIR}/plotlib/PlotClip.cc ${CMAKE_SOURCE_DIR}/plotlib/Plot.cc)
 
 if(ENABLE_FUZZER)
   cpp_add_simpletest(doc_fuzzer ./fuzzing/doc_fuzzer.cc)

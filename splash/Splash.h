@@ -257,6 +257,12 @@ public:
     // Draw a gouraud triangle shading.
     bool gouraudTriangleShadedFill(SplashGouraudColor *shading);
 
+    // StrokeOutputDev uses these interfaces to render PDF paths down to
+    // simpler paths -- but then intercepting those paths before they end
+    // up as vectors.
+    SplashPath *makeDashedPath(SplashPath *xPath);
+    static SplashPath *flattenPath(SplashPath *path, SplashCoord *matrix, SplashCoord flatness);
+
 private:
     void pipeInit(SplashPipe *pipe, int x, int y, SplashPattern *pattern, SplashColorPtr cSrc, unsigned char aInput, bool usesShape, bool nonIsolatedGroup, bool knockout = false, unsigned char knockoutOpacity = 255);
     void pipeRun(SplashPipe *pipe);
@@ -281,12 +287,10 @@ private:
     void drawAAPixel(SplashPipe *pipe, int x, int y);
     void drawSpan(SplashPipe *pipe, int x0, int x1, int y, bool noClip);
     void drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adjustLine = false, unsigned char lineOpacity = 0);
-    void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
+    static void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
     void strokeNarrow(SplashPath *path);
     void strokeWide(SplashPath *path, SplashCoord w);
-    SplashPath *flattenPath(SplashPath *path, SplashCoord *matrix, SplashCoord flatness);
-    void flattenCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord *matrix, SplashCoord flatness2, SplashPath *fPath);
-    SplashPath *makeDashedPath(SplashPath *xPath);
+    static void flattenCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord *matrix, SplashCoord flatness2, SplashPath *fPath);
     void getBBoxFP(SplashPath *path, SplashCoord *xMinA, SplashCoord *yMinA, SplashCoord *xMaxA, SplashCoord *yMaxA);
     SplashError fillWithPattern(SplashPath *path, bool eo, SplashPattern *pattern, SplashCoord alpha);
     bool pathAllOutside(SplashPath *path);

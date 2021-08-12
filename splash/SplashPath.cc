@@ -53,7 +53,7 @@ SplashPath::SplashPath()
     hintsLength = hintsSize = 0;
 }
 
-SplashPath::SplashPath(SplashPath *path)
+SplashPath::SplashPath(const SplashPath *path)
 {
     length = path->length;
     size = path->size;
@@ -99,6 +99,18 @@ SplashPath::~SplashPath()
 void SplashPath::reserve(int nPts)
 {
     grow(nPts - size);
+}
+
+SplashPath *SplashPath::transform(SplashCoord *matrix) const
+{
+    SplashPath *newPath = copy();
+    for (int i = 0; i < newPath->getLength(); i++) {
+        double ix = newPath->pts[i].x;
+        double iy = newPath->pts[i].y;
+        newPath->pts[i].x = matrix[0] * ix + matrix[2] * iy + matrix[4];
+        newPath->pts[i].y = matrix[1] * ix + matrix[3] * iy + matrix[5];
+    }
+    return newPath;
 }
 
 // Add space for <nPts> more points.

@@ -23,6 +23,7 @@
 #define SPLASHXPATH_H
 
 #include "SplashTypes.h"
+#include "poppler_private_export.h"
 
 class SplashPath;
 struct SplashXPathAdjust;
@@ -56,7 +57,7 @@ struct SplashXPathSeg
 // SplashXPath
 //------------------------------------------------------------------------
 
-class SplashXPath
+class POPPLER_PRIVATE_EXPORT SplashXPath
 {
 public:
     // Expands (converts to segments) and flattens (converts curves to
@@ -79,6 +80,10 @@ public:
 
     // Sort by upper coordinate (lower y), in y-major order.
     void sort();
+
+    // Access to resulting segments.
+    inline int getLength() const { return length; }
+    const SplashXPathSeg &getSegment(int i) const;
 
 protected:
     SplashXPath(SplashXPath *xPath);

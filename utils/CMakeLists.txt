@@ -20,6 +20,29 @@ endif()
 install(TARGETS pdftoppm DESTINATION bin)
 install(FILES pdftoppm.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
+# pdftoplotter
+include_directories(
+  ../plotlib
+)
+set(pdftoplotter_SOURCES ${common_srcs}
+  pdftoplotter.cc
+  ../plotlib/StrokeOutputDev.cc
+  ../plotlib/HersheyDirectory.cc
+  ../plotlib/HersheyUnicodeSubstitutions.cc
+  ../plotlib/HersheyFont.cc
+  ../plotlib/Plot.cc
+  ../plotlib/PlotClip.cc
+  ../plotlib/PlotEmitHpgl.cc
+  ../plotlib/PlotEmitSvg.cc
+)
+add_executable(pdftoplotter ${pdftoplotter_SOURCES})
+target_link_libraries(pdftoplotter ${common_libs})
+if(LCMS2_FOUND)
+  target_link_libraries(pdftoplotter ${LCMS2_LIBRARIES})
+endif()
+install(TARGETS pdftoplotter DESTINATION bin)
+install(FILES pdftoplotter.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+
 if (HAVE_CAIRO)
   # pdftocairo
   set(pdftocairo_SOURCES ${common_srcs}
