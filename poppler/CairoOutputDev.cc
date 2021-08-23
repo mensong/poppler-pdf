@@ -935,8 +935,12 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
     Dict *resDict = tPat->getResDict();
     Object *str = tPat->getContentStream();
 
-    xStep = abs(xStep);
-    yStep = abs(yStep);
+    xStep = fabs(xStep);
+    yStep = fabs(yStep);
+
+    if (xStep == 0 || yStep == 0) {
+        return false;
+    }
 
     bbox_width = bbox[2] - bbox[0];
     bbox_height = bbox[3] - bbox[1];
@@ -989,10 +993,11 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
         return false;
     }
 
-    // If our bounding box size is the same as our xStep and yStep, then we can tile it.
+    // If our bounding box size is the same as our xStep and yStep (within some tolerance),
+    // then we can tile it directly.
     // Otherwise, we need to make a new tiling cell that is the size of xStep and yStep and
     // draw our current pattern into it.
-    if (bbox_width != xStep || bbox_height != yStep) {
+    if (fabs(bbox_width - xStep) / xStep > 0.001 || fabs(bbox_height - yStep) / yStep > 0.001) {
         // Now, make a surface the size of the repeating cell on which to draw the pattern.
         surface = cairo_surface_create_similar(cairo_get_target(old_cairo), CAIRO_CONTENT_COLOR_ALPHA, xStep, yStep);
         if (cairo_surface_status(surface))
@@ -1000,9 +1005,32 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
         cairo = cairo_create(surface);
         cairo_surface_destroy(surface);
         setContextAntialias(cairo, antialias);
-        // Draw repeats of the pattern on the same surface as needed.
-        for (int i = 0; i < bbox_width; i += xStep) {
-            for (int j = 0; j < bbox_height; j += yStep) {
+        // To tile this pattern, imagine having a grid with cell size xStep and yStep.
+        // At each grid point we should draw the pattern's content.
+        // If the pattern is larger than the grid cell size, then each cell will need to know
+        // the content from neighboring cells that may spill into it.
+        //
+        // Our current pattern has the bounding box set at the coordinate origin.
+        // This means that it only contains content in the positive x and y directions.
+        // That means that the only cells that can spill into the one we are drawing are
+        // those that are in the negative x and y directions from it. Once we've gone
+        // in those directions far enough to move past the bounding box, there are no
+        // more potential overlaps.
+        //
+        // One more wrinkle is that the bounding box may be offset from the base cell.
+        // So, we determine the smallest positive offset and start drawing/moving from there.
+        double x = std::fmod(box.x1, xStep);
+        if (x < 0) {
+            x += xStep;
+        }
+        double y = std::fmod(box.y1, yStep);
+        if (y < 0) {
+            y += yStep;
+        }
+        // Moving down and to the left, draw repeats of the pattern on the same surface
+        // as needed.
+        for (double i = -x; i < bbox_width; i += xStep) {
+            for (double j = -y; j < bbox_height; j += yStep) {
                 cairo_rectangle(cairo, 0, 0, xStep, yStep);
                 cairo_matrix_init_identity(&matrix);
                 cairo_matrix_translate(&matrix, i, j);
@@ -1017,22 +1045,6 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
         cairo_destroy(cairo);
         if (cairo_pattern_status(pattern))
             return false;
-        // Now, determine the cell pattern translation.
-        // We've drawn our cell at the origin, but it should be offset to
-        // where the bounding box is (modulo our cell size).
-        // We make this translation as small as possible (in absolute size)
-        // so that cairo doesn't fail (?).
-        cairo_matrix_init_identity(&matrix);
-        double x = std::fmod(box.x1, xStep);
-        if (abs(x) > xStep / 2) {
-            x += (x < 0) ? xStep : -xStep;
-        }
-        double y = std::fmod(box.y1, yStep);
-        if (abs(y) > yStep / 2) {
-            y += (y < 0) ? yStep : -yStep;
-        }
-        cairo_matrix_translate(&matrix, -x, -y);
-        cairo_pattern_set_matrix(pattern, &matrix);
     } else {
         // This pattern should be translated to
         // match where the boundary box starts.
