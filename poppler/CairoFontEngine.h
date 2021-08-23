@@ -68,10 +68,16 @@ protected:
 
 //------------------------------------------------------------------------
 
+struct CairoFtLibrary
+{
+    FT_Library ft_lib;
+    std::mutex mutex;
+};
+
 class CairoFreeTypeFont : public CairoFont
 {
 public:
-    static CairoFreeTypeFont *create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs);
+    static CairoFreeTypeFont *create(GfxFont *gfxFont, XRef *xref, CairoFtLibrary *lib, bool useCIDs);
     ~CairoFreeTypeFont() override;
 
 private:
@@ -104,7 +110,7 @@ class CairoFontEngine
 {
 public:
     // Create a font engine.
-    CairoFontEngine(FT_Library libA);
+    CairoFontEngine(CairoFtLibrary *libA);
     ~CairoFontEngine();
     CairoFontEngine(const CairoFontEngine &) = delete;
     CairoFontEngine &operator=(const CairoFontEngine &other) = delete;
@@ -113,7 +119,7 @@ public:
 
 private:
     CairoFont *fontCache[cairoFontCacheSize];
-    FT_Library lib;
+    CairoFtLibrary *lib;
     bool useCIDs;
     mutable std::recursive_mutex mutex;
 };

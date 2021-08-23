@@ -36,6 +36,7 @@
 #define CAIROOUTPUTDEV_H
 
 #include <cairo-ft.h>
+#include "CairoFontEngine.h"
 #include "OutputDev.h"
 #include "TextOutputDev.h"
 #include "GfxState.h"
@@ -292,7 +293,7 @@ protected:
 
     PDFDoc *doc; // the current document
 
-    static FT_Library ft_lib;
+    static CairoFtLibrary ft_lib;
     static std::once_flag ft_lib_once_flag;
 
     CairoFontEngine *fontEngine;
