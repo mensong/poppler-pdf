@@ -976,6 +976,8 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
     cairo = cairo_create(surface);
     cairo_surface_destroy(surface);
     copyAntialias(cairo, old_cairo);
+    // Make sure the new cairo object has the new line width (maybe updateAll for the entire graphics state?)
+    updateLineWidth(state);
 
     box.x1 = bbox[0];
     box.y1 = bbox[1];
@@ -1016,14 +1018,23 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
     // draw our current pattern into it.
     if (std::fabs(bbox_width - xStep) / xStep > 0.001 || std::fabs(bbox_height - yStep) / yStep > 0.001) {
         // Now, make a surface the size of the repeating cell on which to draw the pattern.
-        surface_width = xStep * scaleX;
-        surface_height = yStep * scaleY;
+        // Because the surface needs to have integer dimensions, we need to determine a new scale
+        // for the combined pattern and rescale our single cell pattern appropriately when drawing it.
+        double old_scaleX = scaleX;
+        double old_scaleY = scaleY;
+        double rescale_x, rescale_y;
+        surface_width = ceil(xStep * scaleX);
+        surface_height = ceil(yStep * scaleY);
+        scaleX = surface_width / xStep;
+        scaleY = surface_height / yStep;
+        rescale_x = old_scaleX / scaleX;
+        rescale_y = old_scaleY / scaleY;
         surface = cairo_surface_create_similar(cairo_get_target(old_cairo), CAIRO_CONTENT_COLOR_ALPHA, surface_width, surface_height);
         if (cairo_surface_status(surface))
             return false;
         cairo = cairo_create(surface);
         cairo_surface_destroy(surface);
-        setContextAntialias(cairo, antialias);
+        copyAntialias(cairo, old_cairo);
         // To tile this pattern, imagine having a grid with cell size xStep and yStep.
         // At each grid point we should draw the pattern's content.
         // If the pattern is larger than the grid cell size, then each cell will need to know
@@ -1051,7 +1062,7 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
         for (double i = -x; i < bbox_width; i += xStep) {
             for (double j = -y; j < bbox_height; j += yStep) {
                 cairo_rectangle(cairo, 0, 0, surface_width, surface_height);
-                cairo_matrix_init_identity(&matrix);
+                cairo_matrix_init_scale(&matrix, rescale_x, rescale_y);
                 cairo_matrix_translate(&matrix, i * scaleX, j * scaleY);
                 cairo_pattern_set_matrix(pattern, &matrix);
                 cairo_set_source(cairo, pattern);
