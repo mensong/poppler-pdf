@@ -260,7 +260,7 @@ static TextPage *poppler_page_get_text_page(PopplerPage *page)
                                     -1, -1, -1, -1, false, /* printing */
                                     nullptr, nullptr);
         page->page->display(gfx);
-        text_dev->endPage();
+        text_dev->endPage(nullptr);
 
         page->text = text_dev->takeText();
         delete gfx;

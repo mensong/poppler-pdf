@@ -280,7 +280,7 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     }
 }
 
-void CairoOutputDev::endPage()
+void CairoOutputDev::endPage(GfxState *state)
 {
     if (textPage) {
         textPage->endPage();

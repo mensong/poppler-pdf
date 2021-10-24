@@ -74,7 +74,7 @@ public:
     void startPage(int pageNum, GfxState *state, XRef *xref) override;
 
     // End a page.
-    void endPage() override;
+    void endPage(GfxState *state) override;
 
     //----- path painting
     void stroke(GfxState *state) override;

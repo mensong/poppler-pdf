@@ -256,7 +256,7 @@ public:
     void startPage(int pageNum, GfxState *state, XRef *xref) override;
 
     // End a page.
-    void endPage() override;
+    void endPage(GfxState* state) override;
 
     // add a background image to the list of background images,
     // as this seems to be done outside other processing. takes ownership of img.

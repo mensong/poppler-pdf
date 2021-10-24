@@ -500,9 +500,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
         out->clip(state);
         state->clearPath();
     }
-#ifdef USE_CMS
-    initDisplayProfile();
-#endif
 }
 
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, Gfx *gfxA)
@@ -560,42 +557,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
         out->clip(state);
         state->clearPath();
     }
-#ifdef USE_CMS
-    initDisplayProfile();
-#endif
 }
-
-#ifdef USE_CMS
-
-#    include <lcms2.h>
-
-void Gfx::initDisplayProfile()
-{
-    Object catDict = xref->getCatalog();
-    if (catDict.isDict()) {
-        Object outputIntents = catDict.dictLookup("OutputIntents");
-        if (outputIntents.isArray() && outputIntents.arrayGetLength() == 1) {
-            Object firstElement = outputIntents.arrayGet(0);
-            if (firstElement.isDict()) {
-                Object profile = firstElement.dictLookup("DestOutputProfile");
-                if (profile.isStream()) {
-                    Stream *iccStream = profile.getStream();
-                    int length = 0;
-                    unsigned char *profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
-                    auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf, length));
-                    if (!hp) {
-                        error(errSyntaxWarning, -1, "read ICCBased color space profile error");
-                    } else {
-                        state->setDisplayProfile(hp);
-                    }
-                    gfree(profBuf);
-                }
-            }
-        }
-    }
-}
-
-#endif
 
 Gfx::~Gfx()
 {
@@ -603,7 +565,7 @@ Gfx::~Gfx()
         popStateGuard();
     }
     if (!subPage) {
-        out->endPage();
+        out->endPage(state);
     }
     // There shouldn't be more saves, but pop them if there were any
     while (state->hasSaves()) {

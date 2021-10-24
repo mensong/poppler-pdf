@@ -158,9 +158,6 @@ public:
 
     // Constructor for a sub-page object.
     Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data) = nullptr, void *abortCheckCbkDataA = nullptr, Gfx *gfxA = nullptr);
-#ifdef USE_CMS
-    void initDisplayProfile();
-#endif
     ~Gfx();
 
     Gfx(const Gfx &) = delete;

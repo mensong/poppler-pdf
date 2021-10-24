@@ -58,6 +58,10 @@ public:
         entries.emplace(entries.begin(), key, std::unique_ptr<Item> { item });
     }
 
+    void invalidate()
+    {
+        entries.clear();
+    }
 private:
     std::vector<std::pair<Key, std::unique_ptr<Item>>> entries;
 };

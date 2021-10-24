@@ -48,7 +48,7 @@ PreScanOutputDev::~PreScanOutputDev() { }
 
 void PreScanOutputDev::startPage(int /*pageNum*/, GfxState * /*state*/, XRef * /*xref*/) { }
 
-void PreScanOutputDev::endPage() { }
+void PreScanOutputDev::endPage(GfxState *state) { }
 
 void PreScanOutputDev::stroke(GfxState *state)
 {

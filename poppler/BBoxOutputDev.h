@@ -22,7 +22,7 @@ public:
     BBoxOutputDev();
     BBoxOutputDev(bool text, bool vector, bool raster);
     BBoxOutputDev(bool text, bool vector, bool raster, bool lwidth);
-    void endPage() override;
+    void endPage(GfxState *state) override;
     void stroke(GfxState *state) override;
     void fill(GfxState *state) override;
     void eoFill(GfxState *state) override;

@@ -112,6 +112,8 @@ static GooString defaultrgbprofilename;
 static GfxLCMSProfilePtr defaultrgbprofile;
 static GooString defaultcmykprofilename;
 static GfxLCMSProfilePtr defaultcmykprofile;
+static GooString proofingprofilename;
+static GfxLCMSProfilePtr proofingprofile;
 #endif
 static char sep[2] = "-";
 static bool forceNum = false;
@@ -172,6 +174,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-defaultgrayprofile", argGooString, &defaultgrayprofilename, 0, "ICC color profile to use as the DefaultGray color space" },
                                    { "-defaultrgbprofile", argGooString, &defaultrgbprofilename, 0, "ICC color profile to use as the DefaultRGB color space" },
                                    { "-defaultcmykprofile", argGooString, &defaultcmykprofilename, 0, "ICC color profile to use as the DefaultCMYK color space" },
+                                   { "-proofingprofile", argGooString, &proofingprofilename, 0, "ICC color profile to use as the proofing profile" },
 #endif
                                    { "-sep", argString, sep, sizeof(sep), "single character separator between name and page number, default - " },
                                    { "-forcenum", argFlag, &forceNum, 0, "force page number even if there is only one page " },
@@ -368,7 +371,7 @@ static void processPageJobs()
         pthread_mutex_unlock(&pageJobMutex);
 
         // process the job
-        SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
+        SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : jpegcmyk ? splashModeDeviceN8 : splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
         splashOut->setFontAntialias(fontAntialias);
         splashOut->setVectorAntialias(vectorAntialias);
         splashOut->setEnableFreeType(enableFreeType);
@@ -536,6 +539,9 @@ int main(int argc, char *argv[])
     // write PPM files
     if (jpegcmyk || overprint) {
         globalParams->setOverprintPreview(true);
+    }
+
+    if (jpegcmyk) {
         splashClearColor(paperColor);
     } else {
         paperColor[0] = 255;
@@ -559,7 +565,7 @@ int main(int argc, char *argv[])
         // Note: In contrast to pdftops we do not fail if a non-matching ICC profile is supplied.
         //       Doing so would be pretentious, since SplashOutputDev by default assumes sRGB, even for
         //       the CMYK and Mono cases.
-        if (jpegcmyk || overprint) {
+        if (jpegcmyk) {
             if (profilecolorspace != cmsSigCmykData) {
                 fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a CMYK profile.\n", displayprofilename.c_str());
             }
@@ -591,11 +597,15 @@ int main(int argc, char *argv[])
             return kOtherError;
         }
     }
+    if (!proofingprofilename.toStr().empty()) {
+        // TODO: add checks
+        proofingprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(proofingprofilename.c_str(), "r"));
+    }
 #endif
 
 #ifndef UTILS_USE_PTHREADS
 
-    splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, paperColor, true, thinLineMode);
+    splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : jpegcmyk ? splashModeDeviceN8 : splashModeRGB8, 4, false, paperColor, true, thinLineMode);
 
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
@@ -605,6 +615,7 @@ int main(int argc, char *argv[])
     splashOut->setDefaultGrayProfile(defaultgrayprofile);
     splashOut->setDefaultRGBProfile(defaultrgbprofile);
     splashOut->setDefaultCMYKProfile(defaultcmykprofile);
+    splashOut->addProofingProfile(proofingprofile);
 #    endif
     splashOut->startDoc(doc.get());
 

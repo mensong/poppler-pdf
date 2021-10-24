@@ -1230,7 +1230,7 @@ void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef *xref)
     pages->pageHeight = static_cast<int>(state->getPageHeight());
 }
 
-void HtmlOutputDev::endPage()
+void HtmlOutputDev::endPage(GfxState *state)
 {
     Links *linksList = docPage->getLinks();
     for (int i = 0; i < linksList->getNumLinks(); ++i) {

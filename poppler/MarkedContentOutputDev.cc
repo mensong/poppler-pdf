@@ -51,7 +51,7 @@ void MarkedContentOutputDev::startPage(int pageNum, GfxState *state, XRef *xref)
     }
 }
 
-void MarkedContentOutputDev::endPage()
+void MarkedContentOutputDev::endPage(GfxState *state)
 {
     pageWidth = pageHeight = 0.0;
 }

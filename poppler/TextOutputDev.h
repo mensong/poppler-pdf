@@ -803,7 +803,7 @@ public:
     void startPage(int pageNum, GfxState *state, XRef *xref) override;
 
     // End a page.
-    void endPage() override;
+    void endPage(GfxState *state) override;
 
     //----- save/restore graphics state
     void restoreState(GfxState *state) override;

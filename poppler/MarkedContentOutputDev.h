@@ -100,7 +100,7 @@ public:
     bool needCharCount() override { return false; }
 
     void startPage(int pageNum, GfxState *state, XRef *xref) override;
-    void endPage() override;
+    void endPage(GfxState *state) override;
 
     void beginForm(Ref id) override;
     void endForm(Ref id) override;

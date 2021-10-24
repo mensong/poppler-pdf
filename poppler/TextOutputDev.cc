@@ -4819,7 +4819,7 @@ void TextSelectionPainter::endPage()
     }
 
     out->restoreState(state);
-    out->endPage();
+    out->endPage(state);
 }
 
 void TextWord::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style)
@@ -5709,7 +5709,7 @@ void TextOutputDev::startPage(int pageNum, GfxState *state, XRef *xref)
     text->startPage(state);
 }
 
-void TextOutputDev::endPage()
+void TextOutputDev::endPage(GfxState *state)
 {
     text->endPage();
     text->coalesce(physLayout, fixedPitch, doHTML);
