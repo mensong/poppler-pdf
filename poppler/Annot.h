@@ -56,6 +56,7 @@
 
 #include "AnnotStampImageHelper.h"
 #include "Object.h"
+#include "Catalog.h"
 #include "poppler_private_export.h"
 
 class XRef;
@@ -1576,11 +1577,13 @@ public:
 
         Type getType() const;
         Params *getParams() const;
+        const Object &getAsset() const;
 
     private:
         // optional
         Type type; // Subtype
         std::unique_ptr<Params> params; // Params
+        Object asset; // Asset
     };
 
     class POPPLER_PRIVATE_EXPORT Configuration
@@ -1615,25 +1618,6 @@ public:
 
     class Content;
 
-    class POPPLER_PRIVATE_EXPORT Asset
-    {
-    public:
-        Asset();
-        ~Asset();
-
-        Asset(const Asset &) = delete;
-        Asset &operator=(const Asset &) = delete;
-
-        const GooString *getName() const;
-        Object *getFileSpec() const;
-
-    private:
-        friend class AnnotRichMedia::Content;
-
-        std::unique_ptr<GooString> name;
-        Object fileSpec;
-    };
-
     class POPPLER_PRIVATE_EXPORT Content
     {
     public:
@@ -1646,16 +1630,18 @@ public:
         int getConfigurationsCount() const;
         Configuration *getConfiguration(int index) const;
 
-        int getAssetsCount() const;
-        Asset *getAsset(int index) const;
+        // The intended interface: name -> asset
+        Object getAsset(const GooString *name) const;
+
+        // For iterating over assets. (qt copy)
+        const NameTree *getAssets() const;
 
     private:
         // optional
         Configuration **configurations; // Configurations
         int nConfigurations;
 
-        Asset **assets; // Assets
-        int nAssets;
+        NameTree assets;
     };
 
     class POPPLER_PRIVATE_EXPORT Activation

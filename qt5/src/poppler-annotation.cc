@@ -742,6 +742,12 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
                                     instance->setParams(params);
                                 }
 
+                                const Object &annotAsset = annotInstance->getAsset();
+                                if (!annotAsset.isNone()) {
+                                    FileSpec *fileSpec = new FileSpec(&annotAsset);
+                                    instance->setAsset(new EmbeddedFile(*new EmbeddedFileData(fileSpec)));
+                                }
+
                                 instances.append(instance);
                             }
 
@@ -754,24 +760,21 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
                     content->setConfigurations(configurations);
                 }
 
-                const int assetsCount = annotContent->getAssetsCount();
+                const NameTree *assetTree = annotContent->getAssets();
+                const int assetsCount = assetTree->numEntries();
                 if (assetsCount > 0) {
-                    QList<RichMediaAnnotation::Asset *> assets;
+                    QHash<QString, EmbeddedFile *> assets;
 
                     for (int i = 0; i < assetsCount; ++i) {
-                        const AnnotRichMedia::Asset *annotAsset = annotContent->getAsset(i);
+                        const Object *annotAsset = assetTree->getValue(i);
+                        const GooString *annotAssetName = assetTree->getName(i);
                         if (!annotAsset)
                             continue;
 
-                        RichMediaAnnotation::Asset *asset = new RichMediaAnnotation::Asset;
+                        FileSpec *fileSpec = new FileSpec(annotAsset);
+                        EmbeddedFile *asset = new EmbeddedFile(*new EmbeddedFileData(fileSpec));
 
-                        if (annotAsset->getName())
-                            asset->setName(UnicodeParsedString(annotAsset->getName()));
-
-                        FileSpec *fileSpec = new FileSpec(annotAsset->getFileSpec());
-                        asset->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(fileSpec)));
-
-                        assets.append(asset);
+                        assets.insert(UnicodeParsedString(annotAssetName), asset);
                     }
 
                     content->setAssets(assets);
@@ -4483,6 +4486,7 @@ public:
 
     RichMediaAnnotation::Instance::Type type;
     RichMediaAnnotation::Params *params;
+    EmbeddedFile *asset;
 };
 
 RichMediaAnnotation::Instance::Instance() : d(new Private) { }
@@ -4508,6 +4512,17 @@ void RichMediaAnnotation::Instance::setParams(RichMediaAnnotation::Params *param
 RichMediaAnnotation::Params *RichMediaAnnotation::Instance::params() const
 {
     return d->params;
+}
+
+void RichMediaAnnotation::Instance::setAsset(EmbeddedFile *asset)
+{
+    delete d->asset;
+    d->asset = asset;
+}
+
+EmbeddedFile *RichMediaAnnotation::Instance::asset() const
+{
+    return d->asset;
 }
 
 class RichMediaAnnotation::Configuration::Private
@@ -4565,45 +4580,6 @@ QList<RichMediaAnnotation::Instance *> RichMediaAnnotation::Configuration::insta
     return d->instances;
 }
 
-class RichMediaAnnotation::Asset::Private
-{
-public:
-    Private() : embeddedFile(nullptr) { }
-
-    ~Private() { delete embeddedFile; }
-
-    Private(const Private &) = delete;
-    Private &operator=(const Private &) = delete;
-
-    QString name;
-    EmbeddedFile *embeddedFile;
-};
-
-RichMediaAnnotation::Asset::Asset() : d(new Private) { }
-
-RichMediaAnnotation::Asset::~Asset() { }
-
-void RichMediaAnnotation::Asset::setName(const QString &name)
-{
-    d->name = name;
-}
-
-QString RichMediaAnnotation::Asset::name() const
-{
-    return d->name;
-}
-
-void RichMediaAnnotation::Asset::setEmbeddedFile(EmbeddedFile *embeddedFile)
-{
-    delete d->embeddedFile;
-    d->embeddedFile = embeddedFile;
-}
-
-EmbeddedFile *RichMediaAnnotation::Asset::embeddedFile() const
-{
-    return d->embeddedFile;
-}
-
 class RichMediaAnnotation::Content::Private
 {
 public:
@@ -4621,7 +4597,7 @@ public:
     Private &operator=(const Private &) = delete;
 
     QList<RichMediaAnnotation::Configuration *> configurations;
-    QList<RichMediaAnnotation::Asset *> assets;
+    QHash<QString, EmbeddedFile *> assets;
 };
 
 RichMediaAnnotation::Content::Content() : d(new Private) { }
@@ -4641,7 +4617,7 @@ QList<RichMediaAnnotation::Configuration *> RichMediaAnnotation::Content::config
     return d->configurations;
 }
 
-void RichMediaAnnotation::Content::setAssets(const QList<RichMediaAnnotation::Asset *> &assets)
+void RichMediaAnnotation::Content::setAssets(const QHash<QString, EmbeddedFile *> &assets)
 {
     qDeleteAll(d->assets);
     d->assets.clear();
@@ -4649,7 +4625,7 @@ void RichMediaAnnotation::Content::setAssets(const QList<RichMediaAnnotation::As
     d->assets = assets;
 }
 
-QList<RichMediaAnnotation::Asset *> RichMediaAnnotation::Content::assets() const
+QHash<QString, EmbeddedFile *> RichMediaAnnotation::Content::assets() const
 {
     return d->assets;
 }
