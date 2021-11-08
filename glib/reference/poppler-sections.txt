@@ -428,6 +428,7 @@ PopplerAnnotMarkup
 PopplerAnnotMovie
 PopplerAnnotScreen
 PopplerAnnotSquare
+PopplerAnnotInk
 PopplerAnnotText
 PopplerAnnotTextMarkup
 PopplerAnnotExternalDataType
@@ -488,6 +489,9 @@ poppler_annot_set_flags
 poppler_annot_set_rectangle
 poppler_annot_square_get_interior_color
 poppler_annot_square_new
+poppler_annot_ink_new
+poppler_annot_ink_set_ink_list
+poppler_annot_ink_get_ink_list_size
 poppler_annot_square_set_interior_color
 poppler_annot_text_get_icon
 poppler_annot_text_get_is_open
@@ -512,6 +516,7 @@ POPPLER_ANNOT_MARKUP
 POPPLER_ANNOT_MOVIE
 POPPLER_ANNOT_SCREEN
 POPPLER_ANNOT_SQUARE
+POPPLER_ANNOT_INK
 POPPLER_ANNOT_TEXT
 POPPLER_ANNOT_TEXT_MARKUP
 POPPLER_IS_ANNOT
@@ -523,6 +528,7 @@ POPPLER_IS_ANNOT_MARKUP
 POPPLER_IS_ANNOT_MOVIE
 POPPLER_IS_ANNOT_SCREEN
 POPPLER_IS_ANNOT_SQUARE
+POPPLER_IS_ANNOT_INK
 POPPLER_IS_ANNOT_TEXT
 POPPLER_IS_ANNOT_TEXT_MARKUP
 POPPLER_TYPE_ANNOT
@@ -539,6 +545,7 @@ POPPLER_TYPE_ANNOT_MARKUP_REPLY_TYPE
 POPPLER_TYPE_ANNOT_MOVIE
 POPPLER_TYPE_ANNOT_SCREEN
 POPPLER_TYPE_ANNOT_SQUARE
+POPPLER_TYPE_ANNOT_INK
 POPPLER_TYPE_ANNOT_TEXT
 POPPLER_TYPE_ANNOT_TEXT_MARKUP
 POPPLER_TYPE_ANNOT_TEXT_STATE
@@ -557,6 +564,7 @@ poppler_annot_markup_reply_type_get_type
 poppler_annot_movie_get_type
 poppler_annot_screen_get_type
 poppler_annot_square_get_type
+poppler_annot_ink_get_type
 poppler_annot_text_get_type
 poppler_annot_text_markup_get_type
 poppler_annot_text_state_get_type

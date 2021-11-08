@@ -337,6 +337,8 @@ Release 20.09.0:
          * Add accessor functions for PopplerAttachment
          * Deprecate PopplerAttachment GTime fields
          * Deprecate PopplerDocument date properties
+         * Add PopplerAnnotInk and related methods
+         * Support ink annotations in the glib demo
 
         utils:
          * pdftoppm: report error and exit if output file cannot be written
