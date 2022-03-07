@@ -103,6 +103,11 @@ public:
     void getCMYKLine(int y, SplashColorPtr line);
     unsigned char getAlpha(int x, int y);
 
+    // Get pointer into alpha buffer from given x and y values
+    unsigned char *alphaAt(int x, int y) { return alpha + y * static_cast<ptrdiff_t>(width) + x; }
+    // Get pointer into data buffer from given x_offset and y values
+    SplashColorPtr dataAt(int x_offset, int y) { return data + y * static_cast<ptrdiff_t>(rowSize) + x_offset; }
+
     // Caller takes ownership of the bitmap data.  The SplashBitmap
     // object is no longer valid -- the next call should be to the
     // destructor.

@@ -110,7 +110,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode
     data = (SplashColorPtr)gmallocn_checkoverflow(rowSize, height);
     if (data != nullptr) {
         if (!topDown) {
-            data += (height - 1) * rowSize;
+            data += (height - 1) * static_cast<ptrdiff_t>(rowSize);
             rowSize = -rowSize;
         }
         if (alphaA) {
@@ -132,17 +132,19 @@ SplashBitmap *SplashBitmap::copy(const SplashBitmap *src)
     SplashBitmap *result = new SplashBitmap(src->getWidth(), src->getHeight(), src->getRowPad(), src->getMode(), src->getAlphaPtr() != nullptr, src->getRowSize() >= 0, src->getSeparationList());
     SplashColorConstPtr dataSource = src->getDataPtr();
     unsigned char *dataDest = result->getDataPtr();
-    int amount = src->getRowSize();
+    size_t width = result->getWidth();
+    size_t height = result->getHeight();
+    ptrdiff_t amount = result->getRowSize();
     if (amount < 0) {
-        dataSource = dataSource + (src->getHeight() - 1) * amount;
-        dataDest = dataDest + (src->getHeight() - 1) * amount;
-        amount *= -src->getHeight();
+        dataSource += (height - 1) * amount;
+        dataDest += (height - 1) * amount;
+        amount *= -height;
     } else {
-        amount *= src->getHeight();
+        amount *= height;
     }
     memcpy(dataDest, dataSource, amount);
     if (src->getAlphaPtr() != nullptr) {
-        memcpy(result->getAlphaPtr(), src->getAlphaPtr(), src->getWidth() * src->getHeight());
+        memcpy(result->getAlphaPtr(), src->getAlphaPtr(), width * height);
     }
     return result;
 }
@@ -151,7 +153,7 @@ SplashBitmap::~SplashBitmap()
 {
     if (data) {
         if (rowSize < 0) {
-            gfree(data + (height - 1) * rowSize);
+            gfree(data + (height - 1) * static_cast<ptrdiff_t>(rowSize));
         } else {
             gfree(data);
         }
@@ -267,7 +269,7 @@ SplashError SplashBitmap::writeAlphaPGMFile(char *fileName)
         return splashErrOpenFile;
     }
     fprintf(f, "P5\n%d %d\n255\n", width, height);
-    fwrite(alpha, 1, width * height, f);
+    fwrite(alpha, 1, static_cast<size_t>(width) * static_cast<size_t>(height), f);
     fclose(f);
     return splashOk;
 }
@@ -281,41 +283,41 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel)
     }
     switch (mode) {
     case splashModeMono1:
-        p = &data[y * rowSize + (x >> 3)];
+        p = dataAt((x >> 3), y);
         pixel[0] = (p[0] & (0x80 >> (x & 7))) ? 0xff : 0x00;
         break;
     case splashModeMono8:
-        p = &data[y * rowSize + x];
+        p = dataAt(x, y);
         pixel[0] = p[0];
         break;
     case splashModeRGB8:
-        p = &data[y * rowSize + 3 * x];
+        p = dataAt(3 * x, y);
         pixel[0] = p[0];
         pixel[1] = p[1];
         pixel[2] = p[2];
         break;
     case splashModeXBGR8:
-        p = &data[y * rowSize + 4 * x];
+        p = dataAt(4 * x, y);
         pixel[0] = p[2];
         pixel[1] = p[1];
         pixel[2] = p[0];
         pixel[3] = p[3];
         break;
     case splashModeBGR8:
-        p = &data[y * rowSize + 3 * x];
+        p = dataAt(3 * x, y);
         pixel[0] = p[2];
         pixel[1] = p[1];
         pixel[2] = p[0];
         break;
     case splashModeCMYK8:
-        p = &data[y * rowSize + 4 * x];
+        p = dataAt(4 * x, y);
         pixel[0] = p[0];
         pixel[1] = p[1];
         pixel[2] = p[2];
         pixel[3] = p[3];
         break;
     case splashModeDeviceN8:
-        p = &data[y * rowSize + (SPOT_NCOMPS + 4) * x];
+        p = dataAt((SPOT_NCOMPS + 4) * x, y);
         for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
             pixel[cp] = p[cp];
         break;
@@ -324,7 +326,7 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel)
 
 unsigned char SplashBitmap::getAlpha(int x, int y)
 {
-    return alpha[y * width + x];
+    return *alphaAt(x, y);
 }
 
 SplashColorPtr SplashBitmap::takeData()
@@ -555,10 +557,10 @@ bool SplashBitmap::convertToXBGR(ConversionMode conversionMode)
         if (conversionMode != conversionOpaque) {
             // Copy the alpha channel into the fourth component so that XBGR becomes ABGR.
             const SplashColorPtr dbegin = data;
-            const SplashColorPtr dend = data + rowSize * height;
+            const SplashColorPtr dend = dataAt(0, height);
 
             unsigned char *const abegin = alpha;
-            unsigned char *const aend = alpha + width * height;
+            unsigned char *const aend = alphaAt(0, height);
 
             SplashColorPtr d = dbegin;
             unsigned char *a = abegin;
@@ -721,11 +723,12 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
     case splashModeBGR8: {
         unsigned char *row = new unsigned char[3 * width];
         for (int y = 0; y < height; y++) {
+            SplashColorPtr sourceRow = dataAt(0, y);
             // Convert into a PNG row
             for (int x = 0; x < width; x++) {
-                row[3 * x] = data[y * rowSize + x * 3 + 2];
-                row[3 * x + 1] = data[y * rowSize + x * 3 + 1];
-                row[3 * x + 2] = data[y * rowSize + x * 3];
+                row[3 * x] = sourceRow[x * 3 + 2];
+                row[3 * x + 1] = sourceRow[x * 3 + 1];
+                row[3 * x + 2] = sourceRow[x * 3];
             }
 
             if (!writer->writeRow(&row)) {
@@ -739,11 +742,12 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
     case splashModeXBGR8: {
         unsigned char *row = new unsigned char[3 * width];
         for (int y = 0; y < height; y++) {
+            SplashColorPtr sourceRow = dataAt(0, y);
             // Convert into a PNG row
             for (int x = 0; x < width; x++) {
-                row[3 * x] = data[y * rowSize + x * 4 + 2];
-                row[3 * x + 1] = data[y * rowSize + x * 4 + 1];
-                row[3 * x + 2] = data[y * rowSize + x * 4];
+                row[3 * x] = sourceRow[x * 4 + 2];
+                row[3 * x + 1] = sourceRow[x * 4 + 1];
+                row[3 * x + 2] = sourceRow[x * 4];
             }
 
             if (!writer->writeRow(&row)) {
@@ -774,9 +778,10 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
             for (int y = 0; y < height; y++) {
                 // Convert into a PNG row
                 for (int x = 0; x < width; x++) {
-                    row[3 * x] = data[y * rowSize + x];
-                    row[3 * x + 1] = data[y * rowSize + x];
-                    row[3 * x + 2] = data[y * rowSize + x];
+                    SplashColorPtr sourceValue = dataAt(x, y);
+                    row[3 * x] = *sourceValue;
+                    row[3 * x + 1] = *sourceValue;
+                    row[3 * x + 2] = *sourceValue;
                 }
 
                 if (!writer->writeRow(&row)) {
