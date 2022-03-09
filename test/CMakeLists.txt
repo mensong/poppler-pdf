@@ -134,3 +134,33 @@ if(ENABLE_LIBPNG OR ENABLE_LIBJPEG)
   unset(IMG_DIR)
   unset(INPUT_PDF)
 endif()
+
+if(FONTCONFIG_FOUND)
+  set(font_embedding_SRCS
+    font-embedding.cc
+    ../utils/parseargs.cc
+  )
+  add_executable(font-embedding ${font_embedding_SRCS})
+  target_link_libraries(font-embedding poppler)
+
+  set(INPUT_PDF ${TESTDATADIR}/unittestcases/xr01.pdf)
+  set(FONTS_DIR ${TESTDATADIR}/unittestcases/fonts)
+  set(FONT_EMBEDDING_PATH ${EXECUTABLE_OUTPUT_PATH}/font-embedding)
+
+  add_test(
+    NAME embedd-ttf
+    COMMAND ${FONT_EMBEDDING_PATH} ${INPUT_PDF} ${FONTS_DIR}/RobotoCondensed-Regular.ttf
+  )
+  add_test(
+    NAME embedd-otf
+    COMMAND ${FONT_EMBEDDING_PATH} ${INPUT_PDF} ${FONTS_DIR}/FreeSans.otf
+  )
+  add_test(
+    NAME embed-malformed-font
+    COMMAND ${FONT_EMBEDDING_PATH} ${INPUT_PDF} ${TESTDATADIR}/unittestcases/images/png-rgb8.png -fail
+  )
+
+  unset(FONT_EMBEDDING_PATH)
+  unset(FONTS_DIR)
+  unset(INPUT_PDF)
+endif()
