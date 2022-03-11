@@ -1030,8 +1030,9 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
         rescale_x = old_scaleX / scaleX;
         rescale_y = old_scaleY / scaleY;
         surface = cairo_surface_create_similar(cairo_get_target(old_cairo), CAIRO_CONTENT_COLOR_ALPHA, surface_width, surface_height);
-        if (cairo_surface_status(surface))
+        if (cairo_surface_status(surface)) {
             return false;
+        }
         cairo = cairo_create(surface);
         cairo_surface_destroy(surface);
         copyAntialias(cairo, old_cairo);
@@ -1073,8 +1074,9 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
         cairo_pattern_destroy(pattern);
         pattern = cairo_pattern_create_for_surface(cairo_get_target(cairo));
         cairo_destroy(cairo);
-        if (cairo_pattern_status(pattern))
+        if (cairo_pattern_status(pattern)) {
             return false;
+        }
         cairo_matrix_init_scale(&matrix, scaleX, scaleY);
         cairo_pattern_set_matrix(pattern, &matrix);
     } else {
