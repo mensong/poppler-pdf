@@ -485,6 +485,8 @@ err2:
 //------------------------------------------------------------------------
 
 static const cairo_user_data_key_t type3_font_key = { 0 };
+static const cairo_user_data_key_t output_dev_key = { 0 };
+static const cairo_user_data_key_t gfx_key = { 0 };
 
 typedef struct _type3_font_info
 {
@@ -501,6 +503,18 @@ static void _free_type3_font_info(void *closure)
 {
     type3_font_info_t *info = (type3_font_info_t *)closure;
     delete info;
+}
+
+static void _free_output_dev(void *closure)
+{
+    CairoOutputDev *output_dev = (CairoOutputDev *)closure;
+    delete output_dev;
+}
+
+static void _free_gfx(void *closure)
+{
+    Gfx *gfx = (Gfx *)closure;
+    delete gfx;
 }
 
 static cairo_status_t _init_type3_glyph(cairo_scaled_font_t *scaled_font, cairo_t *cr, cairo_font_extents_t *extents)
@@ -523,11 +537,9 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
 {
     Dict *charProcs;
     Object charProc;
-    CairoOutputDev *output_dev;
     cairo_matrix_t matrix, invert_y_axis;
     const double *mat;
     double wx, wy;
-    PDFRectangle box;
     type3_font_info_t *info;
     Gfx *gfx;
     cairo_status_t status;
@@ -535,7 +547,6 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     info = (type3_font_info_t *)cairo_font_face_get_user_data(cairo_scaled_font_get_font_face(scaled_font), &type3_font_key);
 
     std::shared_ptr<const GfxFont> font = info->font;
-    Dict *resDict = ((Gfx8BitFont *)font.get())->getResources();
     charProcs = ((Gfx8BitFont *)(info->font.get()))->getCharProcs();
     if (!charProcs) {
         return CAIRO_STATUS_USER_FONT_ERROR;
@@ -556,16 +567,12 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     cairo_matrix_multiply(&matrix, &matrix, &invert_y_axis);
     cairo_transform(cr, &matrix);
 
-    output_dev = new CairoOutputDev();
+    CairoOutputDev *output_dev = (CairoOutputDev *)cairo_font_face_get_user_data(cairo_scaled_font_get_font_face(scaled_font), &output_dev_key);
     output_dev->setCairo(cr);
-    output_dev->setPrinting(info->printing);
 
-    mat = font->getFontBBox();
-    box.x1 = mat[0];
-    box.y1 = mat[1];
-    box.x2 = mat[2];
-    box.y2 = mat[3];
-    gfx = new Gfx(info->doc, output_dev, resDict, &box, nullptr);
+    gfx = (Gfx *)cairo_font_face_get_user_data(cairo_scaled_font_get_font_face(scaled_font), &gfx_key);
+    gfx->saveState();
+
     output_dev->startDoc(info->doc, info->fontEngine);
     output_dev->startType3Render(gfx->getState(), gfx->getXRef());
     output_dev->setInType3Char(true);
@@ -586,6 +593,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
         metrics->width = bbox[2] - bbox[0];
         metrics->height = bbox[3] - bbox[1];
     }
+    gfx->restoreState();
 
     status = CAIRO_STATUS_SUCCESS;
 
@@ -595,9 +603,6 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     if (color && !output_dev->type3GlyphHasColor()) {
         status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
     }
-
-    delete gfx;
-    delete output_dev;
 
     return status;
 }
@@ -622,6 +627,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<const GfxFont> &gfx
     unsigned int codeToGIDLen;
     int i, j;
     char *name;
+    const double *mat;
 
     Dict *charProcs = ((Gfx8BitFont *)gfxFont.get())->getCharProcs();
     ref = *gfxFont->getID();
@@ -637,6 +643,20 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<const GfxFont> &gfx
     type3_font_info_t *info = new type3_font_info_t(gfxFont, doc, fontEngine, printing, xref);
 
     cairo_font_face_set_user_data(font_face, &type3_font_key, (void *)info, _free_type3_font_info);
+
+    CairoOutputDev *output_dev = new CairoOutputDev();
+    output_dev->setPrinting(info->printing);
+    cairo_font_face_set_user_data(font_face, &output_dev_key, (void *)output_dev, _free_output_dev);
+
+    Dict *resDict = ((Gfx8BitFont *)gfxFont.get())->getResources();
+    mat = gfxFont->getFontBBox();
+    PDFRectangle box;
+    box.x1 = mat[0];
+    box.y1 = mat[1];
+    box.x2 = mat[2];
+    box.y2 = mat[3];
+    Gfx *gfx = new Gfx(info->doc, output_dev, resDict, &box, nullptr);
+    cairo_font_face_set_user_data(font_face, &gfx_key, (void *)gfx, _free_gfx);
 
     char **enc = ((Gfx8BitFont *)gfxFont.get())->getEncoding();
     codeToGID = (int *)gmallocn(256, sizeof(int));
