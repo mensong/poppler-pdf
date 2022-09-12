@@ -182,3 +182,12 @@ trigger_pages:
   script:
     - 'curl --request POST --form "token=$WEB_PAGE_TRIGGER" --form ref=master https://gitlab.freedesktop.org/api/v4/projects/poppler%2Fpoppler-web-page/trigger/pipeline'
   cache: {}
+
+rendering_regression_tests:
+  stage: build
+  script:
+    - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
+    - mkdir -p build && cd build
+    - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data ..
+    - ninja
+    - python3 regtest/main.py -v run-tests --refs-dir=${TEST_DATA_URL} --docs-dir=${TEST_DATA_URL} tests
