@@ -190,4 +190,4 @@ rendering_regression_tests:
     - mkdir -p build && cd build
     - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data ..
     - ninja
-    - python3 regtest/main.py -v run-tests --refs-dir=${TEST_DATA_URL} --docs-dir=${TEST_DATA_URL} tests
+    - python3 ../regtest/main.py -v run-tests --refs-dir=${TEST_DATA_URL} --docs-dir=${TEST_DATA_URL} tests
