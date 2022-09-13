@@ -185,6 +185,11 @@ trigger_pages:
 
 rendering_regression_tests:
   stage: build
+  # This job shall only be triggered manually, because it is so time-consuming
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: always
+    - when: never
   script:
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
