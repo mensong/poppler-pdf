@@ -197,7 +197,7 @@ rendering_regression_tests:
     - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data ..
     - ninja
     # Download the test files from where they are on the internet
-    - python3 ../regtest/main.py download-files --files-dir=test-files list-of-test-files.txt
+    - python3 ../regtest/main.py download-files --files-dir=test-files ../regtest/list-of-test-files.txt
     # Create reference renderings
     # TODO: This ain't working: Right now we are creating the reference renderings
     # with the code that we want to test.
