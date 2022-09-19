@@ -22,7 +22,7 @@ from collections import deque
 import sys
 
 class InterruptibleQueue:
-    """Simpler implementation of Queue that uses wait with a timeout to make join interruptile"""
+    """Simpler implementation of Queue that uses wait with a timeout to make join interruptible"""
 
     def __init__(self):
         self._queue = deque()
