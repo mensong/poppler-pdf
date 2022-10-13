@@ -3965,7 +3965,7 @@ static bool isImageInterpolationRequired(int srcWidth, int srcHeight, int scaled
     if (interpolate || srcWidth == 0 || srcHeight == 0) {
         return true;
     }
-   
+
     /* When scale factor is >= 400% we don't interpolate. See bugs #25268, #9860 */
     if (scaledWidth / srcWidth >= 4 || scaledHeight / srcHeight >= 4 || dontInterpolate) {
         return false;
@@ -3975,7 +3975,8 @@ static bool isImageInterpolationRequired(int srcWidth, int srcHeight, int scaled
 }
 
 // Scale an image into a SplashBitmap.
-SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, bool interpolate, bool tilingPattern, bool forSoftmask)
+SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, bool interpolate, bool tilingPattern, 
+                                 bool forSoftmask)
 {
     SplashBitmap *dest;
 
