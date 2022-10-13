@@ -298,7 +298,7 @@ private:
     void blitMask(SplashBitmap *src, int xDest, int yDest, SplashClipResult clipRes);
     SplashError arbitraryTransformImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, SplashCoord *mat, bool interpolate,
                                         bool tilingPattern = false, bool forSoftmask = false);
-    SplashBitmap *scaleImage(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, bool interpolate, bool tilingPattern = false, 
+    SplashBitmap *scaleImage(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, bool interpolate, bool tilingPattern = false,
                                         bool forSoftmask = false);
     bool scaleImageYdownXdown(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     bool scaleImageYdownXup(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);

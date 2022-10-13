@@ -3975,7 +3975,7 @@ static bool isImageInterpolationRequired(int srcWidth, int srcHeight, int scaled
 }
 
 // Scale an image into a SplashBitmap.
-SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, bool interpolate, bool tilingPattern, 
+SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, bool interpolate, bool tilingPattern,
                                  bool forSoftmask)
 {
     SplashBitmap *dest;
