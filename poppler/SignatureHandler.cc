@@ -257,17 +257,14 @@ const SEC_ASN1Template TimeStampReq_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullp
                                                    { 0, 0, nullptr, 0 } };
 */
 
+// The context that will be created in setNSSDir
+// This can leak if setNSSDir is called from outside of any of the constructors.
+NSSInitContext *context;
+
 // a dummy, actually
 static char *passwordCallback(PK11SlotInfo * /*slot*/, PRBool /*retry*/, void *arg)
 {
     return PL_strdup(static_cast<char *>(arg));
-}
-
-static void shutdownNss()
-{
-    if (NSS_Shutdown() != SECSuccess) {
-        fprintf(stderr, "NSS_Shutdown failed: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
-    }
 }
 
 // SEC_StringToOID() and NSS_CMSSignerInfo_AddUnauthAttr() are
@@ -730,6 +727,7 @@ static std::optional<std::string> getDefaultFirefoxCertDB()
 }
 
 std::string SignatureHandler::sNssDir;
+// std::atomic_uint SignatureHandler::sNssCounter;
 
 /**
  * Initialise NSS
@@ -747,35 +745,30 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
         return;
     }
 
-    setNssDirCalled = true;
-
-    atexit(shutdownNss);
-
-    bool initSuccess = false;
     if (nssDir.getLength() > 0) {
-        initSuccess = (NSS_Init(nssDir.c_str()) == SECSuccess);
+        context = NSS_InitContext(nssDir.c_str(), "", "", SECMOD_DB, nullptr, NSS_INIT_READONLY);
         sNssDir = nssDir.toStr();
     } else {
         const std::optional<std::string> certDBPath = getDefaultFirefoxCertDB();
         if (!certDBPath) {
-            initSuccess = (NSS_Init("sql:/etc/pki/nssdb") == SECSuccess);
+            context = NSS_InitContext("sql:/etc/pki/nssdb", "", "", SECMOD_DB, nullptr, NSS_INIT_READONLY);
             sNssDir = "sql:/etc/pki/nssdb";
         } else {
-            initSuccess = (NSS_Init(certDBPath->c_str()) == SECSuccess);
+            context = NSS_InitContext(certDBPath->c_str(), "", "", SECMOD_DB, nullptr, NSS_INIT_READONLY);
             sNssDir = *certDBPath;
         }
-        if (!initSuccess) {
+        if (!context) {
             GooString homeNssDb(getenv("HOME"));
             homeNssDb.append("/.pki/nssdb");
-            initSuccess = (NSS_Init(homeNssDb.c_str()) == SECSuccess);
+            context = NSS_InitContext(homeNssDb.c_str(), "", "", SECMOD_DB, nullptr, NSS_INIT_READONLY);
             sNssDir = homeNssDb.toStr();
-            if (!initSuccess) {
+            if (!context) {
                 NSS_NoDB_Init(nullptr);
             }
         }
     }
 
-    if (initSuccess) {
+    if (context) {
         // Make sure NSS root certificates module is loaded
         SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);
     }
@@ -823,7 +816,6 @@ SignatureHandler::SignatureHandler() : hash_length(), digest_alg_tag(), CMSitem(
 
 HASHContext *SignatureHandler::initHashContext()
 {
-
     SECItem usedAlgorithm = NSS_CMSSignedData_GetDigestAlgs(CMSSignedData)[0]->algorithm;
     hash_length = digestLength(SECOID_FindOIDTag(&usedAlgorithm));
     HASH_HashType hashType;
@@ -858,6 +850,12 @@ SignatureHandler::~SignatureHandler()
     }
 
     free(temp_certs);
+
+    if (NSS_IsInitialized()) {
+        if (NSS_ShutdownContext(context) != SECSuccess) {
+            fprintf(stderr, "NSS_Shutdown failed: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
+        }
+    }
 }
 
 NSSCMSMessage *SignatureHandler::CMS_MessageCreate(SECItem *cms_item)
