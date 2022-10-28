@@ -68,7 +68,10 @@ public:
     // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb
     // If you don't want a custom NSS dir and the default entries are fine for you, not calling this function is fine
     // If wanted, this has to be called before doing signature validation calls
-    static void setNSSDir(const GooString &nssDir);
+    static NSSInitContext *setNSSDir(const GooString &nssDir);
+
+    // To release the context created by setNSSDir
+    static void shutdownContext(NSSInitContext *context);
 
     // Gets the currently in use NSS dir
     static std::string getNSSDir();
@@ -107,6 +110,7 @@ private:
     NSSCMSSignerInfo *CMSSignerInfo;
     CERTCertificate *signing_cert;
     CERTCertificate **temp_certs;
+    NSSInitContext *context;
 
     static std::string sNssDir;
 };

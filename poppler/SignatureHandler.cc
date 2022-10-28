@@ -257,10 +257,6 @@ const SEC_ASN1Template TimeStampReq_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullp
                                                    { 0, 0, nullptr, 0 } };
 */
 
-// The context that will be created in setNSSDir
-// This can leak if setNSSDir is called from outside of any of the constructors.
-NSSInitContext *context;
-
 // a dummy, actually
 static char *passwordCallback(PK11SlotInfo * /*slot*/, PRBool /*retry*/, void *arg)
 {
@@ -727,22 +723,17 @@ static std::optional<std::string> getDefaultFirefoxCertDB()
 }
 
 std::string SignatureHandler::sNssDir;
-// std::atomic_uint SignatureHandler::sNssCounter;
 
 /**
  * Initialise NSS
  */
-void SignatureHandler::setNSSDir(const GooString &nssDir)
+NSSInitContext *SignatureHandler::setNSSDir(const GooString &nssDir)
 {
-    static bool setNssDirCalled = false;
+    NSSInitContext *context = nullptr;
 
     if (NSS_IsInitialized() && nssDir.getLength() > 0) {
         error(errInternal, 0, "You need to call setNSSDir before signature validation related operations happen");
-        return;
-    }
-
-    if (setNssDirCalled) {
-        return;
+        return context;
     }
 
     if (nssDir.getLength() > 0) {
@@ -772,7 +763,17 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
         // Make sure NSS root certificates module is loaded
         SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);
     }
+
+    return context;
 }
+
+void SignatureHandler::shutdownContext(NSSInitContext *context)
+{
+    if (NSS_ShutdownContext(context) != SECSuccess) {
+        fprintf(stderr, "NSS_Shutdown failed: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
+    }
+}
+
 
 std::string SignatureHandler::getNSSDir()
 {
@@ -788,7 +789,7 @@ void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const c
 
 SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
 {
-    setNSSDir({});
+    context = setNSSDir({});
     CMSitem.data = p7;
     CMSitem.len = p7_length;
     CMSMessage = CMS_MessageCreate(&CMSitem);
@@ -802,7 +803,7 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_cont
 SignatureHandler::SignatureHandler(const char *certNickname, SECOidTag digestAlgTag)
     : hash_length(digestLength(digestAlgTag)), digest_alg_tag(digestAlgTag), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
 {
-    setNSSDir({});
+    context = setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname);
     hash_context = HASH_Create(HASH_GetHashTypeByOidTag(digestAlgTag));
@@ -810,7 +811,7 @@ SignatureHandler::SignatureHandler(const char *certNickname, SECOidTag digestAlg
 
 SignatureHandler::SignatureHandler() : hash_length(), digest_alg_tag(), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
 {
-    setNSSDir({});
+    context = setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
 }
 
@@ -852,9 +853,7 @@ SignatureHandler::~SignatureHandler()
     free(temp_certs);
 
     if (NSS_IsInitialized()) {
-        if (NSS_ShutdownContext(context) != SECSuccess) {
-            fprintf(stderr, "NSS_Shutdown failed: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
-        }
+        shutdownContext(context);
     }
 }
 
