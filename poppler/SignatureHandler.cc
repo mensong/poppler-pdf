@@ -774,7 +774,6 @@ void SignatureHandler::shutdownContext(NSSInitContext *context)
     }
 }
 
-
 std::string SignatureHandler::getNSSDir()
 {
     return sNssDir;
