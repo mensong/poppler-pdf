@@ -786,7 +786,7 @@ void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const c
     PasswordFunction = f;
 }
 
-SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
+SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr), context(nullptr)
 {
     context = setNSSDir({});
     CMSitem.data = p7;
@@ -800,7 +800,7 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_cont
 }
 
 SignatureHandler::SignatureHandler(const char *certNickname, SECOidTag digestAlgTag)
-    : hash_length(digestLength(digestAlgTag)), digest_alg_tag(digestAlgTag), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
+    : hash_length(digestLength(digestAlgTag)), digest_alg_tag(digestAlgTag), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr), context(nullptr)
 {
     context = setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
@@ -808,7 +808,7 @@ SignatureHandler::SignatureHandler(const char *certNickname, SECOidTag digestAlg
     hash_context = HASH_Create(HASH_GetHashTypeByOidTag(digestAlgTag));
 }
 
-SignatureHandler::SignatureHandler() : hash_length(), digest_alg_tag(), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
+SignatureHandler::SignatureHandler() : hash_length(), digest_alg_tag(), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr), context(nullptr)
 {
     context = setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
@@ -851,7 +851,7 @@ SignatureHandler::~SignatureHandler()
 
     free(temp_certs);
 
-    if (NSS_IsInitialized()) {
+    if (context) {
         shutdownContext(context);
     }
 }
