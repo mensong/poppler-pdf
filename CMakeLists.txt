@@ -463,6 +463,9 @@ if(FONTCONFIG_FOUND)
   add_definitions(${FONTCONFIG_DEFINITIONS})
   include_directories(SYSTEM ${FONTCONFIG_INCLUDE_DIR})
   set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
+  set(poppler_SRCS ${poppler_SRCS}
+    poppler/FontEmbeddingUtils.cc
+  )
 endif()
 
 if(JPEG_FOUND)
