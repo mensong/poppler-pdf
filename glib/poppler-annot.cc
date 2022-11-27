@@ -487,6 +487,38 @@ static void poppler_annot_screen_finalize(GObject *object)
         poppler_action_free(annot_screen->action);
         annot_screen->action = nullptr;
     }
+    if (annot_screen->cursor_entering_action) {
+        poppler_action_free(annot_screen->cursor_entering_action);
+        annot_screen->cursor_entering_action = nullptr;
+    }
+    if (annot_screen->cursor_leaving_action) {
+        poppler_action_free(annot_screen->cursor_leaving_action);
+        annot_screen->cursor_leaving_action = nullptr;
+    }
+    if (annot_screen->mouse_pressed_action) {
+        poppler_action_free(annot_screen->mouse_pressed_action);
+        annot_screen->mouse_pressed_action = nullptr;
+    }
+    if (annot_screen->mouse_released_action) {
+        poppler_action_free(annot_screen->mouse_released_action);
+        annot_screen->mouse_released_action = nullptr;
+    }
+    if (annot_screen->page_opening_action) {
+        poppler_action_free(annot_screen->page_opening_action);
+        annot_screen->page_opening_action = nullptr;
+    }
+    if (annot_screen->page_closing_action) {
+        poppler_action_free(annot_screen->page_closing_action);
+        annot_screen->page_closing_action = nullptr;
+    }
+    if (annot_screen->page_visible_action) {
+        poppler_action_free(annot_screen->page_visible_action);
+        annot_screen->page_visible_action = nullptr;
+    }
+    if (annot_screen->page_invisible_action) {
+        poppler_action_free(annot_screen->page_invisible_action);
+        annot_screen->page_invisible_action = nullptr;
+    }
 
     G_OBJECT_CLASS(poppler_annot_screen_parent_class)->finalize(object);
 }
