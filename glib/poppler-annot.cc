@@ -119,6 +119,14 @@ struct _PopplerAnnotScreen
     PopplerAnnot parent_instance;
 
     PopplerAction *action;
+    PopplerAction *cursor_entering_action;
+    PopplerAction *cursor_leaving_action;
+    PopplerAction *mouse_pressed_action;
+    PopplerAction *mouse_released_action;
+    PopplerAction *page_opening_action;
+    PopplerAction *page_closing_action;
+    PopplerAction *page_visible_action;
+    PopplerAction *page_invisible_action;
 };
 
 struct _PopplerAnnotScreenClass
@@ -1944,6 +1952,79 @@ PopplerMovie *poppler_annot_movie_get_movie(PopplerAnnotMovie *poppler_annot)
 PopplerAction *poppler_annot_screen_get_action(PopplerAnnotScreen *poppler_annot)
 {
     return poppler_annot->action;
+}
+
+/**
+ * poppler_annot_screen_get_additional_action:
+ * @poppler_annot: a #PopplerAnnotScreen
+ * @type: the type of additional action
+ *
+ * Retrieves the action (#PopplerAction) that shall be performed when
+ * an additional action is triggered on @poppler_annot, or %NULL.
+ *
+ * Return value: (transfer none): the action to perform. The returned
+ *               object is owned by @field and should not be freed.
+ *
+ *
+ * Since: 22.12.0
+ */
+PopplerAction *poppler_annot_screen_get_additional_action(PopplerAnnotScreen *poppler_annot, PopplerAdditionalActionType type)
+{
+    Annot::AdditionalActionsType screen_action;
+    PopplerAction **action;
+    AnnotScreen *annot_screen;
+
+    switch (type) {
+    case POPPLER_ADDITIONAL_ACTION_CURSOR_ENTERING:
+        screen_action = Annot::actionCursorEntering;
+        action = &poppler_annot->cursor_entering_action;
+        break;
+    case POPPLER_ADDITIONAL_ACTION_CURSOR_LEAVING:
+        screen_action = Annot::actionCursorLeaving;
+        action = &poppler_annot->cursor_leaving_action;
+        break;
+    case POPPLER_ADDITIONAL_ACTION_MOUSE_PRESSED:
+        screen_action = Annot::actionMousePressed;
+        action = &poppler_annot->mouse_pressed_action;
+        break;
+    case POPPLER_ADDITIONAL_ACTION_MOUSE_RELEASED:
+        screen_action = Annot::actionMouseReleased;
+        action = &poppler_annot->mouse_released_action;
+        break;
+    case POPPLER_ADDITIONAL_ACTION_PAGE_OPENING:
+        screen_action = Annot::actionPageOpening;
+        action = &poppler_annot->page_opening_action;
+        break;
+    case POPPLER_ADDITIONAL_ACTION_PAGE_CLOSING:
+        screen_action = Annot::actionPageClosing;
+        action = &poppler_annot->page_closing_action;
+        break;
+    case POPPLER_ADDITIONAL_ACTION_PAGE_VISIBLE:
+        screen_action = Annot::actionPageVisible;
+        action = &poppler_annot->page_visible_action;
+        break;
+    case POPPLER_ADDITIONAL_ACTION_PAGE_INVISIBLE:
+        screen_action = Annot::actionPageInvisible;
+        action = &poppler_annot->page_invisible_action;
+        break;
+    default:
+        g_return_val_if_reached(nullptr);
+        return nullptr;
+    }
+
+    if (*action) {
+        return *action;
+    }
+
+    annot_screen = static_cast<AnnotScreen *>(POPPLER_ANNOT(poppler_annot)->annot);
+    std::unique_ptr<LinkAction> link_action = annot_screen->getAdditionalAction(screen_action);
+    if (!link_action) {
+        return nullptr;
+    }
+
+    *action = _poppler_action_new(nullptr, link_action.get(), nullptr);
+
+    return *action;
 }
 
 /* PopplerAnnotLine */

@@ -312,6 +312,8 @@ POPPLER_PUBLIC
 GType poppler_annot_screen_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
 PopplerAction *poppler_annot_screen_get_action(PopplerAnnotScreen *poppler_annot);
+POPPLER_PUBLIC
+PopplerAction *poppler_annot_screen_get_additional_action(PopplerAnnotScreen *poppler_annot, PopplerAdditionalActionType type);
 
 /* PopplerAnnotLine */
 POPPLER_PUBLIC
