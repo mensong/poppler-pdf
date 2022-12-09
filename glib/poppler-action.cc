@@ -548,7 +548,23 @@ static void build_reset_form(PopplerAction *action, const LinkResetForm *link)
 
 static void build_rendition(PopplerAction *action, const LinkRendition *link)
 {
-    action->rendition.op = link->getOperation();
+    switch (link->getOperation()) {
+    case LinkRendition::NoRendition:
+        action->rendition.op = POPPLER_ACTION_RENDITION_NONE;
+        break;
+    case LinkRendition::PlayRendition:
+        action->rendition.op = POPPLER_ACTION_RENDITION_PLAY;
+        break;
+    case LinkRendition::StopRendition:
+        action->rendition.op = POPPLER_ACTION_RENDITION_STOP;
+        break;
+    case LinkRendition::PauseRendition:
+        action->rendition.op = POPPLER_ACTION_RENDITION_PAUSE;
+        break;
+    case LinkRendition::ResumeRendition:
+        action->rendition.op = POPPLER_ACTION_RENDITION_RESUME;
+        break;
+    }
     if (link->getMedia()) {
         action->rendition.media = _poppler_media_new(link->getMedia());
     }
