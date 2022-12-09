@@ -2312,3 +2312,28 @@ gboolean poppler_annot_stamp_set_custom_image(PopplerAnnotStamp *poppler_annot, 
 
     return TRUE;
 }
+
+/**
+ * poppler_annot_screen_is_referenced_by_rendition:
+ * @poppler_annot: a #PopplerAnnotScreen
+ * @rendition: a #PopplerAtionRendition
+ *
+ * Checks whether the screen annotation specified by @rendition is @poppler_annot
+ *
+ * Return value: %TRUE, if @rendition specifies @poppler_annot, %FALSE otherwise
+ *
+ *
+ * Since: 22.12.0
+ */
+gboolean poppler_annot_screen_is_referenced_by_rendition(PopplerAnnotScreen *poppler_annot, PopplerActionRendition *rendition)
+{
+    auto rendition_extended = reinterpret_cast<PopplerActionRenditionExtended*>(rendition);
+
+    if (rendition_extended->annotRef == Ref::INVALID() || !poppler_annot->parent_instance.annot->getHasRef()) {
+        return FALSE;
+    } else if (rendition_extended->annotRef != poppler_annot->parent_instance.annot->getRef()) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
