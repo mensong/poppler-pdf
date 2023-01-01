@@ -73,7 +73,7 @@ public:
     // Gets the currently in use NSS dir
     static std::string getNSSDir();
 
-    static void setNSSPasswordCallback(const std::function<char *(const char *)> &f);
+    static void setNSSPasswordCallback(const std::function<char *(const char *, bool)> &f);
 
 private:
     typedef struct

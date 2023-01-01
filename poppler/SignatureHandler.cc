@@ -787,9 +787,9 @@ std::string SignatureHandler::getNSSDir()
     return sNssDir;
 }
 
-static std::function<char *(const char *)> PasswordFunction;
+static std::function<char *(const char *, bool)> PasswordFunction;
 
-void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const char *)> &f)
+void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const char *, bool)> &f)
 {
     PasswordFunction = f;
 }
@@ -1215,11 +1215,11 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     return std::unique_ptr<GooString>(signature);
 }
 
-static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool /*retry*/, void * /*arg*/)
+static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool retry, void * /*arg*/)
 {
     const char *name = PK11_GetTokenName(slot);
     if (PasswordFunction) {
-        return PasswordFunction(name);
+        return PasswordFunction(name, retry);
     }
     return nullptr;
 }

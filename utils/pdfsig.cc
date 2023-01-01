@@ -185,16 +185,14 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
     bool wrongPassword = false;
     bool passwordNeeded = false;
     std::string failedTokenName;
-    auto passwordCallback = [&passwordNeeded, &wrongPassword, &failedTokenName](const char *tokenName) -> char * {
-        static bool firstTime = true;
-        if (!firstTime) {
+    auto passwordCallback = [&passwordNeeded, &wrongPassword, &failedTokenName](const char *tokenName, bool retry) -> char * {
+        if (retry) {
             wrongPassword = true;
             if (tokenName) {
                 failedTokenName = std::string(tokenName);
             }
             return nullptr;
         }
-        firstTime = false;
         if (nssPassword.getLength() > 0) {
             return strdup(nssPassword.c_str());
         } else {

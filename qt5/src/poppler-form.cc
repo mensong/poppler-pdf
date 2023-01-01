@@ -1174,7 +1174,7 @@ std::function<QString(const QString &)> nssPasswordCall;
 void setNSSPasswordCallback(const std::function<char *(const char *)> &f)
 {
 #ifdef ENABLE_NSS3
-    SignatureHandler::setNSSPasswordCallback(f);
+    SignatureHandler::setNSSPasswordCallback([=](const char *name, bool) -> char * { return f(name); });
 #else
     qWarning() << "setNSSPasswordCallback called but this poppler is built without NSS support";
     (void)f;
