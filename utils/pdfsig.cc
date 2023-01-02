@@ -180,7 +180,7 @@ static void print_version_usage(bool usage)
     }
 }
 
-static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *error)
+static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *error, char *nickname = nullptr)
 {
     bool wrongPassword = false;
     bool passwordNeeded = false;
@@ -199,7 +199,7 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
         }
     };
     SignatureHandler::setNSSPasswordCallback(passwordCallback);
-    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates(nickname);
     SignatureHandler::setNSSPasswordCallback({});
     if (passwordNeeded) {
         *error = true;
@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
 
         bool getCertsError;
         // We need to call this otherwise NSS spins forever
-        getAvailableSigningCertificates(&getCertsError);
+        getAvailableSigningCertificates(&getCertsError, certNickname);
         if (getCertsError) {
             return 2;
         }
