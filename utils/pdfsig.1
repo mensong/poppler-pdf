@@ -38,7 +38,7 @@ prefix. If not specified the other search locations described in
 are used.
 .TP
 .B \-nss-pwd "password"
-Specify the password needed to access the NSS database (if any).
+PIN/password of token that contains the signing certificate (if any). May refer to the internal NSS database, to a smart card, or to an HSM. The -nick argument determines which token is used.
 .TP
 .B \-nocert
 Do not validate the certificate.
