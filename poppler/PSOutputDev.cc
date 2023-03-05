@@ -1991,8 +1991,25 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
             case gfxFontLocEmbedded:
                 switch (fontLoc->fontType) {
                 case fontType1:
-                    // this assumes that the PS font name matches the PDF font name
-                    psName = font->getEmbeddedFontName() ? font->getEmbeddedFontName()->copy() : new GooString();
+                    {
+                        // Check whether it is a base font or not.
+                        // If not, and since we have checked fontIDs already,
+                        // we play safe and assume to face a unique font that has
+                        // not been embedded yet. As such we make a unique ps
+                        // font name.
+                        bool isbasefont = false;
+                        for (i = 0; i < 14; ++i) {
+                            if (font->getEmbeddedFontName()->cmp(psBase14SubstFonts[i].psName) == 0) {
+                                isbasefont = true;
+                                break;
+                            }
+                        }
+                        if (!isbasefont) {
+                            psName = makePSFontName(font, &fontLoc->embFontID);
+                        } else {
+                            psName = font->getEmbeddedFontName()->copy();
+                        }
+                    }
                     setupEmbeddedType1Font(&fontLoc->embFontID, psName);
                     break;
                 case fontType1C:
@@ -2142,11 +2159,6 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
     int start[4];
     bool binMode;
     bool writePadding = true;
-
-    // check if font is already embedded
-    if (!fontNames.emplace(psName->toStr()).second) {
-        return;
-    }
 
     // get the font stream and info
     Object obj1, obj2, obj3;
