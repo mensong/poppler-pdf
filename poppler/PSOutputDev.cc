@@ -54,6 +54,7 @@
 #include <climits>
 #include <algorithm>
 #include <array>
+#include <regex>
 #include "goo/GooString.h"
 #include "poppler-config.h"
 #include "GlobalParams.h"
@@ -2183,9 +2184,38 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
     } else {
         strObj.streamReset();
     }
+
     // copy ASCII portion of font
-    for (i = 0; i < length1 && (c = strObj.streamGetChar()) != EOF; ++i) {
-        writePSChar(c);
+    {
+        std::vector<char> chars;
+        chars.resize(length1);
+        int actuallength1 = strObj.getStream()->doGetChars(length1,
+                reinterpret_cast<unsigned char*>(&chars[0]));
+        std::string asciiportion(chars.begin(), chars.begin()+actuallength1);
+
+        // Changing the FontName of a Type1 font is not so easy, since in
+        // principle it is mostly valid Postscript, which is copied verbatim
+        // to the resulting Postscript file. However, many fonts seem to
+        // follow the blueprint as described in Adobe's "Adobe Type 1 Font
+        // Format" manual. In particular, within the encrypted "eexec" portion
+        // these fonts contain code like
+        //      dup /FontName get exch definefont pop
+        // As such the /FontName is registered in fontdict. And the current
+        // machinery of "pdfMakeFont" in setupFont, which follows this embedding
+        // of a Type1 font, relies on this behavior as well. As such we need to
+        // change /FontName when it is defined.
+        //
+        // In what follows we match FoFiType1::parse's behavior to determine
+        // the embedded /FontName, i.e., we search for a newline that starts
+        // with "/FontName" succeeded by the font name.
+        if (psName->getLength()) {
+            std::string newasciiportion = std::regex_replace(asciiportion,
+                    std::regex("^/FontName[\\s]+/[^\\s]+[\\s]+def", std::regex::multiline),
+                    std::string("/FontName /") + psName->toStr() + std::string(" def"));
+            asciiportion = newasciiportion;
+        }
+
+        writePS(asciiportion.c_str());
     }
 
     // figure out if encrypted portion is binary or ASCII
