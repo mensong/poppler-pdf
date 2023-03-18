@@ -149,7 +149,7 @@ static bool useAIACertFetch = false;
 static GooString newSignatureFieldName;
 
 static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path to directory of libnss3 database" },
-                                   { "-nss-pwd", argGooString, &nssPassword, 0, "password to access the NSS database (if any)" },
+                                   { "-nss-pwd", argGooString, &nssPassword, 0, "PIN/password of token that contains the signing certificate (if any)" },
                                    { "-nocert", argFlag, &dontVerifyCert, 0, "don't perform certificate validation" },
                                    { "-no-ocsp", argFlag, &noOCSPRevocationCheck, 0, "don't perform online OCSP certificate revocation check" },
                                    { "-aia", argFlag, &useAIACertFetch, 0, "use Authority Information Access (AIA) extension for certificate fetching" },
@@ -181,36 +181,41 @@ static void print_version_usage(bool usage)
     }
 }
 
-static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *error)
+static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *error, char *nickname = nullptr)
 {
     bool wrongPassword = false;
     bool passwordNeeded = false;
-    auto passwordCallback = [&passwordNeeded, &wrongPassword](const char *) -> char * {
-        static bool firstTime = true;
-        if (!firstTime) {
+    std::string failedTokenName;
+    auto passwordCallback = [&passwordNeeded, &wrongPassword, &failedTokenName](const char *tokenName, bool retry) -> char * {
+        if (retry) {
             wrongPassword = true;
+            if (tokenName) {
+                failedTokenName = std::string(tokenName);
+            }
             return nullptr;
         }
-        firstTime = false;
         if (nssPassword.getLength() > 0) {
             return strdup(nssPassword.c_str());
         } else {
             passwordNeeded = true;
+            if (tokenName) {
+                failedTokenName = std::string(tokenName);
+            }
             return nullptr;
         }
     };
     SignatureHandler::setNSSPasswordCallback(passwordCallback);
-    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates(nickname);
     SignatureHandler::setNSSPasswordCallback({});
     if (passwordNeeded) {
         *error = true;
-        printf("Password is needed to access the NSS database.\n");
+        printf("Password is needed to access token \"%s\".\n", failedTokenName.c_str());
         printf("\tPlease provide one with -nss-pwd.\n");
         return {};
     }
     if (wrongPassword) {
         *error = true;
-        printf("Password was not accepted to open the NSS database.\n");
+        printf("Password was not accepted to open token \"%s\".\n", failedTokenName.c_str());
         printf("\tPlease provide the correct one with -nss-pwd.\n");
         return {};
     }
@@ -350,7 +355,7 @@ int main(int argc, char *argv[])
 
         bool getCertsError;
         // We need to call this otherwise NSS spins forever
-        getAvailableSigningCertificates(&getCertsError);
+        getAvailableSigningCertificates(&getCertsError, certNickname);
         if (getCertsError) {
             return 2;
         }

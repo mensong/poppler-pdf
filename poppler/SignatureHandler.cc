@@ -657,7 +657,7 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCerti
     certInfo->setSubjectInfo(getEntityInfo(&cert->subject));
 
     // nickname (as a handle to refer to the CERT later)
-    certInfo->setNickName(GooString(cert->dbnickname));
+    certInfo->setNickName(GooString(cert->nickname));
 
     // public key info
     X509CertificateInfo::PublicKeyInfo pkInfo;
@@ -792,9 +792,9 @@ std::string SignatureHandler::getNSSDir()
     return sNssDir;
 }
 
-static std::function<char *(const char *)> PasswordFunction;
+static std::function<char *(const char *, bool)> PasswordFunction;
 
-void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const char *)> &f)
+void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const char *, bool)> &f)
 {
     PasswordFunction = f;
 }
@@ -1214,51 +1214,38 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     return std::unique_ptr<GooString>(signature);
 }
 
-static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool /*retry*/, void * /*arg*/)
+static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool retry, void * /*arg*/)
 {
     const char *name = PK11_GetTokenName(slot);
     if (PasswordFunction) {
-        return PasswordFunction(name);
+        return PasswordFunction(name, retry);
     }
     return nullptr;
 }
 
-std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailableSigningCertificates()
+std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailableSigningCertificates(char *nicknameOrPkcs11uri)
 {
     // set callback, in case one of the slots has a password set
     PK11_SetPasswordFunc(GetPasswordFunction);
     setNSSDir({});
 
     std::vector<std::unique_ptr<X509CertificateInfo>> certsList;
-    PK11SlotList *slotList = PK11_GetAllTokens(CKM_INVALID_MECHANISM, PR_FALSE, PR_FALSE, nullptr);
-    if (slotList) {
-        for (PK11SlotListElement *slotElement = slotList->head; slotElement; slotElement = slotElement->next) {
-            PK11SlotInfo *pSlot = slotElement->slot;
-            if (PK11_NeedLogin(pSlot)) {
-                SECStatus nRet = PK11_Authenticate(pSlot, PR_TRUE, nullptr);
-                // PK11_Authenticate may fail in case the a slot has not been initialized.
-                // this is the case if the user has a new profile, so that they have never
-                // added a personal certificate.
-                if (nRet != SECSuccess && PORT_GetError() != SEC_ERROR_IO) {
-                    continue;
+    CERTCertList *certs = PK11_FindCertsFromNickname(nicknameOrPkcs11uri ? nicknameOrPkcs11uri : "pkcs11:type=cert", nullptr);
+    if (certs) {
+        while (!PR_CLIST_IS_EMPTY(&certs->list)) {
+            PRCList *node = PR_LIST_HEAD(&certs->list);
+            CERTCertificate *certCandidate = ((CERTCertListNode *)node)->cert;
+            if (certCandidate) {
+                SECKEYPrivateKey *privKey = PK11_FindPrivateKeyFromCert(certCandidate->slot, certCandidate, nullptr);
+                if (privKey) {
+                    certsList.push_back(getCertificateInfoFromCERT(certCandidate));
+                    SECKEY_DestroyPrivateKey(privKey);
                 }
+                CERT_DestroyCertificate(certCandidate);
             }
-
-            SECKEYPrivateKeyList *privKeyList = PK11_ListPrivateKeysInSlot(pSlot);
-            if (privKeyList) {
-                for (SECKEYPrivateKeyListNode *curPri = PRIVKEY_LIST_HEAD(privKeyList); !PRIVKEY_LIST_END(curPri, privKeyList) && curPri != nullptr; curPri = PRIVKEY_LIST_NEXT(curPri)) {
-                    if (curPri->key) {
-                        CERTCertificate *cert = PK11_GetCertFromPrivateKey(curPri->key);
-                        if (cert) {
-                            certsList.push_back(getCertificateInfoFromCERT(cert));
-                            CERT_DestroyCertificate(cert);
-                        }
-                    }
-                }
-                SECKEY_DestroyPrivateKeyList(privKeyList);
-            }
+            PR_REMOVE_LINK(node);
         }
-        PK11_FreeSlotList(slotList);
+        CERT_DestroyCertList(certs);
     }
 
     PK11_SetPasswordFunc(nullptr);
