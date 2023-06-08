@@ -510,8 +510,9 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
 
     const SysFontInfo *fi = sysFonts->find(familyAndStyle, false, false, filesToIgnore);
     if (fi) {
-        return FamilyStyleFontSearchResult(fi->path->toStr(), fi->fontNum);
+        return FamilyStyleFontSearchResult(fi->path->toStr(), fi->fontNum, false /*windows don't really with current code paths gives us any substitutions*/);
     }
+    // Try look up using fontFiles
 
     return {};
 }

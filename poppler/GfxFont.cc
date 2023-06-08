@@ -2355,6 +2355,23 @@ double GfxCIDFont::getWidth(char *s, int len) const
     return getWidth(cid);
 }
 
+bool GfxFont::isBase14Font(std::string_view family, std::string_view style)
+{
+    std::string key;
+    key.reserve(family.size() + (style.empty() ? 0 : style.size() + 1));
+    key.append(family);
+    if (!style.empty()) {
+        key.push_back('-');
+        key.append(style);
+    }
+    for (const auto &font : base14SubstFonts) {
+        if (font == key) {
+            return true;
+        }
+    }
+    return false;
+}
+
 //------------------------------------------------------------------------
 // GfxFontDict
 //------------------------------------------------------------------------
