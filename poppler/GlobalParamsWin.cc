@@ -510,9 +510,23 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
 
     const SysFontInfo *fi = sysFonts->find(familyAndStyle, false, false, filesToIgnore);
     if (fi) {
-        return FamilyStyleFontSearchResult(fi->path->toStr(), fi->fontNum, false /*windows don't really with current code paths gives us any substitutions*/);
+        return FamilyStyleFontSearchResult(fi->path->toStr(), fi->fontNum, false /* With the current code paths, windows don't give us any substitutions. */);
     }
-    // Try look up using fontFiles
+    // Let's see if we have it in our own table of fonts
+    // in our own lookup table, we have fontFamily-fontStyle and fontFamily,fontStyle
+    std::vector<std::string> names;
+    if (fontStyle.empty()) {
+        names.push_back(fontFamily);
+    } else {
+        names.push_back(fontFamily + "-" + fontStyle);
+        names.push_back(fontFamily + "," + fontStyle);
+    }
+    for (const auto &name : names) {
+        auto it = fontFiles.find(name);
+        if (it != fontFiles.end()) {
+            return FamilyStyleFontSearchResult(it->second, 0, true);
+        }
+    }
 
     return {};
 }

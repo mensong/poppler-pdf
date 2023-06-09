@@ -2778,9 +2778,9 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         return {};
     }
 
-    // If caller asked for a one of the base14 fonts and got something named differently
+    // If caller asked for one of the base14 fonts and got something named differently
     // we are only having something close anyways, so don't embed the font program (and
-    // when we don't embed the font program, also don't embed widths and the CIDToGIDMap
+    // when we don't embed the font program, also don't embed widths and the CIDToGIDMap)
     bool embedActualFont = !(fontSubstitutedIn && GfxFont::isBase14Font(fontFamily, fontStyle));
 
     XRef *xref = doc->getXRef();
