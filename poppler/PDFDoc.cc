@@ -1652,22 +1652,13 @@ void PDFDoc::writeHeader(OutStream *outStr, int major, int minor)
     outStr->printf("%%%c%c%c%c\n", 0xE2, 0xE3, 0xCF, 0xD3);
 }
 
-bool PDFDoc::markDictionary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
+bool PDFDoc::markDictionary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> alreadyMarkedDicts)
 {
-    bool deleteSet = false;
-    if (!alreadyMarkedDicts) {
-        alreadyMarkedDicts = new std::set<Dict *>;
-        deleteSet = true;
-    }
-
-    if (alreadyMarkedDicts->find(dict) != alreadyMarkedDicts->end()) {
+    if (alreadyMarkedDicts.find(dict) != alreadyMarkedDicts.end()) {
         error(errSyntaxWarning, -1, "PDFDoc::markDictionary: Found recursive dicts");
-        if (deleteSet) {
-            delete alreadyMarkedDicts;
-        }
         return true;
     } else {
-        alreadyMarkedDicts->insert(dict);
+        alreadyMarkedDicts.insert(dict);
     }
 
     for (int i = 0; i < dict->getLength(); i++) {
@@ -1686,14 +1677,10 @@ bool PDFDoc::markDictionary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int
         }
     }
 
-    if (deleteSet) {
-        delete alreadyMarkedDicts;
-    }
-
     return true;
 }
 
-bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
+bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> alreadyMarkedDicts)
 {
     Array *array;
 
@@ -1795,7 +1782,7 @@ bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBo
     return true;
 }
 
-bool PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
+bool PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> alreadyMarkedDicts)
 {
     pageDict->remove("OpenAction");
     pageDict->remove("Outlines");
@@ -1814,7 +1801,7 @@ bool PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigne
     return true;
 }
 
-bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldPageNum, int newPageNum, std::set<Dict *> *alreadyMarkedDicts)
+bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldPageNum, int newPageNum, std::set<Dict *> alreadyMarkedDicts)
 {
     bool modified = false;
     Object annots = annotsObj->fetch(getXRef());
