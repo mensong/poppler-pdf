@@ -2327,7 +2327,7 @@ gboolean poppler_annot_stamp_set_custom_image(PopplerAnnotStamp *poppler_annot, 
  */
 gboolean poppler_annot_screen_is_referenced_by_rendition(PopplerAnnotScreen *poppler_annot, PopplerActionRendition *rendition)
 {
-    auto rendition_extended = reinterpret_cast<PopplerActionRenditionExtended*>(rendition);
+    auto rendition_extended = reinterpret_cast<PopplerActionRenditionExtended *>(rendition);
 
     if (rendition_extended->annotRef == Ref::INVALID() || !poppler_annot->parent_instance.annot->getHasRef()) {
         return FALSE;

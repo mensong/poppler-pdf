@@ -109,7 +109,7 @@ void poppler_action_free(PopplerAction *action)
         return;
     }
 
-    action_extended = reinterpret_cast<PopplerActionExtended*>(action);
+    action_extended = reinterpret_cast<PopplerActionExtended *>(action);
 
     /* Action specific stuff */
     switch (action->type) {
@@ -179,7 +179,7 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
     g_return_val_if_fail(action != nullptr, NULL);
 
     /* Do a straight copy of the memory */
-    action_extended = reinterpret_cast<PopplerActionExtended*>(action);
+    action_extended = reinterpret_cast<PopplerActionExtended *>(action);
     new_action_extended = g_slice_dup(PopplerActionExtended, action_extended);
     new_action = &new_action_extended->action;
 

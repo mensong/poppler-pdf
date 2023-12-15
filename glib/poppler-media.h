@@ -77,7 +77,6 @@ gboolean poppler_media_save_to_callback(PopplerMedia *poppler_media, PopplerMedi
 POPPLER_PUBLIC
 gboolean poppler_media_is_same_media(PopplerMedia *poppler_media, PopplerMedia *other);
 
-
 G_END_DECLS
 
 #endif /* __POPPLER_MEDIA_H__ */

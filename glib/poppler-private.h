@@ -151,8 +151,7 @@ typedef struct
     Ref annotRef;
 } PopplerActionRenditionExtended;
 
-typedef union
-{
+typedef union {
     /*< private >*/
     PopplerAction action;
     PopplerActionRenditionExtended rendition;
