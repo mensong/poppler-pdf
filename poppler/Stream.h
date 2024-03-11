@@ -227,8 +227,11 @@ public:
     // reached.
     virtual unsigned int discardChars(unsigned int n);
 
-    // Get current position in file.
-    virtual Goffset getPos() = 0;
+    virtual Goffset getPos() final
+    {
+        // Account for unread buffered data.
+        return getRawPos() - (bufEnd - bufPtr);
+    }
 
     // Go to a position in the stream.  If <dir> is negative, the
     // position is from the end of the file; otherwise the position is
@@ -270,6 +273,8 @@ public:
 
     // May always return less than nChars, only a return of 0 indicates an EOF.
     virtual int getSomeChars(int nChars, unsigned char *buffer) = 0;
+
+    virtual Goffset getRawPos() = 0;
 
 private:
     friend class Object; // for incRef/decRef
@@ -403,7 +408,6 @@ public:
     void reset() override;
     void close() override;
 
-    Goffset getPos() override { return bufPos + (bufPtr - buf); }
     void setPos(Goffset pos, int dir = 0) override;
     Goffset getStart() override { return start; }
     void moveStart(Goffset delta) override;
@@ -412,6 +416,7 @@ public:
     void unfilteredReset() override { reset(); }
 
     int getSomeChars(int nChars, unsigned char *buffer) override;
+    Goffset getRawPos() override { return bufPos; }
 
 protected:
     Goffset start;
@@ -442,7 +447,6 @@ public:
     explicit FilterStream(Stream *strA);
     ~FilterStream() override;
     void close() override;
-    Goffset getPos() override { return str->getPos(); }
     void setPos(Goffset pos, int dir = 0) override;
     BaseStream *getBaseStream() override { return str->getBaseStream(); }
     Stream *getUndecodedStream() override { return str->getUndecodedStream(); }
@@ -452,6 +456,8 @@ public:
 
     int getUnfilteredChar() override { return str->getUnfilteredChar(); }
     void unfilteredReset() override { str->unfilteredReset(); }
+
+    Goffset getRawPos() override { return str->getRawPos(); }
 
 protected:
     Stream *str;
@@ -524,13 +530,13 @@ public:
 
     bool isOk() { return ok; }
 
-    Goffset getPos() override { return str->getPos(); }
     void setPos(Goffset pos, int dir = 0) override;
     void reset() override { str->reset(); }
 
     bool isBinary(bool last = true) const override { return str->isBinary(last); };
 
     int getSomeChars(int nChars, unsigned char *buffer) override;
+    Goffset getRawPos() override { return str->getPos(); }
 
 private:
     bool getNextLine();
@@ -564,7 +570,6 @@ public:
     void reset() override;
     void close() override;
 
-    Goffset getPos() override { return bufPos + (bufPtr - buf); }
     void setPos(Goffset pos, int dir = 0) override;
     Goffset getStart() override { return start; }
     void moveStart(Goffset delta) override;
@@ -576,12 +581,13 @@ public:
     void setNeedsEncryptionOnSave(bool needsEncryptionOnSaveA) { needsEncryptionOnSave = needsEncryptionOnSaveA; }
 
     int getSomeChars(int nChars, unsigned char *buffer) override;
+    Goffset getRawPos() override { return offset; }
+
 private:
     GooFile *file;
     Goffset offset;
     Goffset start;
     bool limited;
-    Goffset bufPos;
     Goffset savePos;
     bool saved;
     bool needsEncryptionOnSave; // Needed for FileStreams that point to "external" files
@@ -603,7 +609,6 @@ public:
     void reset() override;
     void close() override;
 
-    Goffset getPos() override { return strPos; }
     void setPos(Goffset pos, int dir = 0) override;
     Goffset getStart() override { return start; }
     void moveStart(Goffset delta) override;
@@ -612,6 +617,7 @@ public:
     void unfilteredReset() override { reset(); }
 
     int getSomeChars(int nChars, unsigned char *buffer) override;
+    Goffset getRawPos() override { return strPos; }
 
 private:
     CachedFile *cc;
@@ -663,8 +669,6 @@ public:
 
     void close() override { }
 
-    Goffset getPos() override { return (int)(memPtr - mem); }
-
     void setPos(Goffset pos, int dir = 0) override
     {
         Goffset i;
@@ -712,6 +716,7 @@ public:
         memPtr += nChars;
         return nChars;
     }
+    Goffset getRawPos() override { return (int)(memPtr - mem); }
 
 protected:
     T *mem;
@@ -764,7 +769,6 @@ public:
     StreamKind getKind() const override { return str->getKind(); }
     void reset() override;
 
-    Goffset getPos() override;
     void setPos(Goffset pos, int dir = 0) override;
     Goffset getStart() override;
     void moveStart(Goffset delta) override;
@@ -776,6 +780,7 @@ public:
     void restore();
 
     int getSomeChars(int nChars, unsigned char *buffer) override;
+    Goffset getRawPos() override;
 
 private:
     Stream *str;
@@ -1450,10 +1455,10 @@ public:
     Dict *getDict() override { return nullptr; }
     Object *getDictObject() override { return nullptr; }
 
-    Goffset getPos() override;
     void setPos(Goffset pos, int dir = 0) override;
 
     polyfillGetSomeChars(getRawChar);
+    Goffset getRawPos() override;
 
 private:
     int getRawChar();

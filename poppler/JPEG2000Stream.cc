@@ -93,7 +93,7 @@ void JPXStream::close()
     }
 }
 
-Goffset JPXStream::getPos()
+Goffset JPXStream::getRawPos()
 {
     return priv->counter * priv->ncomps + priv->ccounter;
 }

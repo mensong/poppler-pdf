@@ -34,13 +34,13 @@ public:
     StreamKind getKind() const override { return strJPX; }
     void reset() override;
     void close() override;
-    Goffset getPos() override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
     void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode) override;
 
     int readStream(int nChars, unsigned char *buffer) { return str->doGetChars(nChars, buffer); }
     int getSomeChars(int nChars, unsigned char *buffer) override;
+    Goffset getRawPos() override;
 
 private:
     JPXStreamPrivate *priv;
