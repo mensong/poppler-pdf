@@ -131,7 +131,7 @@ class POPPLER_PRIVATE_EXPORT Stream
 {
 public:
     // Constructor.
-    Stream() : ref(1), bufPtr(buf), bufEnd(buf) { }
+    Stream() : ref(1), bufPtr(buf + streamBufSize), bufEnd(buf + streamBufSize) { }
 
     // Destructor.
     virtual ~Stream() = default;
@@ -151,7 +151,6 @@ public:
     inline int getChar() { return (bufPtr >= bufEnd && !fillCacheBuf()) ? EOF : (*bufPtr++ & 0xff); }
     inline int lookChar() { return (bufPtr >= bufEnd && !fillCacheBuf()) ? EOF : (*bufPtr & 0xff); }
 
-    // Rename to getChars
     inline int doGetChars(int nchars, unsigned char *buffer)
     {
         int got = bufEnd - bufPtr;
@@ -202,21 +201,14 @@ public:
         int size = initialSize;
         int length = 0;
         int charsToRead = initialSize;
-        bool continueReading = true;
         reset();
-        while (continueReading && (readChars = doGetChars(charsToRead, res.data() + length)) != 0) {
+        while ((readChars = doGetChars(charsToRead, res.data() + length)) != 0) {
             length += readChars;
-            if (readChars == charsToRead) {
-                if (lookChar() != EOF) {
-                    size += sizeIncrement;
-                    charsToRead = sizeIncrement;
-                    res.resize(size);
-                } else {
-                    continueReading = false;
-                }
-            } else {
-                continueReading = false;
-            }
+            if (readChars < charsToRead)
+                break;
+            size += sizeIncrement;
+            charsToRead = sizeIncrement;
+            res.resize(size);
         }
 
         res.resize(length);
@@ -312,7 +304,9 @@ protected:
     unsigned char *bufPtr = nullptr;
     unsigned char *bufEnd = nullptr;
 
-    void purgeBuffer() { bufPtr = bufEnd = buf; }
+    void purgeBuffer() { bufPtr = bufEnd = buf + streamBufSize; }
+    // Used by EmbedStream to move unused buffered data back into its base.
+    void flushBackToParent(Stream *parent, int nChars, unsigned char *data);
 };
 
 //------------------------------------------------------------------------
@@ -826,6 +820,7 @@ public:
 
 private:
     int getRawChar();
+    bool eof;
 };
 
 //------------------------------------------------------------------------

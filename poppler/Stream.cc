@@ -198,6 +198,15 @@ bool Stream::isEncrypted() const
     return false;
 }
 
+void Stream::flushBackToParent(Stream *parent, int nChars, unsigned char *data)
+{
+    if (nChars > 0) {
+        assert(parent->bufPtr >= parent->buf + nChars);
+        parent->bufPtr -= nChars;
+        memcpy(parent->bufPtr, data, nChars);
+    }
+}
+
 class BaseStreamStream : public Stream
 {
 public:
@@ -205,7 +214,11 @@ public:
     ~BaseStreamStream() override;
 
     StreamKind getKind() const override { return str->getBaseStream()->getKind(); }
-    void reset() override { str->getBaseStream()->reset(); }
+    void reset() override
+    {
+        str->getBaseStream()->reset();
+        purgeBuffer();
+    }
 
     bool isBinary(bool last = true) const override { return str->getBaseStream()->isBinary(); }
     int getUnfilteredChar() override { return str->getBaseStream()->getUnfilteredChar(); }
@@ -487,7 +500,14 @@ void BaseSeekInputStream::moveStart(Goffset delta)
 
 int BaseSeekInputStream::getSomeChars(int nChars, unsigned char *buffer)
 {
-    Goffset got = read((char *)buffer, nChars);
+    int remaining = start + length - bufPos;
+    if (limited && nChars > remaining) {
+        nChars = remaining;
+    }
+    Goffset got = 0;
+    if (nChars > 0) {
+        got = read((char *)buffer, nChars);
+    }
     bufPos += got;
     return got;
 }
@@ -1061,6 +1081,7 @@ EmbedStream::~EmbedStream()
     if (reusable) {
         gfree(bufData);
     }
+    flushBackToParent(str, bufEnd - bufPtr, bufPtr);
 }
 
 void EmbedStream::reset()
@@ -1105,7 +1126,6 @@ void EmbedStream::rewind()
 
 void EmbedStream::restore()
 {
-    purgeBuffer();
     replay = false;
 }
 
@@ -1120,7 +1140,7 @@ Goffset EmbedStream::getRawPos()
 
 int EmbedStream::getSomeChars(int nChars, unsigned char *buffer)
 {
-    int len;
+    int got;
 
     if (nChars <= 0) {
         return 0;
@@ -1129,13 +1149,13 @@ int EmbedStream::getSomeChars(int nChars, unsigned char *buffer)
         if (bufPos >= bufLen) {
             return 0;
         }
-        len = bufLen - bufPos;
-        if (nChars > len) {
-            nChars = len;
+        got = bufLen - bufPos;
+        if (nChars > got) {
+            nChars = got;
         }
         memcpy(buffer, bufData, nChars);
         bufPos += nChars;
-        return len;
+        return nChars;
     } else {
         if (limited) {
             if (length < nChars) {
@@ -1143,21 +1163,21 @@ int EmbedStream::getSomeChars(int nChars, unsigned char *buffer)
                     return 0;
                 nChars = length;
             }
-            length -= nChars;
         }
-        len = str->doGetChars(nChars, buffer);
+        got = str->doGetChars(nChars, buffer);
+        length -= got;
         if (record) {
-            if (bufLen + len >= bufMax) {
-                while (bufLen + len >= bufMax) {
+            if (bufLen + got >= bufMax) {
+                while (bufLen + got >= bufMax) {
                     bufMax *= 2;
                 }
                 bufData = (unsigned char *)grealloc(bufData, bufMax);
             }
-            memcpy(bufData + bufLen, buffer, len);
-            bufLen += len;
+            memcpy(bufData + bufLen, buffer, got);
+            bufLen += got;
         }
     }
-    return len;
+    return got;
 }
 
 void EmbedStream::setPos(Goffset pos, int dir)
@@ -1180,7 +1200,7 @@ void EmbedStream::moveStart(Goffset delta)
 // ASCIIHexStream
 //------------------------------------------------------------------------
 
-ASCIIHexStream::ASCIIHexStream(Stream *strA) : FilterStream(strA) { }
+ASCIIHexStream::ASCIIHexStream(Stream *strA) : FilterStream(strA), eof(false) { }
 
 ASCIIHexStream::~ASCIIHexStream()
 {
@@ -1190,17 +1210,23 @@ ASCIIHexStream::~ASCIIHexStream()
 void ASCIIHexStream::reset()
 {
     str->reset();
+    eof = false;
+    purgeBuffer();
 }
 
 int ASCIIHexStream::getRawChar()
 {
     int c1, c2, x = 0;
+    if (eof) {
+        return EOF;
+    }
 
     do {
         c1 = str->getChar();
     } while (isspace(c1));
 
     if (c1 == EOF || c1 == '>') {
+        eof = true;
         return EOF;
     }
 
@@ -1208,6 +1234,7 @@ int ASCIIHexStream::getRawChar()
         c2 = str->getChar();
     } while (isspace(c2));
     if (c2 == '>') {
+        eof = true;
         c2 = '0';
     }
 
@@ -1217,6 +1244,9 @@ int ASCIIHexStream::getRawChar()
         x = (c1 - 'A' + 10) << 4;
     } else if (c1 >= 'a' && c1 <= 'f') {
         x = (c1 - 'a' + 10) << 4;
+    } else if (c1 == EOF) {
+        eof = true;
+        x = 0;
     } else {
         error(errSyntaxError, getPos(), "Illegal character <{0:02x}> in ASCIIHex stream", c1);
         x = 0;
@@ -1228,7 +1258,9 @@ int ASCIIHexStream::getRawChar()
         x += c2 - 'A' + 10;
     } else if (c2 >= 'a' && c2 <= 'f') {
         x += c2 - 'a' + 10;
-    } else if (c2 != EOF) {
+    } else if (c2 == EOF) {
+        eof = true;
+    } else {
         error(errSyntaxError, getPos(), "Illegal character <{0:02x}> in ASCIIHex stream", c2);
     }
 
@@ -1272,6 +1304,7 @@ ASCII85Stream::~ASCII85Stream()
 void ASCII85Stream::reset()
 {
     str->reset();
+    purgeBuffer();
     index = n = 0;
     eof = false;
 }
@@ -1389,6 +1422,7 @@ int LZWStream::getSomeChars(int nChars, unsigned char *buffer)
 void LZWStream::reset()
 {
     str->reset();
+    purgeBuffer();
     eof = false;
     inputBits = 0;
     clearTable();
@@ -1531,6 +1565,7 @@ void RunLengthStream::reset()
 {
     str->reset();
     bufPtr = bufEnd = buf;
+    purgeBuffer();
     eof = false;
 }
 
@@ -1658,6 +1693,7 @@ void CCITTFaxStream::ccittReset(bool unfiltered)
     } else {
         str->reset();
     }
+    purgeBuffer();
 
     row = 0;
     nextLine2D = encoding < 0;
@@ -2468,6 +2504,7 @@ void DCTStream::dctReset(bool unfiltered)
         str->unfilteredReset();
     else
         str->reset();
+    purgeBuffer();
 
     progressive = interleaved = false;
     width = height = 0;
