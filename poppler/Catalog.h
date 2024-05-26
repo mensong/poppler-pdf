@@ -48,6 +48,7 @@
 
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 class PDFDoc;
@@ -277,6 +278,7 @@ private:
     PDFDoc *doc;
     XRef *xref; // the xref table for this PDF file
     std::vector<std::pair<std::unique_ptr<Page>, Ref>> pages;
+    std::unordered_map<Ref, std::size_t> refPageMap;
     std::vector<Object> *pagesList;
     std::vector<Ref> *pagesRefList;
     std::vector<PageAttrs *> *attrsList;
@@ -303,7 +305,10 @@ private:
     PageLayout pageLayout; // page layout
     Object additionalActions; // page additional actions
 
+    bool initPageList(); // init the page list. called by cachePageTree.
+    bool cacheSubTree(); // called by cachePageTree.
     bool cachePageTree(int page); // Cache first <page> pages.
+    std::size_t cachePageTreeForRef(const Ref pageRef); // Cache until <pageRef>.
     Object *findDestInTree(Object *tree, GooString *name, Object *obj);
 
     Object *getNames();
