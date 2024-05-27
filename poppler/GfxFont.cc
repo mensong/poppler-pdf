@@ -1727,6 +1727,36 @@ struct cmpWidthExcepVFunctor
     bool operator()(const GfxFontCIDWidthExcepV &w1, const GfxFontCIDWidthExcepV &w2) { return w1.first < w2.first; }
 };
 
+// For a sorted array of ranges, removes elements which are fully contained in previous ones
+// and adjusts those which overlap with previous ones so they don't overlap
+template< class RandomIt >
+int removeIntersectedRanges(RandomIt begin, RandomIt end)
+{
+    if (begin == end)
+        return 0;
+
+    auto processed = begin;
+    for (auto current = std::next(begin); current < end; ++current) {
+        if (current->first > processed->last) {
+            // No overlapping, keep the unchanged element
+            processed++;
+            if (processed != current) {
+                // We have already removed some elements, so copy the new one to its new place
+                *processed = *current;
+            }
+        }
+        else if (current->last > processed->last) {
+            // Overlaps with previous, copy the updated element to its new place
+            current->first = processed->last + 1;
+            *(++processed) = *current;
+        }
+        else {
+            // Fully contained in previous, skip this element
+        }
+    }
+    return static_cast<int>(std::distance(begin, processed)) + 1;
+}
+
 GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
 {
     Dict *desFontDict;
@@ -1910,6 +1940,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
             }
         }
         std::sort(widths.exceps, widths.exceps + widths.nExceps, cmpWidthExcepFunctor());
+        widths.nExceps = removeIntersectedRanges(widths.exceps, widths.exceps + widths.nExceps);
     }
 
     // default metrics for vertical font
@@ -1975,6 +2006,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
             }
         }
         std::sort(widths.excepsV, widths.excepsV + widths.nExcepsV, cmpWidthExcepVFunctor());
+        widths.nExcepsV = removeIntersectedRanges(widths.excepsV, widths.excepsV + widths.nExcepsV);
     }
 
     ok = true;
