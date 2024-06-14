@@ -383,7 +383,7 @@ Object GfxResources::lookupColorSpace(const char *name)
     return Object(objNull);
 }
 
-GfxPattern *GfxResources::lookupPattern(const char *name, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxPattern> GfxResources::lookupPattern(const char *name, OutputDev *out, GfxState *state)
 {
     GfxResources *resPtr;
 
@@ -397,7 +397,7 @@ GfxPattern *GfxResources::lookupPattern(const char *name, OutputDev *out, GfxSta
         }
     }
     error(errSyntaxError, -1, "Unknown pattern '{0:s}'", name);
-    return nullptr;
+    return {};
 }
 
 GfxShading *GfxResources::lookupShading(const char *name, OutputDev *out, GfxState *state)
@@ -1513,7 +1513,6 @@ void Gfx::opSetStrokeColor(Object args[], int numArgs)
 void Gfx::opSetFillColorN(Object args[], int numArgs)
 {
     GfxColor color;
-    GfxPattern *pattern;
     int i;
 
     if (state->getFillColorSpace()->getMode() == csPattern) {
@@ -1533,8 +1532,9 @@ void Gfx::opSetFillColorN(Object args[], int numArgs)
             out->updateFillColor(state);
         }
         if (numArgs > 0) {
+            std::unique_ptr<GfxPattern> pattern;
             if (args[numArgs - 1].isName() && (pattern = res->lookupPattern(args[numArgs - 1].getName(), out, state))) {
-                state->setFillPattern(pattern);
+                state->setFillPattern(std::move(pattern));
             }
         }
 
@@ -1559,7 +1559,6 @@ void Gfx::opSetFillColorN(Object args[], int numArgs)
 void Gfx::opSetStrokeColorN(Object args[], int numArgs)
 {
     GfxColor color;
-    GfxPattern *pattern;
     int i;
 
     if (state->getStrokeColorSpace()->getMode() == csPattern) {
@@ -1582,8 +1581,9 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs)
             error(errSyntaxError, getPos(), "Incorrect number of arguments in 'SCN' command");
             return;
         }
+        std::unique_ptr<GfxPattern> pattern;
         if (args[numArgs - 1].isName() && (pattern = res->lookupPattern(args[numArgs - 1].getName(), out, state))) {
-            state->setStrokePattern(pattern);
+            state->setStrokePattern(std::move(pattern));
         }
 
     } else {
