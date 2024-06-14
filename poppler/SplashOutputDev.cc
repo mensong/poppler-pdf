@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -3539,7 +3539,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
         Object maskDecode(new Array((xref) ? xref : doc->getXRef()));
         maskDecode.arrayAdd(Object(maskInvert ? 0 : 1));
         maskDecode.arrayAdd(Object(maskInvert ? 1 : 0));
-        maskColorMap = new GfxImageColorMap(1, &maskDecode, new GfxDeviceGrayColorSpace());
+        maskColorMap = new GfxImageColorMap(1, &maskDecode, std::make_unique<GfxDeviceGrayColorSpace>());
         drawSoftMaskedImage(state, ref, str, width, height, colorMap, interpolate, maskStr, maskWidth, maskHeight, maskColorMap, maskInterpolate);
         delete maskColorMap;
 
