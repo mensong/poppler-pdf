@@ -338,6 +338,8 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     case actionResetForm:
         // Not handled in Qt5 front-end yet
         break;
+    case actionSubmitForm:
+        // Not handled in Qt5 front-end yet
 
     case actionUnknown:
         break;

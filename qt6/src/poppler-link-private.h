@@ -67,6 +67,17 @@ public:
     bool isShow;
 };
 
+class LinkSubmitFormPrivate : public LinkPrivate
+{
+public:
+    LinkSubmitFormPrivate(const QRectF &area, const QVector<int> &fieldIds, const QString &url, quint32 flags) : LinkPrivate(area), m_fieldIds(fieldIds), m_url(url), m_flags(flags) { }
+    ~LinkSubmitFormPrivate() override;
+
+    QVector<int> m_fieldIds;
+    QString m_url;
+    quint32 m_flags;
+};
+
 }
 
 #endif

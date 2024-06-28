@@ -338,6 +338,30 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
         // Not handled in Qt6 front-end yet
         break;
 
+    case actionSubmitForm: {
+        ::LinkSubmitForm *lsf = (::LinkSubmitForm *)a;
+        std::vector<std::string> stdStringFields = lsf->getFields();
+        QVector<int> fieldIds;
+        fieldIds.reserve(stdStringFields.size());
+        Form *form = parentDoc->doc->getCatalog()->getForm();
+        for (const std::string &fieldStr : stdStringFields) {
+            ::FormField *field = form->findFieldByFullyQualifiedNameOrRef(fieldStr);
+            if (!field->getNoExport()) {
+                int numWidgets = field->getNumWidgets();
+                for (int i = 0; i < numWidgets; i++) {
+                    ::FormWidget *widget = field->getWidget(i);
+                    if (widget) {
+                        fieldIds.append(field->getWidget(i)->getID());
+                    }
+                }
+            }
+        }
+        QString qStringUrl = QString::fromStdString(lsf->getUrl());
+        quint32 qFlags = lsf->getFlags();
+        LinkSubmitFormPrivate *lsfp = new LinkSubmitFormPrivate(linkArea, fieldIds, qStringUrl, qFlags);
+        popplerLink = std::make_unique<LinkSubmitForm>(lsfp);
+    } break;
+
     case actionUnknown:
         break;
     }

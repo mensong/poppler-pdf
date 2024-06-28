@@ -75,6 +75,8 @@ LinkOCGStatePrivate::~LinkOCGStatePrivate() = default;
 
 LinkHidePrivate::~LinkHidePrivate() = default;
 
+LinkSubmitFormPrivate::~LinkSubmitFormPrivate() = default;
+
 class LinkGotoPrivate : public LinkPrivate
 {
 public:
@@ -696,5 +698,33 @@ bool LinkHide::isShowAction() const
 {
     Q_D(const LinkHide);
     return d->isShow;
+}
+
+// LinkSubmitForm
+LinkSubmitForm::LinkSubmitForm(LinkSubmitFormPrivate *lsfp) : Link(*lsfp) { }
+
+LinkSubmitForm::~LinkSubmitForm() { }
+
+Link::LinkType LinkSubmitForm::linkType() const
+{
+    return SubmitForm;
+}
+
+QVector<int> LinkSubmitForm::getFieldIds() const
+{
+    Q_D(const LinkSubmitForm);
+    return d->m_fieldIds;
+}
+
+QString LinkSubmitForm::getUrl() const
+{
+    Q_D(const LinkSubmitForm);
+    return d->m_url;
+}
+
+quint32 LinkSubmitForm::getFlags() const
+{
+    Q_D(const LinkSubmitForm);
+    return d->m_flags;
 }
 }
