@@ -705,9 +705,9 @@ void NameTree::parse(const Object *tree, RefRecursionChecker &seen)
 
 Object NameTree::lookup(const GooString *name)
 {
-    auto entry = std::find_if(entries.begin(), entries.end(), [name](const auto &element) { return name->cmp(&element->name) == 0; });
+    auto entry = std::lower_bound(entries.begin(), entries.end(), name, [](const auto &element, const GooString *n) { return element->name.cmp(n) < 0; });
 
-    if (entry != entries.end()) {
+    if (entry != entries.end() && (*entry)->name.cmp(name) == 0) {
         return (*entry)->value.fetch(xref);
     } else {
         error(errSyntaxError, -1, "failed to look up ({0:s})", name->c_str());
