@@ -103,6 +103,8 @@
 #include "FlateEncoder.h"
 #include "JSInfo.h"
 #include "ImageEmbeddingUtils.h"
+#include "Gfx.h"
+#include "GfxFont.h"
 
 //------------------------------------------------------------------------
 
@@ -2204,6 +2206,19 @@ bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickna
     const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
     if (pdfFontName.empty()) {
         return false;
+    }
+    std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName.c_str());
+
+    // If a font size is set to zero, calculate the optimal size for the available space
+    const auto dx = rect.x2 - rect.x1;
+    const auto dy = rect.y2 - rect.y1;
+    const double wMax = dx - 2 * borderWidth - 4;
+    const double hMax = dy - 2 * borderWidth;
+    if (fontSize == 0 && wMax > 0) {
+        fontSize = Annot::calculateFontSize(form, font.get(), &signatureText, wMax / 2.0, hMax);
+    }
+    if (leftFontSize == 0 && wMax > 0) {
+        leftFontSize = Annot::calculateFontSize(form, font.get(), &signatureTextLeft, wMax / 2.0, hMax);
     }
 
     const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
