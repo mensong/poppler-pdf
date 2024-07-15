@@ -544,7 +544,8 @@ int main(int argc, char *argv[])
         const std::string signatureText(GooString::format(_("Digitally signed by {0:s}"), signerName.c_str()) + "\n" + GooString::format(_("Date: {0:s}"), timestamp.c_str()));
         const auto gSignatureText = std::make_unique<GooString>((signatureText.empty() || noAppearance) ? "" : utf8ToUtf16WithBom(signatureText));
         const auto gSignatureLeftText = std::make_unique<GooString>((signerName.empty() || noAppearance) ? "" : utf8ToUtf16WithBom(signerName));
-        const bool success = fws->signDocumentWithAppearance(argv[2], std::string { certNickname }, std::string { password }, rs.get(), nullptr, {}, {}, *gSignatureText, *gSignatureLeftText, 0, 0, std::make_unique<AnnotColor>(blackColor));
+        const bool success =
+                fws->signDocumentWithAppearance(argv[2], std::string { certNickname }, std::string { password }, rs.get(), nullptr, {}, {}, *gSignatureText, *gSignatureLeftText, 0, 0, std::make_unique<AnnotColor>(blackColor), {});
         return success ? 0 : 3;
     }
 

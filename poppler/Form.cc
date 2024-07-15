@@ -75,6 +75,7 @@
 #include "Parser.h"
 #include "CIDFontsWidthsBuilder.h"
 #include "UTF.h"
+#include "ImageEmbeddingUtils.h"
 
 #include "fofi/FoFiTrueType.h"
 #include "fofi/FoFiIdentifier.h"
@@ -726,7 +727,8 @@ static std::tuple<double, double> calculateDxDy(int rot, const PDFRectangle *rec
 
 bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location,
                                                      const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
-                                                     double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
+                                                     double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor,
+                                                     const std::string &imagePath)
 {
     // Set the appearance
     GooString *aux = getField()->getDefaultAppearance();
@@ -738,6 +740,15 @@ bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFile
         return false;
     }
     std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName.c_str());
+
+    // If a path to an image is given, embed it
+    Ref imageResourceRef = Ref::INVALID();
+    if (!imagePath.empty()) {
+        imageResourceRef = ImageEmbeddingUtils::embed(xref, imagePath);
+        if (imageResourceRef == Ref::INVALID()) {
+            return false;
+        }
+    }
 
     double x1, y1, x2, y2;
     getRect(&x1, &y1, &x2, &y2);
@@ -778,6 +789,7 @@ bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFile
     ffs->setCustomAppearanceContent(signatureText);
     ffs->setCustomAppearanceLeftContent(signatureTextLeft);
     ffs->setCustomAppearanceLeftFontSize(leftFontSize);
+    ffs->setImageResource(imageResourceRef);
 
     // say that there a now signatures and that we should append only
     doc->getCatalog()->getAcroForm()->dictSet("SigFlags", Object(3));
