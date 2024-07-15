@@ -414,6 +414,16 @@ OutlineItem::OutlineItem(const Dict *dict, Ref refA, OutlineItem *parentA, XRef 
     if (obj1.isString()) {
         const GooString *s = obj1.getString();
         title = TextStringToUCS4(s->toStr());
+        // All downstream users treats titleLen == 0
+        // as this item (and children) doesn't exist
+        // but it is kind of valid to have a outline
+        // title to be empty string.
+        // In order to don't break downstreams, do
+        // like firefox's pdf component and replace
+        // with a dash.
+        if (title.empty()) {
+            title = TextStringToUCS4("-");
+        }
     }
 
     obj1 = dict->lookup("Dest");
