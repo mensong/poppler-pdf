@@ -483,6 +483,14 @@ public:
      */
     bool canBeSpellChecked() const;
 
+    /**
+      Sets the text inside the Appearance Stream to the specified
+      \p text
+
+      \since 24.07
+     */
+    void setAppearanceChoiceText(const QString &text);
+
 private:
     Q_DISABLE_COPY(FormFieldChoice)
 };
